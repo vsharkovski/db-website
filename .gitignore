@@ -1,0 +1,2 @@
+# Ignore scripts used for deployment
+*.ps1
