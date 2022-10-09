@@ -8,6 +8,10 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { HomeComponent } from './home/home.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { MainPageComponent } from './main-page/main-page.component';
+import { AppsListComponent } from './apps-list/apps-list.component';
+import { FiguresListComponent } from './figures-list/figures-list.component';
+import { AboutComponent } from './about/about.component';
+import { PapersInfoComponent } from './papers-info/papers-info.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +19,11 @@ import { MainPageComponent } from './main-page/main-page.component';
     NavbarComponent,
     HomeComponent,
     NotFoundComponent,
-    MainPageComponent
+    MainPageComponent,
+    AppsListComponent,
+    FiguresListComponent,
+    AboutComponent,
+    PapersInfoComponent
   ],
   imports: [
     BrowserModule,
