@@ -12,6 +12,8 @@ import { AppsListComponent } from './apps-list/apps-list.component';
 import { FiguresListComponent } from './figures-list/figures-list.component';
 import { AboutComponent } from './about/about.component';
 import { PapersInfoComponent } from './papers-info/papers-info.component';
+import { FigureComponent } from './figure/figure.component';
+import { FiguresPageComponent } from './figures-page/figures-page.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { PapersInfoComponent } from './papers-info/papers-info.component';
     AppsListComponent,
     FiguresListComponent,
     AboutComponent,
-    PapersInfoComponent
+    PapersInfoComponent,
+    FigureComponent,
+    FiguresPageComponent
   ],
   imports: [
     BrowserModule,

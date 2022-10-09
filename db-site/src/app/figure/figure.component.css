@@ -1,0 +1,10 @@
+.full {
+}
+
+.normal {
+  max-height: 60vh;
+}
+
+.small {
+  max-height: 30vh;
+}
