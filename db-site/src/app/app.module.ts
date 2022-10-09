@@ -14,6 +14,7 @@ import { AboutComponent } from './about/about.component';
 import { PapersInfoComponent } from './papers-info/papers-info.component';
 import { FigureComponent } from './figure/figure.component';
 import { FiguresPageComponent } from './figures-page/figures-page.component';
+import { FigureCarouselComponent } from './figure-carousel/figure-carousel.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { FiguresPageComponent } from './figures-page/figures-page.component';
     AboutComponent,
     PapersInfoComponent,
     FigureComponent,
-    FiguresPageComponent
+    FiguresPageComponent,
+    FigureCarouselComponent
   ],
   imports: [
     BrowserModule,
