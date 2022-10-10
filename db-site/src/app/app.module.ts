@@ -11,7 +11,6 @@ import { MainPageComponent } from './main-page/main-page.component';
 import { AppsListComponent } from './apps-list/apps-list.component';
 import { FiguresListComponent } from './figures-list/figures-list.component';
 import { AboutComponent } from './about/about.component';
-import { PapersInfoComponent } from './papers-info/papers-info.component';
 import { FigureComponent } from './figure/figure.component';
 import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { FigureCarouselComponent } from './figure-carousel/figure-carousel.component';
@@ -26,7 +25,6 @@ import { FigureCarouselComponent } from './figure-carousel/figure-carousel.compo
     AppsListComponent,
     FiguresListComponent,
     AboutComponent,
-    PapersInfoComponent,
     FigureComponent,
     FiguresPageComponent,
     FigureCarouselComponent,

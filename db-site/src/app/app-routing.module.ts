@@ -5,7 +5,6 @@ import { AppsListComponent } from './apps-list/apps-list.component';
 import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { PapersInfoComponent } from './papers-info/papers-info.component';
 
 const routes: Routes = [
   {
@@ -29,12 +28,6 @@ const routes: Routes = [
     path: 'about',
     component: AboutComponent,
     title: 'About - A cross-verified database of notable people, 3500BC-2018AD',
-  },
-  {
-    path: 'papers',
-    component: PapersInfoComponent,
-    title:
-      'Papers - A cross-verified database of notable people, 3500BC-2018AD',
   },
   {
     path: 'not-found',
