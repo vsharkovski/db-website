@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import FiguresDataFullJson from 'src/assets/figures/figures-data-full.json';
+import { LocationStrategy } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import FiguresDataFullJson from '../../assets/figures/figures-data-full.json';
 import { FigureData } from '../figure-data.model';
 
 @Component({
@@ -7,6 +8,19 @@ import { FigureData } from '../figure-data.model';
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.css'],
 })
-export class MainPageComponent {
-  readonly figures: FigureData[] = FiguresDataFullJson;
+export class MainPageComponent implements OnInit {
+  readonly baseHref!: string;
+  figures!: FigureData[];
+
+  constructor(private locationStrategy: LocationStrategy) {
+    this.baseHref = this.locationStrategy.getBaseHref();
+  }
+
+  ngOnInit(): void {
+    this.figures = FiguresDataFullJson.map((it) => {
+      const result = { ...it };
+      result.imageSource = `${this.baseHref}${it.imageSource}`;
+      return result;
+    });
+  }
 }

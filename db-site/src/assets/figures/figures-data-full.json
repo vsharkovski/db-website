@@ -1,71 +1,71 @@
 [
   {
-    "imageSource": "/assets/figures/fig1.png",
+    "imageSource": "assets/figures/fig1.png",
     "title": "Fig. 1: Cloud of the most famous individuals in the database",
     "subtitle": "Size is proportional to relative notability level. The cloud focuses on the 3,000 most visible individuals (0.06% of the exhaustive sample). Colors represent the domain of influence defined later in the text (see Figures 5 and 6 for labels, e.g. green is culture, red is politics, blue is academia, etc.)."
   },
   {
-    "imageSource": "/assets/figures/fig2.png",
+    "imageSource": "assets/figures/fig2.png",
     "title": "Fig. 2: Relation between the most frequent Wikipedia editions and sources used to document the biography",
     "subtitle": "Sample restricted to individuals with only one biography in Wikipedia. We consider the 10 most frequent external sources and 10 most popular Wikipedia language editions, and merge the rest into other sources."
   },
   {
-    "imageSource": "/assets/figures/fig3.png",
+    "imageSource": "assets/figures/fig3.png",
     "title": "Fig. 3: Relative importance of the main occupations and domains of influence",
     "subtitle": "Restricted database (at least one Wikipedia edition among the 7 European languages analyzed)."
   },
   {
-    "imageSource": "/assets/figures/fig4.png",
+    "imageSource": "assets/figures/fig4.png",
     "title": "Fig. 4: Share of individuals present in the database in any given year, breakdown by domain of influence",
     "subtitle": "Restricted sample (at least one Wikipedia edition among the 7 European languages analyzed). Imputed life time when missing."
   },
   {
-    "imageSource": "/assets/figures/fig5.png",
+    "imageSource": "assets/figures/fig5.png",
     "title": "Fig. 5: Evolution of the number of individuals associated with “politics”, 1400-2000AD",
     "subtitle": "Restricted sample (at least one Wikipedia edition among the 7 European languages analyzed). Most popular citizenships (share of living individuals on the vertical axis, year on the horizontal axis)."
   },
   {
-    "imageSource": "/assets/figures/fig6.png",
+    "imageSource": "assets/figures/fig6.png",
     "title": "Fig. 6: Age at death on Western non-English editions, 1800-2000AD",
     "subtitle": "Restricted sample (at least one Wikipedia edition among the 7 European languages analyzed). A vertical line corresponds to the distribution of the age at death for a given date. The observed colors discontinuity illustrates wars episodes: First World War, Spanish Civil War, and Second World War."
   },
   {
-    "imageSource": "/assets/figures/figadd1.png",
+    "imageSource": "assets/figures/figadd1.png",
     "title": "Additional Fig. 1: Women in Wikipedia or Wikidata by domains of influence",
     "subtitle": "See Figure 4 for the full set of color codes of the domains of influence."
   },
   {
-    "imageSource": "/assets/figures/figadd1-academia.png",
+    "imageSource": "assets/figures/figadd1-academia.png",
     "title": "Additional Fig. 1.1: Women in Wikipedia or Wikidata in the \"academia\" domain",
     "subtitle": ""
   },
   {
-    "imageSource": "/assets/figures/figadd1-culture.png",
+    "imageSource": "assets/figures/figadd1-culture.png",
     "title": "Additional Fig. 1.2: Women in Wikipedia or Wikidata in the \"culture\" domain",
     "subtitle": ""
   },
   {
-    "imageSource": "/assets/figures/figadd1-politics.png",
+    "imageSource": "assets/figures/figadd1-politics.png",
     "title": "Additional Fig. 1.3: Women in Wikipedia or Wikidata in the \"politics\" domain",
     "subtitle": ""
   },
   {
-    "imageSource": "/assets/figures/figadd2-barycenters.png",
+    "imageSource": "assets/figures/figadd2-barycenters.png",
     "title": "Additional Fig. 2.1: Barycenters and ellipses of covariance matrix of lon. & lat. of birthplaces",
     "subtitle": "Ellipses are based on the variance-covariance matrix of longitudes and latitudes for a given period, with a threshold of 40%."
   },
   {
-    "imageSource": "/assets/figures/figadd2-flows-north-america.png",
+    "imageSource": "assets/figures/figadd2-flows-north-america.png",
     "title": "Additional Fig. 2.2: Birth to death flows of academics from the UK to North America",
     "subtitle": "All curves connect the city of birth and of death of individuals."
   },
   {
-    "imageSource": "/assets/figures/figadd2-flows-south-america.png",
+    "imageSource": "assets/figures/figadd2-flows-south-america.png",
     "title": "Additional Fig. 2.3: Birth to death flows of notable individuals in culture from Italy to South America",
     "subtitle": "All curves connect the city of birth and of death of individuals."
   },
   {
-    "imageSource": "/assets/figures/figadd2-flows-asia.png",
+    "imageSource": "assets/figures/figadd2-flows-asia.png",
     "title": "Additional Fig. 2.4: Birth to death flows (all categories) within a rectangular area encompassing Asia including Central Asia, Western Asia and the southern part of Eurasia.",
     "subtitle": "All curves connect the city of birth and of death of individuals."
   }
