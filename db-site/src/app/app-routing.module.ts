@@ -9,7 +9,8 @@ import { PapersInfoComponent } from './papers-info/papers-info.component';
 
 const routes: Routes = [
   {
-    path: 'home',
+    path: '',
+    pathMatch: 'full',
     component: MainPageComponent,
     title: 'A cross-verified database of notable people, 3500BC-2018AD',
   },
@@ -40,7 +41,10 @@ const routes: Routes = [
     component: NotFoundComponent,
     title: 'Page not found',
   },
-  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  {
+    path: 'home',
+    redirectTo: '',
+  },
   { path: '**', pathMatch: 'full', redirectTo: 'not-found' },
 ];
 

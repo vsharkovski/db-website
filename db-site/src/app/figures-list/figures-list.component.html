@@ -1,7 +1,8 @@
-<dbw-figure
-  *ngFor="let figure of figures"
-  [imageSource]="figure.imageSource"
-  [title]="figure.title"
-  [subtitle]="figure.subtitle"
-  [size]="figureSize"
-></dbw-figure>
+<div *ngFor="let figure of figures" class="mb-3">
+  <dbw-figure
+    [imageSource]="figure.imageSource"
+    [title]="figure.title"
+    [subtitle]="figure.subtitle"
+    [size]="figureSize"
+  ></dbw-figure>
+</div>

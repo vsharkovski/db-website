@@ -2,7 +2,15 @@
 
 <dbw-apps-list></dbw-apps-list>
 
-<h4 class="text-center mb-3">Notable figures</h4>
+<div class="row mt-5">
+  <div class="col-auto mb-3">
+    <h4>Notable figures</h4>
+  </div>
+  <div class="col">
+    <p><a [routerLink]="['/figures']" class="text-muted">(details)</a></p>
+  </div>
+</div>
+
 <dbw-figure-carousel [figures]="figures"></dbw-figure-carousel>
 
 <dbw-about></dbw-about>
