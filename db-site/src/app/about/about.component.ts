@@ -1,15 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { ViewportScroller } from '@angular/common';
+import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { filter, first, Subscription } from 'rxjs';
 
 @Component({
   selector: 'dbw-about',
   templateUrl: './about.component.html',
-  styleUrls: ['./about.component.css']
+  styleUrls: ['./about.component.css'],
 })
-export class AboutComponent implements OnInit {
+export class AboutComponent {
+  @Input() showAboutHeading: boolean = true;
 
-  constructor() { }
+  constructor(
+    private route: ActivatedRoute,
+    private viewportScroller: ViewportScroller
+  ) {}
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
+    // Scroll to fragment on page load, if fragment is present
+    this.route.fragment
+      .pipe(
+        filter((fragment) => fragment !== null),
+        first()
+      )
+      .subscribe((fragment) => {
+        this.viewportScroller.scrollToAnchor(fragment!);
+      });
   }
-
 }

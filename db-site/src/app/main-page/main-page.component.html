@@ -10,7 +10,14 @@
     <p><a [routerLink]="['/figures']" class="text-muted">(details)</a></p>
   </div>
 </div>
-
 <dbw-figure-carousel [figures]="figures"></dbw-figure-carousel>
 
-<dbw-about></dbw-about>
+<div class="row mt-5">
+  <div class="col-auto mb-3">
+    <h4>About</h4>
+  </div>
+  <div class="col">
+    <p><a [routerLink]="['/about']" class="text-muted">(details)</a></p>
+  </div>
+</div>
+<dbw-about [showAboutHeading]="false"></dbw-about>
