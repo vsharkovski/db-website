@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AboutComponent } from './about/about.component';
-import { AppsListComponent } from './apps-list/apps-list.component';
+import { AppsPageComponent } from './apps-page/apps-page.component';
 import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NotFoundComponent } from './not-found/not-found.component';
@@ -15,7 +15,7 @@ const routes: Routes = [
   },
   {
     path: 'apps',
-    component: AppsListComponent,
+    component: AppsPageComponent,
     title: 'Apps - A cross-verified database of notable people, 3500BC-2018AD',
   },
   {

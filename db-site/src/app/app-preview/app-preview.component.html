@@ -1,0 +1,14 @@
+<div class="d-md-flex">
+  <div class="text-md-end pe-md-3">
+    <h5 *ngIf="title">{{ title }}</h5>
+    <p *ngIf="description">{{ description }}</p>
+  </div>
+  <div>
+    <a *ngIf="targetUrl" [href]="targetUrl">
+      <img src="{{ baseHref }}{{ imageSource }}" class="img-fluid rounded" />
+    </a>
+    <a *ngIf="targetRoute" [routerLink]="[targetRoute]">
+      <img src="{{ baseHref }}{{ imageSource }}" class="img-fluid rounded" />
+    </a>
+  </div>
+</div>
