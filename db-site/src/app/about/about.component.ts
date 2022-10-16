@@ -1,7 +1,9 @@
 import { ViewportScroller } from '@angular/common';
-import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { filter, first, Subscription } from 'rxjs';
+import { filter, first } from 'rxjs';
+import { ReferenceData } from '../reference-data.model';
+import ReferencesDataJson from '../../assets/references-data.json';
 
 @Component({
   selector: 'dbw-about',
@@ -10,6 +12,7 @@ import { filter, first, Subscription } from 'rxjs';
 })
 export class AboutComponent {
   @Input() showAboutHeading: boolean = true;
+  references: ReferenceData[] = ReferencesDataJson;
 
   constructor(
     private route: ActivatedRoute,

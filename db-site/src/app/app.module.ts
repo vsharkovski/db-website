@@ -16,6 +16,7 @@ import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { FigureCarouselComponent } from './figure-carousel/figure-carousel.component';
 import { AppPreviewComponent } from './app-preview/app-preview.component';
 import { AppsPageComponent } from './apps-page/apps-page.component';
+import { PaperReferenceComponent } from './paper-reference/paper-reference.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { AppsPageComponent } from './apps-page/apps-page.component';
     FigureCarouselComponent,
     AppPreviewComponent,
     AppsPageComponent,
+    PaperReferenceComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule],
   providers: [],

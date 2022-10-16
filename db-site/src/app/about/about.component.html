@@ -55,6 +55,16 @@ There are more than 700,000 such individuals, almost a third of the database we 
 </p>
 <p>We welcome comments on our approach, and point towards this website to obtain the data, or extended requests.</p>
 
+<h5>Papers</h5>
+<dbw-paper-reference
+  *ngFor="let reference of references"
+  [description]="reference.description"
+  [paperTitle]="reference.paperTitle"
+  [paperUrl]="reference.paperUrl"
+  [inlineCitation]="reference.inlineCitation"
+  [bibtexCitation]="reference.bibtexCitation"
+></dbw-paper-reference>
+
 <h5>Authors</h5>
 <ul>
   <li>

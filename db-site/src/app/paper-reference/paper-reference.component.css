@@ -1,0 +1,13 @@
+.title {
+  font-size: 1.1rem;
+}
+
+pre {
+  font-size: 0.7rem;
+}
+
+.inline-before {
+  width: 0.3rem;
+  background-color: lightgray;
+  margin-right: 0.5rem;
+}
