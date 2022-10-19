@@ -5,4 +5,8 @@ import { Component } from '@angular/core';
   templateUrl: './highlights-list.component.html',
   styleUrls: ['./highlights-list.component.css'],
 })
-export class HighlightsListComponent {}
+export class HighlightsListComponent {
+  topiLink: string = 'https://tjukanovt.github.io/notable-people';
+  altmetricLink: string =
+    'https://nature.altmetric.com/details/129575296#score';
+}

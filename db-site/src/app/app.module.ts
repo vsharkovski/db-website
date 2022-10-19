@@ -14,7 +14,6 @@ import { AboutComponent } from './about/about.component';
 import { FigureComponent } from './figure/figure.component';
 import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { FigureCarouselComponent } from './figure-carousel/figure-carousel.component';
-import { HighlightComponent } from './highlight/highlight.component';
 import { HighlightsPageComponent } from './highlights-page/highlights-page.component';
 import { PaperReferenceComponent } from './paper-reference/paper-reference.component';
 
@@ -31,7 +30,6 @@ import { PaperReferenceComponent } from './paper-reference/paper-reference.compo
     FigureComponent,
     FiguresPageComponent,
     FigureCarouselComponent,
-    HighlightComponent,
     HighlightsPageComponent,
     PaperReferenceComponent,
   ],
