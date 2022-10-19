@@ -2,11 +2,11 @@ import { LocationStrategy } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'dbw-app-preview',
-  templateUrl: './app-preview.component.html',
-  styleUrls: ['./app-preview.component.css'],
+  selector: 'dbw-highlight',
+  templateUrl: './highlight.component.html',
+  styleUrls: ['./highlight.component.css'],
 })
-export class AppPreviewComponent implements OnInit {
+export class HighlightComponent {
   readonly baseHref: string = '';
 
   @Input() title?: string;
@@ -20,9 +20,5 @@ export class AppPreviewComponent implements OnInit {
     if (href !== '/') {
       this.baseHref = this.locationStrategy.getBaseHref();
     }
-  }
-
-  ngOnInit(): void {
-
   }
 }
