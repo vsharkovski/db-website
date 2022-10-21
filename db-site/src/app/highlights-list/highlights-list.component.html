@@ -1,5 +1,23 @@
-<div class="highlight-row mb-3">
-  <h5 class="text-center">
+<div class="d-flex flex-column align-items-center">
+  <div class="text-center">
+    <h5>
+      <span class="position-relative">
+        Earth Visualization
+        <a [href]="topiLink" class="stretched-link"></a>
+      </span>
+    </h5>
+    <p>
+      Topi Tjukanov created an <a [href]="topiLink">interactive visualization</a> of the most notable people around the
+      world, using our dataset.
+    </p>
+  </div>
+  <div class="position-relative">
+    <img src="assets/highlights/topi.png" class="img-fluid rounded" />
+    <a [href]="topiLink" class="stretched-link"></a>
+  </div>
+</div>
+<div class="highlight-row mt-5">
+  <h5 class="text-center mb-3">
     <span class="position-relative">
       Top 0.1% of all scientific papers
       <a [href]="altmetricLink" class="stretched-link"></a>
@@ -30,23 +48,5 @@
       </div>
     </div>
     <div class="col-md-2"></div>
-  </div>
-</div>
-<div class="d-flex flex-column align-items-center">
-  <div class="text-center">
-    <h5>
-      <span class="position-relative">
-        Earth Visualization
-        <a [href]="topiLink" class="stretched-link"></a>
-      </span>
-    </h5>
-    <p>
-      Topi Tjukanov created an <a [href]="topiLink">interactive visualization</a> of the most notable people around the
-      world, using our dataset.
-    </p>
-  </div>
-  <div class="position-relative">
-    <img src="assets/highlights/topi.png" class="img-fluid rounded" />
-    <a [href]="topiLink" class="stretched-link"></a>
   </div>
 </div>
