@@ -1,0 +1,16 @@
+# Should set logging level to ERROR on production, and INFO on dev / test
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dbpaperdb
+    username: vlatko
+    password: vlatko
+  jpa:
+    hibernate:
+      dll-auto: validate
+    open-in-view: false
+  flyway:
+    locations:
+      - classpath:db/migration
+logging:
+  file:
+    path: db-api/logs
