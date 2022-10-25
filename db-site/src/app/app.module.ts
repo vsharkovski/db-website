@@ -16,6 +16,7 @@ import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { FigureCarouselComponent } from './figure-carousel/figure-carousel.component';
 import { HighlightsPageComponent } from './highlights-page/highlights-page.component';
 import { PaperReferenceComponent } from './paper-reference/paper-reference.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { PaperReferenceComponent } from './paper-reference/paper-reference.compo
     FigureCarouselComponent,
     HighlightsPageComponent,
     PaperReferenceComponent,
+    SidebarComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule],
   providers: [],
