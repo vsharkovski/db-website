@@ -42,14 +42,14 @@ data class Person(
     val area2RAttachment: String?,
 
     @Column(name = "birth_longitude")
-    val birthLongitude: Double?,
+    val birthLongitude: Float?,
 
     @Column(name = "birth_latitude")
-    val birthLatitude: Double?,
+    val birthLatitude: Float?,
 
     @Column(name = "death_longitude")
-    val deathLongitude: Double?,
+    val deathLongitude: Float?,
 
     @Column(name = "death_latitude")
-    val deathLatitude: Double?
+    val deathLatitude: Float?
 )

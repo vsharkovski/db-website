@@ -1,7 +1,6 @@
 package com.vsharkovski.dbpaperapi.service
 
 import org.slf4j.LoggerFactory
-import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.core.io.ClassPathResource
@@ -13,14 +12,16 @@ class StartupEventListener(
 ) {
     private val logger = LoggerFactory.getLogger(StartupEventListener::class.java)
 
-    private var firstEventHappened: Boolean = false
+    private var firstEventHappened: Boolean = true
 
     @EventListener
     fun onApplicationEvent(event: ContextRefreshedEvent) {
         if (!firstEventHappened) {
             firstEventHappened = true
             val resource = ClassPathResource("/static/cross-verified-database.csv")
-            val persons = csvService.save(resource.file)
+            logger.info("Starting to add dataset {}", resource.path)
+            csvService.save(resource.file)
+            logger.info("Added dataset {}", resource.path)
         }
     }
 }

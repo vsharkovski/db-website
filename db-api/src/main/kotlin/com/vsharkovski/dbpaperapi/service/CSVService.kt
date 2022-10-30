@@ -4,7 +4,6 @@ import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 
@@ -12,13 +11,7 @@ import java.io.File
 class CSVService(
     val personRepository: PersonRepository
 ) {
-    private val logger = LoggerFactory.getLogger(CSVService::class.java)
-
     fun save(file: File) {
-        val persons = csvToPersons(file)
-    }
-
-    private fun csvToPersons(file: File): List<Person> {
         val bufferedReader = file.bufferedReader()
         val csvParser = CSVParser(
             bufferedReader,
@@ -27,22 +20,29 @@ class CSVService(
                 .setSkipHeaderRecord(true)
                 .setIgnoreHeaderCase(true)
                 .setTrim(true)
+                .setHeader()
                 .build()
         )
-        logger.info("About to parse file with path {}", file.path)
-        for ((index, record) in csvParser.records.withIndex()) {
-            if (index >= 100) {
-                break
-            }
-            logger.info("Record #{} has birth {}", index, record.get("birth"))
+        for (record in csvParser) {
+            val person = Person(
+                wikidataCode = record.get("wikidata_code"),
+                birth = record.get("birth").toIntOrNull(),
+                death = record.get("death").toIntOrNull(),
+                gender = record.get("gender").ifEmpty { null },
+                name = record.get("name").ifEmpty { null },
+                level1MainOcc = record.get("level1_main_occ").ifEmpty { null },
+                level2MainOcc = record.get("level2_main_occ").ifEmpty { null },
+                level2SecondOcc = record.get("level2_second_occ").ifEmpty { null },
+                citizenship1B = record.get("citizenship_1_b").ifEmpty { null },
+                citizenship2B = record.get("citizenship_2_b").ifEmpty { null },
+                area1RAttachment = record.get("area1_of_rattachment").ifEmpty { null },
+                area2RAttachment = record.get("area2_of_rattachment").ifEmpty { null },
+                birthLongitude = record.get("bplo1").toFloatOrNull(),
+                birthLatitude = record.get("bpla1").toFloatOrNull(),
+                deathLongitude = record.get("dplo1").toFloatOrNull(),
+                deathLatitude = record.get("dpla1").toFloatOrNull()
+            )
+            personRepository.save(person)
         }
-        return emptyList()
-//        return csvParser.records.map {
-//            Person(
-//                wikidataCode = it.get("wikidata_code"),
-//                birth = it.get("birth").,
-//                death = it.get("death")
-//            )
-//        }
     }
 }
