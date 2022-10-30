@@ -9,6 +9,7 @@ data class Person(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
+    @Column(name = "wikidata_code")
     val wikidataCode: String?,
 
     val birth: Int?,
@@ -19,25 +20,36 @@ data class Person(
 
     val name: String?,
 
+    @Column(name = "level_1_main_occ")
     val level1MainOcc: String?,
 
+    @Column(name = "level_2_main_occ")
     val level2MainOcc: String?,
 
+    @Column(name = "level_2_second_occ")
     val level2SecondOcc: String?,
 
+    @Column(name = "citizenship_1_b")
     val citizenship1B: String?,
 
+    @Column(name = "citizenship_2_b")
     val citizenship2B: String?,
 
-    val area1OfRAttachment: String?,
+    @Column(name = "area_1_r_attachment")
+    val area1RAttachment: String?,
 
-    val area2OfRAttachment: String?,
+    @Column(name = "area_2_r_attachment")
+    val area2RAttachment: String?,
 
-    val bplo1: Double?,
+    @Column(name = "birth_longitude")
+    val birthLongitude: Double?,
 
-    val bpla1: Double?,
+    @Column(name = "birth_latitude")
+    val birthLatitude: Double?,
 
-    val dplo1: Double?,
+    @Column(name = "death_longitude")
+    val deathLongitude: Double?,
 
-    val dpla1: Double?
+    @Column(name = "death_latitude")
+    val deathLatitude: Double?
 )
