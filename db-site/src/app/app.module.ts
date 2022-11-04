@@ -17,6 +17,11 @@ import { FigureCarouselComponent } from './figure-carousel/figure-carousel.compo
 import { HighlightsPageComponent } from './highlights-page/highlights-page.component';
 import { PaperReferenceComponent } from './paper-reference/paper-reference.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { SearchAppComponent } from './search-app/search-app.component';
+import { SearchOptionsComponent } from './search-options/search-options.component';
+import { SearchResultsQuickComponent } from './search-results-quick/search-results-quick.component';
+import { MapComponent } from './map/map.component';
+import { AboutPageComponent } from './about-page/about-page.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +39,11 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     HighlightsPageComponent,
     PaperReferenceComponent,
     SidebarComponent,
+    SearchAppComponent,
+    SearchOptionsComponent,
+    SearchResultsQuickComponent,
+    MapComponent,
+    AboutPageComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule],
   providers: [],

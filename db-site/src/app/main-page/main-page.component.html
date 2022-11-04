@@ -1,31 +1,38 @@
-<dbw-home></dbw-home>
-
-<div class="row mt-5">
-  <div class="col-auto mb-3">
-    <h4>Highlights</h4>
+<div class="row justify-content-center">
+  <div class="col-auto d-none d-lg-block">
+    <dbw-sidebar class="sidebar"></dbw-sidebar>
   </div>
-  <div class="col">
-    <p><a [routerLink]="['/highlights']" class="text-muted">(details)</a></p>
+  <div class="col col-lg-8 px-sm-5">
+    <dbw-home></dbw-home>
+
+    <div class="row mt-5">
+      <div class="col-auto mb-3">
+        <h4>Highlights</h4>
+      </div>
+      <div class="col">
+        <p><a [routerLink]="['/highlights']" class="text-muted">(details)</a></p>
+      </div>
+    </div>
+    <dbw-highlights-list></dbw-highlights-list>
+
+    <div class="row mt-5">
+      <div class="col-auto mb-3">
+        <h4>Notable figures</h4>
+      </div>
+      <div class="col">
+        <p><a [routerLink]="['/figures']" class="text-muted">(details)</a></p>
+      </div>
+    </div>
+    <dbw-figure-carousel [figures]="figures"></dbw-figure-carousel>
+
+    <div class="row mt-5">
+      <div class="col-auto mb-3">
+        <h4>About</h4>
+      </div>
+      <div class="col">
+        <p><a [routerLink]="['/about']" class="text-muted">(details)</a></p>
+      </div>
+    </div>
+    <dbw-about></dbw-about>
   </div>
 </div>
-<dbw-highlights-list></dbw-highlights-list>
-
-<div class="row mt-5">
-  <div class="col-auto mb-3">
-    <h4>Notable figures</h4>
-  </div>
-  <div class="col">
-    <p><a [routerLink]="['/figures']" class="text-muted">(details)</a></p>
-  </div>
-</div>
-<dbw-figure-carousel [figures]="figures"></dbw-figure-carousel>
-
-<div class="row mt-5">
-  <div class="col-auto mb-3">
-    <h4>About</h4>
-  </div>
-  <div class="col">
-    <p><a [routerLink]="['/about']" class="text-muted">(details)</a></p>
-  </div>
-</div>
-<dbw-about [showAboutHeading]="false"></dbw-about>

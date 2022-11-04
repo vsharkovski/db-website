@@ -5,6 +5,8 @@ import { HighlightsPageComponent } from './highlights-page/highlights-page.compo
 import { FiguresPageComponent } from './figures-page/figures-page.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { NotFoundComponent } from './not-found/not-found.component';
+import { SearchAppComponent } from './search-app/search-app.component';
+import { AboutPageComponent } from './about-page/about-page.component';
 
 const routes: Routes = [
   {
@@ -12,6 +14,12 @@ const routes: Routes = [
     pathMatch: 'full',
     component: MainPageComponent,
     title: 'A cross-verified database of notable people, 3500BC-2018AD',
+  },
+  {
+    path: 'search',
+    component: SearchAppComponent,
+    title:
+      'Search - A cross-verified database of notable people, 3500BC-2018AD',
   },
   {
     path: 'highlights',
@@ -27,7 +35,7 @@ const routes: Routes = [
   },
   {
     path: 'about',
-    component: AboutComponent,
+    component: AboutPageComponent,
     title: 'About - A cross-verified database of notable people, 3500BC-2018AD',
   },
   {
