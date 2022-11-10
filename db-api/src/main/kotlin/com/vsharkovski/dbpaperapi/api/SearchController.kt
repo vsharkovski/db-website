@@ -13,10 +13,18 @@ class SearchController(
     val searchService: SearchService
 ) {
     @GetMapping
-    fun findAllBySpecification(@RequestParam term: String): ResponseEntity<SearchResponse> =
-        ResponseEntity.ok(
+    fun findAllBySpecification(
+        @RequestParam term: String,
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<SearchResponse> {
+        val result = searchService.findPeopleBySearchTerm(term, page)
+        return ResponseEntity.ok(
             SearchResponse(
-                searchService.findFirst10PeopleByTerm(term)
+                persons = result.results,
+                hasPreviousPage = result.hasPreviousPage,
+                hasNextPage = result.hasNextPage
             )
         )
+    }
+
 }

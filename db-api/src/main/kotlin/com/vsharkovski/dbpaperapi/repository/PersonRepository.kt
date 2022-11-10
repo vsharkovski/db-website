@@ -1,11 +1,14 @@
 package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface PersonRepository : JpaRepository<Person, Long> {
-    fun findAll(specification: Specification<Person>): List<Person>
+interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
+    fun findAll(specification: Specification<Person>, pageable: Pageable): Slice<Person>
 }
