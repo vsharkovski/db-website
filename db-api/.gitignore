@@ -36,4 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 /logs/
+/logs/*
 /src/main/resources/static/cross-verified-database.csv
