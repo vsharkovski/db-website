@@ -1,2 +1,3 @@
 # Ignore scripts used for deployment
+/logs/
 *.ps1

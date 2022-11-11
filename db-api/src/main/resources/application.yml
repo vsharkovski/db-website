@@ -13,4 +13,4 @@ spring:
       - classpath:db/migration
 logging:
   file:
-    path: db-api/logs
+    path: logs
