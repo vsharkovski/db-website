@@ -4,6 +4,8 @@ import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.SearchOperation
 import com.vsharkovski.dbpaperapi.model.SearchResult
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -13,6 +15,8 @@ import java.util.regex.Pattern
 class SearchService(
     val personRepository: PersonRepository
 ) {
+    val logger: Logger = LoggerFactory.getLogger(SearchService::class.java)
+
     fun findPeopleBySearchTerm(term: String, pageNumber: Int): SearchResult<Person> {
         if (pageNumber < 0) {
             return SearchResult()
