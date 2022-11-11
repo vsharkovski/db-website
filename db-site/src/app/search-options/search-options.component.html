@@ -1,1 +1,7 @@
-<p>search-options works!</p>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <label for="term" class="form-label">Search query term (try complex rules)</label>
+  <input type="text" class="form-control" formControlName="term" placeholder="Enter search term..." />
+  <label for="page" class="form-label mt-3">Search result page number</label>
+  <input type="number" class="form-control" formControlName="page" />
+  <button type="submit" class="btn btn-primary mt-3">Search</button>
+</form>

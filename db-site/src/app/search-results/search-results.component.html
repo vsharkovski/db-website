@@ -1,1 +1,17 @@
-<p>search-results works!</p>
+<div *ngIf="results">
+  <div class="row">
+    <p class="col">Prev page: {{ results.hasPreviousPage }}</p>
+    <p class="col">Next page: {{ results.hasNextPage }}</p>
+  </div>
+  <div *ngFor="let person of results.persons" class="search-result-test">
+    <hr />
+    <p>Wikidata Code: {{ person.wikidataCode }}</p>
+    <p>Name: {{ person.name }}</p>
+    <p>Birth: {{ person.birth }}</p>
+    <p>Death: {{ person.death }}</p>
+    <p>level1MainOcc: {{ person.level1MainOcc }}</p>
+    <p>level2MainOcc: {{ person.level2MainOcc }}</p>
+    <p>citizenship1: {{ person.citizenship1B }}</p>
+    <p>citizenship2: {{ person.citizenship2B }}</p>
+  </div>
+</div>

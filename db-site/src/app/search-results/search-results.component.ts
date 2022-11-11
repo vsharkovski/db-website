@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { SearchResponse } from '../search-response.model';
 
 @Component({
   selector: 'dbw-search-results',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./search-results.component.css'],
 })
 export class SearchResultsComponent implements OnInit {
+  @Input() results?: SearchResponse;
+
   constructor() {}
 
   ngOnInit(): void {}

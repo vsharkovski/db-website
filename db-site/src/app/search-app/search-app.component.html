@@ -1,14 +1,18 @@
 <div class="row">
-  <div class="col-4">
+  <div class="col-md-4">
     <h1 class="text-center">Find people in history</h1>
-    <dbw-search-options></dbw-search-options>
+    <dbw-search-options
+      (termChanged)="onSearchTermChanged($event)"
+      (pageChanged)="onSearchResultPageChanged($event)"
+      (submitted)="onSubmit()"
+    ></dbw-search-options>
   </div>
-  <div class="col-8">
+  <div class="col-md-8">
     <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
       <li [ngbNavItem]="1">
         <a ngbNavLink>Results</a>
         <ng-template ngbNavContent>
-          <dbw-search-results></dbw-search-results>
+          <dbw-search-results [results]="results"></dbw-search-results>
         </ng-template>
       </li>
       <li [ngbNavItem]="2">
@@ -18,19 +22,14 @@
         </ng-template>
       </li>
     </ul>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div>
   </div>
 </div>
-
+<!--
 <div class="row">
   <h5>Search test</h5>
   <div class="col-4">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <label for="term" class="form-label">Search query term (try complex rules)</label>
-      <input type="text" class="form-control" formControlName="term" placeholder="Enter search term..." />
-      <label for="page" class="form-label mt-3">Search result page number</label>
-      <input type="number" class="form-control" formControlName="page" />
-      <button type="submit" class="btn btn-primary mt-3">Search</button>
-    </form>
+
   </div>
   <div class="col">
     <div *ngIf="results">
@@ -52,4 +51,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

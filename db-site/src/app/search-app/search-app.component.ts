@@ -1,7 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { SearchResponse } from '../search-response.model';
 import { SearchService } from '../search.service';
+
+interface searchTermPagePair {
+  term: string;
+}
 
 @Component({
   selector: 'dbw-search-app',
@@ -9,27 +14,49 @@ import { SearchService } from '../search.service';
   styleUrls: ['./search-app.component.css'],
 })
 export class SearchAppComponent implements OnInit {
-  form = this.formBuilder.group({
-    term: [''],
-    page: 0,
-  });
-
   currentTab = 1;
   results?: SearchResponse;
+  searchTerm: string = '';
+  searchResultPage: number = 0;
+
+  searchTermChanged = new BehaviorSubject<string>('');
+  searchResultPageNumberChanged = new BehaviorSubject<number>(0);
 
   constructor(
-    private formBuilder: FormBuilder,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // TODO: Don't reset term from URL when loading
+    combineLatest([
+      this.searchTermChanged,
+      this.searchResultPageNumberChanged,
+    ]).subscribe(([term, page]) => {
+      this.searchTerm = term;
+      this.searchResultPage = page;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          term: term,
+          page: page,
+        },
+      });
+    });
+  }
+
+  onSearchTermChanged(term: string): void {
+    this.searchTermChanged.next(term);
+  }
+
+  onSearchResultPageChanged(page: number): void {
+    this.searchResultPageNumberChanged.next(page);
+  }
 
   onSubmit(): void {
     this.searchService
-      .getSearchResults(
-        this.form.get('term')!.value ?? '',
-        this.form.get('page')!.value ?? 0
-      )
+      .getSearchResults(this.searchTerm, this.searchResultPage)
       .subscribe((results) => {
         this.results = results;
       });
