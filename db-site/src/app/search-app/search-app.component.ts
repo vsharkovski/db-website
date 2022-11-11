@@ -1,15 +1,37 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { SearchResponse } from '../search-response.model';
+import { SearchService } from '../search.service';
 
 @Component({
   selector: 'dbw-search-app',
   templateUrl: './search-app.component.html',
-  styleUrls: ['./search-app.component.css']
+  styleUrls: ['./search-app.component.css'],
 })
 export class SearchAppComponent implements OnInit {
+  form = this.formBuilder.group({
+    term: [''],
+    page: 0,
+  });
 
-  constructor() { }
+  results?: SearchResponse;
 
-  ngOnInit(): void {
+  constructor(
+    private formBuilder: FormBuilder,
+    private searchService: SearchService
+  ) {}
+
+  ngOnInit(): void {}
+
+  onSubmit(): void {
+    this.searchService
+      .getSearchResults(
+        this.form.get('term')!.value ?? '',
+        this.form.get('page')!.value ?? 0
+      )
+      .subscribe((results) => {
+        this.results = results;
+        console.log('Got results', results);
+      });
   }
-
 }

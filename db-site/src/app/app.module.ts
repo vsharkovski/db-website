@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,6 +23,7 @@ import { SearchOptionsComponent } from './search-options/search-options.componen
 import { SearchResultsQuickComponent } from './search-results-quick/search-results-quick.component';
 import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -45,7 +47,7 @@ import { AboutPageComponent } from './about-page/about-page.component';
     MapComponent,
     AboutPageComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, NgbModule],
+  imports: [BrowserModule, AppRoutingModule, NgbModule, HttpClientModule, ReactiveFormsModule],
   providers: [],
   bootstrap: [AppComponent],
 })
