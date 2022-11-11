@@ -31,7 +31,6 @@ export class SearchAppComponent implements OnInit {
       )
       .subscribe((results) => {
         this.results = results;
-        console.log('Got results', results);
       });
   }
 }

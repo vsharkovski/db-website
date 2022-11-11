@@ -8,12 +8,31 @@
   <h5>Search test</h5>
   <div class="col-4">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label for="term" class="form-label">Search query term (try complex rules)</label>
       <input type="text" class="form-control" formControlName="term" placeholder="Enter search term..." />
+      <label for="page" class="form-label mt-3">Search result page number</label>
       <input type="number" class="form-control" formControlName="page" />
-      <button type="submit" class="btn btn-primary my-3">Search</button>
+      <button type="submit" class="btn btn-primary mt-3">Search</button>
     </form>
   </div>
   <div class="col">
-    <pre *ngIf="results">{{ results | json }}</pre>
+    <div *ngIf="results">
+      <h5>Results</h5>
+      <div class="row">
+        <p class="col">Prev page: {{ results.hasPreviousPage }}</p>
+        <p class="col">Next page: {{ results.hasNextPage }}</p>
+      </div>
+      <div *ngFor="let person of results.persons" class="search-result-test">
+        <hr />
+        <p>Wikidata Code: {{ person.wikidataCode }}</p>
+        <p>Name: {{ person.name }}</p>
+        <p>Birth: {{ person.birth }}</p>
+        <p>Death: {{ person.death }}</p>
+        <p>level1MainOcc: {{ person.level1MainOcc }}</p>
+        <p>level2MainOcc: {{ person.level2MainOcc }}</p>
+        <p>citizenship1: {{ person.citizenship1B }}</p>
+        <p>citizenship2: {{ person.citizenship2B }}</p>
+      </div>
+    </div>
   </div>
 </div>
