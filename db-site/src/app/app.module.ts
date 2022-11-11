@@ -20,7 +20,7 @@ import { PaperReferenceComponent } from './paper-reference/paper-reference.compo
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { SearchAppComponent } from './search-app/search-app.component';
 import { SearchOptionsComponent } from './search-options/search-options.component';
-import { SearchResultsQuickComponent } from './search-results-quick/search-results-quick.component';
+import { SearchResultsComponent } from './search-results/search-results.component';
 import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -43,7 +43,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     SidebarComponent,
     SearchAppComponent,
     SearchOptionsComponent,
-    SearchResultsQuickComponent,
+    SearchResultsComponent,
     MapComponent,
     AboutPageComponent,
   ],

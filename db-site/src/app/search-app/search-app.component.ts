@@ -14,6 +14,7 @@ export class SearchAppComponent implements OnInit {
     page: 0,
   });
 
+  currentTab = 1;
   results?: SearchResponse;
 
   constructor(

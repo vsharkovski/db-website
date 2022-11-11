@@ -1,9 +1,26 @@
-<h1>Search the dataset</h1>
-<div class="d-flex">
-  <dbw-search-options></dbw-search-options>
-  <dbw-search-results-quick></dbw-search-results-quick>
-  <dbw-map></dbw-map>
+<div class="row">
+  <div class="col-4">
+    <h1 class="text-center">Find people in history</h1>
+    <dbw-search-options></dbw-search-options>
+  </div>
+  <div class="col-8">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
+      <li [ngbNavItem]="1">
+        <a ngbNavLink>Results</a>
+        <ng-template ngbNavContent>
+          <dbw-search-results></dbw-search-results>
+        </ng-template>
+      </li>
+      <li [ngbNavItem]="2">
+        <a ngbNavLink>Map</a>
+        <ng-template ngbNavContent>
+          <dbw-map></dbw-map>
+        </ng-template>
+      </li>
+    </ul>
+  </div>
 </div>
+
 <div class="row">
   <h5>Search test</h5>
   <div class="col-4">
