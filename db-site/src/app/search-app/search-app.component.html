@@ -2,8 +2,9 @@
   <div class="col-md-4">
     <h1 class="text-center">Find people in history</h1>
     <dbw-search-options
-      (termChanged)="onSearchTermChanged($event)"
-      (pageChanged)="onSearchResultPageChanged($event)"
+      [initialTerm]="initialSearchTerm"
+      [initialPage]="initialSearchResultPage"
+      (queryChanged)="this.searchQueryChanged.next($event)"
       (submitted)="onSubmit()"
     ></dbw-search-options>
   </div>
