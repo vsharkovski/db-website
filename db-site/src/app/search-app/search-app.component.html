@@ -5,7 +5,7 @@
       [initialTerm]="initialSearchTerm"
       [initialPage]="initialSearchResultPage"
       (queryChanged)="this.searchQueryChanged.next($event)"
-      (submitted)="onSubmit()"
+      (submitted)="this.searchOptionsSubmitted.next()"
     ></dbw-search-options>
   </div>
   <div class="col-md-8">

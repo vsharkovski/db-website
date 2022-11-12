@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  BehaviorSubject,
-  combineLatest,
   debounceTime,
   distinctUntilChanged,
   merge,
   of,
-  startWith,
   Subject,
   Subscription,
   switchMap,
@@ -78,9 +75,5 @@ export class SearchAppComponent implements OnInit {
       .subscribe((results) => {
         this.results = results;
       });
-  }
-
-  onSubmit(): void {
-    this.searchOptionsSubmitted.next();
   }
 }
