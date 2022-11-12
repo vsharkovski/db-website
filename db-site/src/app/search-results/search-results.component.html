@@ -1,17 +1,32 @@
-<div *ngIf="results">
-  <div class="row">
-    <p class="col">Prev page: {{ results.hasPreviousPage }}</p>
-    <p class="col">Next page: {{ results.hasNextPage }}</p>
+<div *ngIf="results" class="row">
+  <p class="col">Prev page: {{ results.hasPreviousPage }}</p>
+  <p class="col">Next page: {{ results.hasNextPage }}</p>
+</div>
+<div *ngIf="results" class="results-table">
+  <div class="search-result results-header">
+    <div><span>Name</span></div>
+    <div><span>Birth</span></div>
+    <div><span>Death</span></div>
+    <div><span>Occupation</span></div>
+    <div><span>Birth country</span></div>
   </div>
-  <div *ngFor="let person of results.persons" class="search-result-test">
-    <hr />
-    <p>Wikidata Code: {{ person.wikidataCode }}</p>
-    <p>Name: {{ person.name }}</p>
-    <p>Birth: {{ person.birth }}</p>
-    <p>Death: {{ person.death }}</p>
-    <p>level1MainOcc: {{ person.level1MainOcc }}</p>
-    <p>level2MainOcc: {{ person.level2MainOcc }}</p>
-    <p>citizenship1: {{ person.citizenship1B }}</p>
-    <p>citizenship2: {{ person.citizenship2B }}</p>
+  <div *ngFor="let person of results.persons" class="search-result">
+    <div>
+      <span>{{ person.name }}</span>
+    </div>
+    <div>
+      <span *ngIf="person.birth !== null">{{ person.birth }}</span>
+      <span *ngIf="person.birth === null">~</span>
+    </div>
+    <div>
+      <span *ngIf="person.death !== null">{{ person.death }}</span>
+      <span *ngIf="person.death === null">~</span>
+    </div>
+    <div>
+      <span *ngIf="person.level1MainOcc !== null">{{ person.level1MainOcc }}</span>
+    </div>
+    <div>
+      <span *ngIf="person.citizenship1B">{{ person.citizenship1B }}</span>
+    </div>
   </div>
 </div>
