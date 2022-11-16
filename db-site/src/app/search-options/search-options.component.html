@@ -1,28 +1,70 @@
 <form [formGroup]="form" (ngSubmit)="this.submitted.next()">
   <label for="term" class="form-label">Name</label>
-  <input type="text" class="form-control" formControlName="name" placeholder="Enter name..." />
+  <input
+    type="text"
+    class="form-control"
+    formControlName="name"
+    placeholder="Enter name..."
+    [class.is-invalid]="nameField.invalid"
+  />
+  <div *ngIf="nameField.errors?.['pattern']" class="invalid-feedback">The name contains invalid characters.</div>
+  <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
   <div class="row mt-3">
     <label class="form-label">Birth year</label>
     <div class="col">
-      <input type="number" class="form-control" formControlName="birthMin" [min]="lifeYearMin" [max]="lifeYearMax" />
+      <input
+        type="number"
+        step="1"
+        class="form-control"
+        formControlName="birthMin"
+        [min]="lifeYearMin"
+        [max]="lifeYearMax"
+        [class.is-invalid]="birthMinField.invalid"
+      />
+      <div *ngIf="birthMinField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
     <div class="col-auto pt-1">
       <span>to</span>
     </div>
     <div class="col">
-      <input type="number" class="form-control" formControlName="birthMax" [min]="lifeYearMin" [max]="lifeYearMax" />
+      <input
+        type="number"
+        step="1"
+        class="form-control"
+        formControlName="birthMax"
+        [min]="lifeYearMin"
+        [max]="lifeYearMax"
+        [class.is-invalid]="birthMaxField.invalid"
+      />
+      <div *ngIf="birthMaxField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
   </div>
   <div class="row mt-3">
     <label class="form-label">Death year</label>
     <div class="col">
-      <input type="number" class="form-control" formControlName="deathMin" [min]="lifeYearMin" [max]="lifeYearMax" />
+      <input
+        type="number"
+        class="form-control"
+        formControlName="deathMin"
+        [min]="lifeYearMin"
+        [max]="lifeYearMax"
+        [class.is-invalid]="deathMinField.invalid"
+      />
+      <div *ngIf="deathMinField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
     <div class="col-auto pt-1">
       <span>to</span>
     </div>
     <div class="col">
-      <input type="number" class="form-control" formControlName="deathMax" [min]="lifeYearMin" [max]="lifeYearMax" />
+      <input
+        type="number"
+        class="form-control"
+        formControlName="deathMax"
+        [min]="lifeYearMin"
+        [max]="lifeYearMax"
+        [class.is-invalid]="deathMaxField.invalid"
+      />
+      <div *ngIf="deathMaxField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
   </div>
   <label for="page" class="form-label mt-3">Result page number</label>

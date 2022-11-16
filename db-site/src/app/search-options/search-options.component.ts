@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
+import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchQuery } from '../search-query.model';
 
 @Component({
@@ -20,23 +21,42 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly lifeYearMax: number = 2020;
 
   form = this.formBuilder.group({
-    page: [0, [Validators.min(0), Validators.max(10000)]],
-    name: ['', [Validators.pattern('^[*A-Za-z\\d\\s_()]+$')]],
+    page: [0, [Validators.maxLength(200), Validators.max(10000)]],
+    name: [
+      '',
+      [Validators.maxLength(200), Validators.pattern('^[*A-Za-z\\d\\s_()]+$')],
+    ],
     birthMin: [
       this.lifeYearMin,
-      [Validators.min(this.lifeYearMin), Validators.max(this.lifeYearMax)],
+      [
+        Validators.min(this.lifeYearMin),
+        Validators.max(this.lifeYearMax),
+        isIntegerOrNullValidator,
+      ],
     ],
     birthMax: [
       this.lifeYearMax,
-      [Validators.min(this.lifeYearMin), Validators.max(this.lifeYearMax)],
+      [
+        Validators.min(this.lifeYearMin),
+        Validators.max(this.lifeYearMax),
+        isIntegerOrNullValidator,
+      ],
     ],
     deathMin: [
       this.lifeYearMin,
-      [Validators.min(this.lifeYearMin), Validators.max(this.lifeYearMax)],
+      [
+        Validators.min(this.lifeYearMin),
+        Validators.max(this.lifeYearMax),
+        isIntegerOrNullValidator,
+      ],
     ],
     deathMax: [
       this.lifeYearMax,
-      [Validators.min(this.lifeYearMin), Validators.max(this.lifeYearMax)],
+      [
+        Validators.min(this.lifeYearMin),
+        Validators.max(this.lifeYearMax),
+        isIntegerOrNullValidator,
+      ],
     ],
   });
 
@@ -79,13 +99,13 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     }
     let term = '';
     if (this.nameField.value) term += `name:${this.nameField.value},`;
-    if (this.birthMinField.touched)
+    if (this.birthMinField.value !== null)
       term += `birth>=${this.birthMinField.value},`;
-    if (this.birthMaxField.touched)
+    if (this.birthMaxField.value !== null)
       term += `birth<=${this.birthMaxField.value},`;
-    if (this.deathMinField.touched)
+    if (this.deathMinField.value !== null)
       term += `death>=${this.deathMinField.value},`;
-    if (this.deathMaxField.touched)
+    if (this.deathMaxField.value !== null)
       term += `death<=${this.deathMaxField.value},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
