@@ -21,10 +21,10 @@
       <span>{{ person.death | dateYear }}</span>
     </div>
     <div>
-      <span *ngIf="person.level1MainOcc !== undefined">{{ person.level1MainOcc }}</span>
+      <span>{{ person.level1MainOcc ?? "~" }}</span>
     </div>
     <div>
-      <span *ngIf="person.citizenship1B">{{ person.citizenship1B }}</span>
+      <span>{{ person.citizenship1B ?? "~" }}</span>
     </div>
   </div>
 </div>
