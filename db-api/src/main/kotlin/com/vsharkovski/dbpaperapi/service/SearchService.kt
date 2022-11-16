@@ -23,8 +23,9 @@ class SearchService(
         }
         val builder = PersonSpecificationBuilder()
         val pattern =
-            Pattern.compile("(\\w+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED})(\\p{Punct}?)(\\w+?)(\\p{Punct}?),")
+            Pattern.compile("([\\w-]+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED})(\\p{Punct}?)([\\w-]+?)(\\p{Punct}?),")
         val matcher = pattern.matcher("$term,")
+//        logger.info("Attempting to match term [{}]", term)
         while (matcher.find()) {
             builder.with(
                 matcher.group(1),
