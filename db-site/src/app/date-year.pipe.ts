@@ -9,8 +9,8 @@ export class DateYearPipe implements PipeTransform {
       return '~';
     }
     if (value < 0) {
-      return `${-value} BCE`;
+      return `${-value} BC`;
     }
-    return `${value} CE`;
+    return `${value}`;
   }
 }
