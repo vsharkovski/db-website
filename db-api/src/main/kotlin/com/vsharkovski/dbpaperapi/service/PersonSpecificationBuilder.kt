@@ -14,10 +14,9 @@ class PersonSpecificationBuilder {
     private val params: MutableList<SearchCriteria> = mutableListOf()
 
     fun with(key: String, operation: String, value: String, prefix: String, suffix: String): PersonSpecificationBuilder {
-        SearchOperation.getSimpleOperation(operation[0])?.let { op ->
+        SearchOperation.getSimpleOperation(operation)?.let { op ->
             var opToAdd = op
             var valueToAdd: Any = value
-            var isStringOperation = false
 
             // Parse string wildcards
             if (op == SearchOperation.EQUALITY) {
@@ -25,20 +24,15 @@ class PersonSpecificationBuilder {
                 val endsWithAsterisk = suffix.contains("*")
                 if (startsWithAsterisk && endsWithAsterisk) {
                     opToAdd = SearchOperation.CONTAINS
-                    isStringOperation = true
                 } else if (startsWithAsterisk) {
                     opToAdd = SearchOperation.ENDS_WITH
-                    isStringOperation = true
                 } else if (endsWithAsterisk) {
                     opToAdd = SearchOperation.STARTS_WITH
-                    isStringOperation = true
                 }
             }
 
             // Parse minus
-            if (!isStringOperation
-                && (opToAdd == SearchOperation.EQUALITY || opToAdd == SearchOperation.GREATER_THAN ||
-                        opToAdd == SearchOperation.LESS_THAN)
+            if (SearchOperation.isOperationNumeric(opToAdd)
                 && prefix == "-"
                 && value.toIntOrNull() != null
             ) {

@@ -22,6 +22,10 @@ data class PersonSpecification(
             builder.greaterThan(root.get(criteria.key), criteria.value.toString())
         SearchOperation.LESS_THAN ->
             builder.lessThan(root.get(criteria.key), criteria.value.toString())
+        SearchOperation.GREATER_THAN_OR_EQUAL ->
+            builder.greaterThanOrEqualTo(root.get(criteria.key), criteria.value.toString())
+        SearchOperation.LESS_THAN_OR_EQUAL ->
+            builder.lessThanOrEqualTo(root.get(criteria.key), criteria.value.toString())
         SearchOperation.LIKE ->
             builder.like(root.get(criteria.key), criteria.value.toString())
         SearchOperation.STARTS_WITH ->
