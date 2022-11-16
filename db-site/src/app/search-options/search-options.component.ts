@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
+import { SearchQuery } from '../search-query.model';
 
 @Component({
   selector: 'dbw-search-options',
@@ -23,15 +24,14 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   @Input() initialPage: number = 0;
   @Input() initialTerm: string = '';
 
-  @Output() queryChanged = new EventEmitter<{ page: number; term: string }>();
+  @Output() queryChanged = new EventEmitter<SearchQuery>();
   @Output() submitted = new EventEmitter<void>();
 
   constructor(private formBuilder: FormBuilder) {}
 
   ngOnInit(): void {
     // set initial options
-    this.form.get('term')!.setValue(this.initialTerm);
-    this.form.get('page')!.setValue(this.initialPage);
+    this.pushQueryToOptions({ page: this.initialPage, term: this.initialTerm });
     // when things are changed, send signal up
     this.form.valueChanges.subscribe((values) => {
       this.queryChanged.emit({
@@ -42,4 +42,13 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {}
+
+  pushQueryToOptions(query: SearchQuery): void {
+    this.form.get('page')!.setValue(query.page);
+    this.form.get('term')!.setValue(query.term);
+  }
+
+  pullQueryFromOptions(): SearchQuery {
+    return { page: 0, term: '' };
+  }
 }
