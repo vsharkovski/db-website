@@ -15,15 +15,13 @@
       <span>{{ person.name }}</span>
     </div>
     <div>
-      <span *ngIf="person.birth !== null">{{ person.birth }}</span>
-      <span *ngIf="person.birth === null">~</span>
+      <span>{{ person.birth | dateYear }}</span>
     </div>
     <div>
-      <span *ngIf="person.death !== null">{{ person.death }}</span>
-      <span *ngIf="person.death === null">~</span>
+      <span>{{ person.death | dateYear }}</span>
     </div>
     <div>
-      <span *ngIf="person.level1MainOcc !== null">{{ person.level1MainOcc }}</span>
+      <span *ngIf="person.level1MainOcc !== undefined">{{ person.level1MainOcc }}</span>
     </div>
     <div>
       <span *ngIf="person.citizenship1B">{{ person.citizenship1B }}</span>

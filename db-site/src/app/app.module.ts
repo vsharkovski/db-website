@@ -24,6 +24,7 @@ import { SearchResultsComponent } from './search-results/search-results.componen
 import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { DateYearPipe } from './date-year.pipe';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     SearchResultsComponent,
     MapComponent,
     AboutPageComponent,
+    DateYearPipe,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule, HttpClientModule, ReactiveFormsModule],
   providers: [],
