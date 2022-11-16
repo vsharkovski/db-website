@@ -25,6 +25,7 @@ import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DateYearPipe } from './date-year.pipe';
+import { IntSliderComponent } from './int-slider/int-slider.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { DateYearPipe } from './date-year.pipe';
     MapComponent,
     AboutPageComponent,
     DateYearPipe,
+    IntSliderComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule, HttpClientModule, ReactiveFormsModule],
   providers: [],
