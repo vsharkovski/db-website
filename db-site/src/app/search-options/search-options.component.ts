@@ -21,7 +21,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly lifeYearMax: number = 2020;
 
   form = this.formBuilder.group({
-    page: [0, [Validators.maxLength(200), Validators.max(10000)]],
+    page: [0, [Validators.min(0), Validators.max(10000)]],
     name: [
       '',
       [Validators.maxLength(200), Validators.pattern('^[*A-Za-z\\d\\s_()]+$')],
@@ -29,32 +29,32 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     birthMin: [
       this.lifeYearMin,
       [
-        Validators.min(this.lifeYearMin),
-        Validators.max(this.lifeYearMax),
+        // Validators.min(this.lifeYearMin),
+        // Validators.max(this.lifeYearMax),
         isIntegerOrNullValidator,
       ],
     ],
     birthMax: [
       this.lifeYearMax,
       [
-        Validators.min(this.lifeYearMin),
-        Validators.max(this.lifeYearMax),
+        // Validators.min(this.lifeYearMin),
+        // Validators.max(this.lifeYearMax),
         isIntegerOrNullValidator,
       ],
     ],
     deathMin: [
       this.lifeYearMin,
       [
-        Validators.min(this.lifeYearMin),
-        Validators.max(this.lifeYearMax),
+        // Validators.min(this.lifeYearMin),
+        // Validators.max(this.lifeYearMax),
         isIntegerOrNullValidator,
       ],
     ],
     deathMax: [
       this.lifeYearMax,
       [
-        Validators.min(this.lifeYearMin),
-        Validators.max(this.lifeYearMax),
+        // Validators.min(this.lifeYearMin),
+        // Validators.max(this.lifeYearMax),
         isIntegerOrNullValidator,
       ],
     ],
@@ -100,13 +100,13 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     let term = '';
     if (this.nameField.value) term += `name:${this.nameField.value},`;
     if (this.birthMinField.value !== null)
-      term += `birth>=${this.birthMinField.value},`;
+      term += `birth>=${Math.max(this.lifeYearMin, this.birthMinField.value)},`;
     if (this.birthMaxField.value !== null)
-      term += `birth<=${this.birthMaxField.value},`;
+      term += `birth<=${Math.min(this.lifeYearMax, this.birthMaxField.value)},`;
     if (this.deathMinField.value !== null)
-      term += `death>=${this.deathMinField.value},`;
+      term += `death>=${Math.max(this.lifeYearMin, this.deathMinField.value)},`;
     if (this.deathMaxField.value !== null)
-      term += `death<=${this.deathMaxField.value},`;
+      term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
