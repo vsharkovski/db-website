@@ -1,6 +1,6 @@
 <div *ngIf="results" class="row">
-  <p class="col">Prev page: {{ results.hasPreviousPage }}</p>
-  <p class="col">Next page: {{ results.hasNextPage }}</p>
+  <p *ngIf="results.hasPreviousPage" class="col">Previous page</p>
+  <p *ngIf="results.hasNextPage" class="col text-end">Next page</p>
 </div>
 <div *ngIf="results" class="results-table">
   <div class="search-result results-header">
