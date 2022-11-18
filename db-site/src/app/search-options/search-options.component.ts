@@ -19,12 +19,14 @@ import { SearchQuery } from '../search-query.model';
 export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly lifeYearMin: number = -3500;
   readonly lifeYearMax: number = 2020;
+  readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
+  readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
     name: [
       '',
-      [Validators.maxLength(200), Validators.pattern('^[*A-Za-z\\d\\s_()]+$')],
+      [Validators.maxLength(200), Validators.pattern(this.safeWildcardPattern)],
     ],
     birthMin: [
       this.lifeYearMin,
@@ -56,6 +58,13 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         // Validators.min(this.lifeYearMin),
         // Validators.max(this.lifeYearMax),
         isIntegerOrNullValidator,
+      ],
+    ],
+    birthCountry: [
+      '',
+      [
+        Validators.maxLength(200),
+        Validators.pattern(this.safeNonWildcardPattern),
       ],
     ],
   });
@@ -107,6 +116,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       term += `death>=${Math.max(this.lifeYearMin, this.deathMinField.value)},`;
     if (this.deathMaxField.value !== null)
       term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
+    if (this.birthCountryField.value)
+      term += `citizenship1B:*${this.birthCountryField.value}*,`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
@@ -138,5 +149,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
   get deathMaxField(): AbstractControl {
     return this.form.get('deathMax')!;
+  }
+
+  get birthCountryField(): AbstractControl {
+    return this.form.get('birthCountry')!;
   }
 }
