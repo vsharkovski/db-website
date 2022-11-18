@@ -50,13 +50,10 @@
     </div>
   </div>
   <label for="birthCountry" class="form-label mt-3">Birth country</label>
-  <input
-    type="text"
-    class="form-control"
-    formControlName="birthCountry"
-    placeholder="Enter birth country..."
-    [class.is-invalid]="birthCountryField.invalid"
-  />
+  <select class="form-select" formControlName="birthCountry">
+    <option ngValue="">(Any)</option>
+    <option *ngFor="let country of citizenship1BOptions" [ngValue]="country">{{ country }}</option>
+  </select>
   <label for="page" class="form-label mt-3">Result page number</label>
   <input type="number" class="form-control" formControlName="page" />
   <button type="submit" class="btn btn-primary mt-3">Search</button>

@@ -1,26 +1,20 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchQuery } from '../search-query.model';
+import citizenship1BData from '../../assets/data/citizenship1B.json';
 
 @Component({
   selector: 'dbw-search-options',
   templateUrl: './search-options.component.html',
   styleUrls: ['./search-options.component.css'],
 })
-export class SearchOptionsComponent implements OnInit, OnChanges {
+export class SearchOptionsComponent implements OnInit {
   readonly lifeYearMin: number = -3500;
   readonly lifeYearMax: number = 2020;
   readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
   readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
+  readonly citizenship1BOptions = citizenship1BData;
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
@@ -60,13 +54,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         isIntegerOrNullValidator,
       ],
     ],
-    birthCountry: [
-      '',
-      [
-        Validators.maxLength(200),
-        Validators.pattern(this.safeNonWildcardPattern),
-      ],
-    ],
+    birthCountry: [''],
   });
 
   @Input() initialPage: number = 0;
@@ -95,8 +83,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {}
-
   pushQueryToOptions(query: SearchQuery): void {
     this.compiledTerm = query.term;
     this.pageField.setValue(query.page);
@@ -117,7 +103,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     if (this.deathMaxField.value !== null)
       term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
     if (this.birthCountryField.value)
-      term += `citizenship1B:*${this.birthCountryField.value}*,`;
+      term += `citizenship1B:${this.birthCountryField.value},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
@@ -125,6 +111,10 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       page: this.pageField.value ?? 0,
       term: term,
     };
+  }
+
+  onBirthCountryChange(event: any): void {
+    this.birthCountryField.setValue(event.value);
   }
 
   get pageField(): AbstractControl {
