@@ -30,7 +30,7 @@ export class SearchOptionsComponent implements OnInit {
       [Validators.maxLength(200), Validators.pattern(this.safeWildcardPattern)],
     ],
     birthMin: [
-      this.lifeYearMin,
+      null,
       [
         // Validators.min(this.lifeYearMin),
         // Validators.max(this.lifeYearMax),
@@ -38,7 +38,7 @@ export class SearchOptionsComponent implements OnInit {
       ],
     ],
     birthMax: [
-      this.lifeYearMax,
+      null,
       [
         // Validators.min(this.lifeYearMin),
         // Validators.max(this.lifeYearMax),
@@ -46,7 +46,7 @@ export class SearchOptionsComponent implements OnInit {
       ],
     ],
     deathMin: [
-      this.lifeYearMin,
+      null,
       [
         // Validators.min(this.lifeYearMin),
         // Validators.max(this.lifeYearMax),
@@ -54,7 +54,7 @@ export class SearchOptionsComponent implements OnInit {
       ],
     ],
     deathMax: [
-      this.lifeYearMax,
+      null,
       [
         // Validators.min(this.lifeYearMin),
         // Validators.max(this.lifeYearMax),
