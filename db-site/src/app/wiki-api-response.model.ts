@@ -1,10 +1,7 @@
+import { WikiApiPage } from './wiki-api-page.model';
+
 export interface WikiApiResponse {
-  query?: {
-    pages?: {
-      thumbnail?: {
-        source?: string;
-      };
-      missing?: boolean;
-    }[];
+  query: {
+    pages: WikiApiPage[];
   };
 }

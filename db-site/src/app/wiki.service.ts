@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 import { ErrorService } from './error.service';
 import { Person } from './person.model';
+import { WikiApiPage } from './wiki-api-page.model';
 import { WikiApiResponse } from './wiki-api-response.model';
 
 /*
@@ -22,7 +23,7 @@ const apiUrl = 'https://en.wikipedia.org/w/api.php';
 export class WikiService {
   constructor(private http: HttpClient, private errorService: ErrorService) {}
 
-  getImageFromEnglishWiki(person: Person): Observable<string | null> {
+  getDataFromEnglishWiki(person: Person): Observable<WikiApiPage | null> {
     if (!person.name) {
       return of(null);
     }
@@ -31,28 +32,34 @@ export class WikiService {
         params: new HttpParams({
           fromObject: {
             origin: '*', // necessary because CORS
-            action: 'query',
             format: 'json',
             formatversion: 2,
-            prop: 'pageimages|pageterms',
+            action: 'query',
+            prop: 'pageimages|pageterms|extracts',
             piprop: 'thumbnail',
             pithumbsize: 600,
+            explaintext: 1,
+            exsectionformat: 'plain',
+            exsentences: 4,
             titles: person.name,
           },
         }),
       })
       .pipe(
         catchError(
-          this.errorService.handleError(
-            'getImageFromEnglishWiki',
-            {} as WikiApiResponse
-          )
+          this.errorService.handleError('getDataFromEnglishWiki', null)
         ),
         switchMap((response) => {
-          const pages = response.query?.pages;
-          if (!pages || pages.length == 0 || pages[0].missing) return of(null);
-          return of(pages[0].thumbnail?.source ?? null);
+          if (!response || !this.doesPageExistInResponse(response))
+            return of(null);
+          return of(response!.query!.pages![0]);
         })
       );
+  }
+
+  private doesPageExistInResponse(response: WikiApiResponse): boolean {
+    const pages = response?.query?.pages;
+    if (!pages || pages.length == 0 || pages[0].missing) return false;
+    return true;
   }
 }

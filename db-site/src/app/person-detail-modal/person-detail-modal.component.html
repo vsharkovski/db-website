@@ -4,9 +4,9 @@
 </div>
 <div class="modal-body">
   <div class="row">
-    <div class="col image-container" *ngIf="this.imageSource">
+    <div class="col image-container" *ngIf="data?.thumbnail?.source">
       <a [href]="wikidataUrl">
-        <img [src]="imageSource" class="img-fluid rounded" />
+        <img [src]="data!.thumbnail!.source" class="img-fluid rounded" />
       </a>
     </div>
     <div class="col-sm info-panel">
@@ -31,6 +31,7 @@
         <span>{{ person.citizenship1B }}</span>
       </div>
     </div>
+    <p *ngIf="data?.extract">{{ data!.extract }}</p>
     <div class="d-flex">
       <span class="ms-auto mt-3"><a [href]="wikidataUrl">Wikidata Page</a></span>
     </div>

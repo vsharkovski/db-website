@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
 import { Person } from '../person.model';
+import { WikiApiPage } from '../wiki-api-page.model';
 import { WikiService } from '../wiki.service';
 
 @Component({
@@ -12,7 +13,7 @@ import { WikiService } from '../wiki.service';
 export class PersonDetailModalComponent implements OnInit {
   @Input() person!: Person;
   wikidataUrl!: string;
-  imageSource: string | null = null;
+  data: WikiApiPage | null = null;
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -22,7 +23,7 @@ export class PersonDetailModalComponent implements OnInit {
   ngOnInit(): void {
     this.wikidataUrl = `https://www.wikidata.org/wiki/${this.person.wikidataCode}`;
     this.wikiService
-      .getImageFromEnglishWiki(this.person)
-      .subscribe((source) => (this.imageSource = source));
+      .getDataFromEnglishWiki(this.person)
+      .subscribe((data) => (this.data = data));
   }
 }
