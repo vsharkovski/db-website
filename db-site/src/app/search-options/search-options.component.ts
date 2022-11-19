@@ -54,7 +54,7 @@ export class SearchOptionsComponent implements OnInit {
         isIntegerOrNullValidator,
       ],
     ],
-    birthCountry: [''],
+    citizenship: [''],
   });
 
   @Input() initialPage: number = 0;
@@ -102,8 +102,8 @@ export class SearchOptionsComponent implements OnInit {
       term += `death>=${Math.max(this.lifeYearMin, this.deathMinField.value)},`;
     if (this.deathMaxField.value !== null)
       term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
-    if (this.birthCountryField.value)
-      term += `citizenship1B:${this.birthCountryField.value},`;
+    if (this.citizenshipField.value)
+      term += `citizenship1B:${this.citizenshipField.value},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
@@ -113,8 +113,8 @@ export class SearchOptionsComponent implements OnInit {
     };
   }
 
-  onBirthCountryChange(event: any): void {
-    this.birthCountryField.setValue(event.value);
+  onCitizenshipChange(event: any): void {
+    this.citizenshipField.setValue(event.value);
   }
 
   get pageField(): AbstractControl {
@@ -141,7 +141,7 @@ export class SearchOptionsComponent implements OnInit {
     return this.form.get('deathMax')!;
   }
 
-  get birthCountryField(): AbstractControl {
-    return this.form.get('birthCountry')!;
+  get citizenshipField(): AbstractControl {
+    return this.form.get('citizenship')!;
   }
 }
