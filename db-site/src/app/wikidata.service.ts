@@ -9,6 +9,8 @@ import { WikiApiResponse } from './wiki-api-response.model';
 https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=600&titles=Albert%20Einstein
 */
 
+const apiUrl = 'https://en.wikipedia.org/w/api.php';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -20,9 +22,10 @@ export class WikidataService {
       return of(null);
     }
     return this.http
-      .get<WikiApiResponse>('/ext/api/wiki/en', {
+      .get<WikiApiResponse>(apiUrl, {
         params: new HttpParams({
           fromObject: {
+            origin: '*', // necessary because CORS
             action: 'query',
             format: 'json',
             formatversion: 2,
