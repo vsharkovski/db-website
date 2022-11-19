@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Person } from '../person.model';
+import { WikidataService } from '../wikidata.service';
 
 @Component({
   selector: 'dbw-person-detail-modal',
@@ -9,8 +10,16 @@ import { Person } from '../person.model';
 })
 export class PersonDetailModalComponent implements OnInit {
   @Input() person!: Person;
+  imageSource: string | null = null;
 
-  constructor(public activeModal: NgbActiveModal) {}
+  constructor(
+    public activeModal: NgbActiveModal,
+    private wikidataService: WikidataService
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.wikidataService
+      .getImageFromEnglishWiki(this.person)
+      .subscribe((source) => (this.imageSource = source));
+  }
 }

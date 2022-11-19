@@ -3,7 +3,7 @@
   <button type="button" class="btn-close" (click)="activeModal.close()"></button>
 </div>
 <div class="modal-body">
-  <div class="row">
+  <!-- <div class="row">
     <div class="col-auto">
       <h6>Birth</h6>
       <p>{{ person.birth | dateYear | unknown }}</p>
@@ -24,7 +24,23 @@
       <h6>Citizenship</h6>
       <p>{{ person.citizenship1B }}</p>
     </div>
+  </div> -->
+  <div class="row">
+    <div class="col">
+      <img [src]="this.imageSource" class="img-fluid rounded" />
+    </div>
+    <div class="col-sm info-panel">
+      <h6>Birth</h6>
+      <p>{{ person.birth | dateYear | unknown }}</p>
+      <h6>Death</h6>
+      <p>{{ person.death | dateYear | unknown: true:true }}</p>
+      <h6>Gender</h6>
+      <p>{{ person.gender | unknown }}</p>
+      <h6>Occupation</h6>
+      <p>{{ person.level1MainOcc }}</p>
+      <h6>Citizenship</h6>
+      <p>{{ person.citizenship1B }}</p>
+    </div>
   </div>
-  <div class="row"></div>
   <pre>{{ person | json }}</pre>
 </div>

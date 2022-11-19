@@ -11,7 +11,7 @@ export class ModalService {
 
   openPersonDetailModal(person: Person): void {
     const modal = this.ngbModal.open(PersonDetailModalComponent, {
-      size: 'xl',
+      // size: 'xl',
       scrollable: true,
     });
     modal.componentInstance.person = person;
