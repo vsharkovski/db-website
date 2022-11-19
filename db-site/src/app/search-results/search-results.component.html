@@ -11,7 +11,7 @@
     <span>Occupation</span>
     <span>Citizenship</span>
   </div>
-  <div *ngFor="let person of results.persons" class="search-result">
+  <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
     <span>{{ person.name }}</span>
     <span>{{ person.birth | dateYear }}</span>
     <span>{{ person.death | dateYear }}</span>

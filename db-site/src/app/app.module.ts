@@ -27,6 +27,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { DateYearPipe } from './date-year.pipe';
 import { IntSliderComponent } from './int-slider/int-slider.component';
 import { GenderPipe } from './gender.pipe';
+import { PersonDetailModalComponent } from './person-detail-modal/person-detail-modal.component';
 
 @NgModule({
   declarations: [
@@ -52,8 +53,15 @@ import { GenderPipe } from './gender.pipe';
     DateYearPipe,
     IntSliderComponent,
     GenderPipe,
+    PersonDetailModalComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, NgbModule, HttpClientModule, ReactiveFormsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NgbModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
