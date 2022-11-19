@@ -1,45 +1,33 @@
 <div class="modal-header">
-  <h3 class="modal-title">{{ person.name }}</h3>
+  <h3 class="modal-title text-wrap text-break">{{ person.name }}</h3>
   <button type="button" class="btn-close" (click)="activeModal.close()"></button>
 </div>
 <div class="modal-body">
-  <!-- <div class="row">
-    <div class="col-auto">
-      <h6>Birth</h6>
-      <p>{{ person.birth | dateYear | unknown }}</p>
-    </div>
-    <div class="col-auto" *ngIf="person.death !== null">
-      <h6>Death</h6>
-      <p>{{ person.death | dateYear | unknown }}</p>
-    </div>
-    <div class="col-auto">
-      <h6>Gender</h6>
-      <p>{{ person.gender | unknown }}</p>
-    </div>
-    <div class="col-auto" *ngIf="person.level1MainOcc !== null">
-      <h6>Occupation</h6>
-      <p>{{ person.level1MainOcc }}</p>
-    </div>
-    <div class="col-auto" *ngIf="person.citizenship1B !== null">
-      <h6>Citizenship</h6>
-      <p>{{ person.citizenship1B }}</p>
-    </div>
-  </div> -->
   <div class="row">
-    <div class="col">
+    <div class="col image-container" *ngIf="this.imageSource">
       <img [src]="this.imageSource" class="img-fluid rounded" />
     </div>
-    <div class="col-sm info-panel">
-      <h6>Birth</h6>
-      <p>{{ person.birth | dateYear | unknown }}</p>
-      <h6>Death</h6>
-      <p>{{ person.death | dateYear | unknown: true:true }}</p>
-      <h6>Gender</h6>
-      <p>{{ person.gender | unknown }}</p>
-      <h6>Occupation</h6>
-      <p>{{ person.level1MainOcc }}</p>
-      <h6>Citizenship</h6>
-      <p>{{ person.citizenship1B }}</p>
+    <div class="col-sm pt-3 info-panel">
+      <div *ngIf="person.birth !== null || person.death !== null">
+        <span>Birth</span>
+        <span>{{ person.birth | dateYear | unknown: true:false }}</span>
+      </div>
+      <div *ngIf="person.death !== null">
+        <span>Death</span>
+        <span>{{ person.death | dateYear }}</span>
+      </div>
+      <div>
+        <span>Gender</span>
+        <span>{{ person.gender | unknown }}</span>
+      </div>
+      <div>
+        <span>Occupation</span>
+        <span>{{ person.level1MainOcc }}</span>
+      </div>
+      <div>
+        <span>Citizenship</span>
+        <span>{{ person.citizenship1B }}</span>
+      </div>
     </div>
   </div>
   <pre>{{ person | json }}</pre>

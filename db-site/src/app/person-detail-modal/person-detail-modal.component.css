@@ -1,8 +1,13 @@
-.info-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.image-container {
+  display: flex;
+  justify-content: center;
 }
 
-.info-panel > p {
-  text-align: right;
+.image-container > img {
+  max-height: 50vh;
+}
+
+.info-panel > div {
+  display: flex;
+  justify-content: space-between;
 }

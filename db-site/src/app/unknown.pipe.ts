@@ -11,7 +11,7 @@ export class UnknownPipe implements PipeTransform {
   ): string {
     if (value === undefined || value === null || value == '' || value == '~') {
       if (useUnknownOrMissing && useNotDead) {
-        return 'not dead / unknown';
+        return 'alive / unknown';
       } else if (useUnknownOrMissing) {
         return 'unknown';
       } else if (useNotDead) {
