@@ -9,6 +9,11 @@ import { WikiApiResponse } from './wiki-api-response.model';
 https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=600&titles=Albert%20Einstein
 */
 
+/*
+Possible improvement:
+Check different wikipedia versions on fail
+*/
+
 const apiUrl = 'https://en.wikipedia.org/w/api.php';
 
 @Injectable({

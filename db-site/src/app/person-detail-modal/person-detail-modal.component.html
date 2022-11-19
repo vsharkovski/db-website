@@ -5,7 +5,9 @@
 <div class="modal-body">
   <div class="row">
     <div class="col image-container" *ngIf="this.imageSource">
-      <img [src]="this.imageSource" class="img-fluid rounded" />
+      <a [href]="wikidataUrl">
+        <img [src]="imageSource" class="img-fluid rounded" />
+      </a>
     </div>
     <div class="col-sm info-panel">
       <div *ngIf="person.birth !== null || person.death !== null">
@@ -28,6 +30,9 @@
         <span>Citizenship</span>
         <span>{{ person.citizenship1B }}</span>
       </div>
+    </div>
+    <div class="d-flex">
+      <span class="ms-auto mt-3"><a [href]="wikidataUrl">Wikidata Page</a></span>
     </div>
   </div>
 </div>
