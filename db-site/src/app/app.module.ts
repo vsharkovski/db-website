@@ -26,6 +26,7 @@ import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DateYearPipe } from './date-year.pipe';
 import { IntSliderComponent } from './int-slider/int-slider.component';
+import { GenderPipe } from './gender.pipe';
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import { IntSliderComponent } from './int-slider/int-slider.component';
     AboutPageComponent,
     DateYearPipe,
     IntSliderComponent,
+    GenderPipe,
   ],
   imports: [BrowserModule, AppRoutingModule, NgbModule, HttpClientModule, ReactiveFormsModule],
   providers: [],

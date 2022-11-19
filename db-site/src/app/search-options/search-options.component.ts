@@ -3,6 +3,12 @@ import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchQuery } from '../search-query.model';
 import citizenship1BData from '../../assets/data/citizenship1B.json';
+import genderData from '../../assets/data/gender.json';
+
+interface OptionPair {
+  label: string;
+  value: string;
+}
 
 @Component({
   selector: 'dbw-search-options',
@@ -14,7 +20,8 @@ export class SearchOptionsComponent implements OnInit {
   readonly lifeYearMax: number = 2020;
   readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
   readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
-  readonly citizenship1BOptions = citizenship1BData;
+  readonly citizenship1BOptions: string[] = citizenship1BData;
+  readonly genderOptions: string[] = genderData;
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
@@ -55,6 +62,7 @@ export class SearchOptionsComponent implements OnInit {
       ],
     ],
     citizenship: [''],
+    gender: [''],
   });
 
   @Input() initialPage: number = 0;
@@ -104,6 +112,7 @@ export class SearchOptionsComponent implements OnInit {
       term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
     if (this.citizenshipField.value)
       term += `citizenship1B:${this.citizenshipField.value},`;
+    if (this.genderField.value) term += `gender:${this.genderField.value},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
@@ -111,10 +120,6 @@ export class SearchOptionsComponent implements OnInit {
       page: this.pageField.value ?? 0,
       term: term,
     };
-  }
-
-  onCitizenshipChange(event: any): void {
-    this.citizenshipField.setValue(event.value);
   }
 
   get pageField(): AbstractControl {
@@ -143,5 +148,9 @@ export class SearchOptionsComponent implements OnInit {
 
   get citizenshipField(): AbstractControl {
     return this.form.get('citizenship')!;
+  }
+
+  get genderField(): AbstractControl {
+    return this.form.get('gender')!;
   }
 }

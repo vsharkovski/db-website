@@ -51,8 +51,13 @@
   </div>
   <label for="citizenship" class="form-label mt-3">Citizenship</label>
   <select class="form-select" formControlName="citizenship">
-    <option ngValue="">(Any)</option>
+    <option ngValue="">Any</option>
     <option *ngFor="let country of citizenship1BOptions" [ngValue]="country">{{ country }}</option>
+  </select>
+  <label for="gender" class="form-label mt-3">Gender</label>
+  <select class="form-select" formControlName="gender">
+    <option ngValue="">Any</option>
+    <option *ngFor="let gender of genderOptions" [ngValue]="gender">{{ gender }}</option>
   </select>
   <label for="page" class="form-label mt-3">Result page number</label>
   <input type="number" class="form-control" formControlName="page" />

@@ -7,6 +7,7 @@
     <div><span>Name</span></div>
     <div><span>Birth</span></div>
     <div><span>Death</span></div>
+    <div><span>Gender</span></div>
     <div><span>Occupation</span></div>
     <div><span>Citizenship</span></div>
   </div>
@@ -19,6 +20,9 @@
     </div>
     <div>
       <span>{{ person.death | dateYear }}</span>
+    </div>
+    <div>
+      <span>{{ person.gender | gender }}</span>
     </div>
     <div>
       <span>{{ person.level1MainOcc ?? "~" }}</span>
