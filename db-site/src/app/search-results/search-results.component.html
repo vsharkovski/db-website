@@ -4,31 +4,19 @@
 </div>
 <div *ngIf="results" class="results-table">
   <div class="search-result results-header">
-    <div><span>Name</span></div>
-    <div><span>Birth</span></div>
-    <div><span>Death</span></div>
-    <div><span>Gender</span></div>
-    <div><span>Occupation</span></div>
-    <div><span>Citizenship</span></div>
+    <span>Name</span>
+    <span>Birth</span>
+    <span>Death</span>
+    <span>Gender</span>
+    <span>Occupation</span>
+    <span>Citizenship</span>
   </div>
   <div *ngFor="let person of results.persons" class="search-result">
-    <div>
-      <span>{{ person.name }}</span>
-    </div>
-    <div>
-      <span>{{ person.birth | dateYear }}</span>
-    </div>
-    <div>
-      <span>{{ person.death | dateYear }}</span>
-    </div>
-    <div>
-      <span>{{ person.gender | gender }}</span>
-    </div>
-    <div>
-      <span>{{ person.level1MainOcc ?? "~" }}</span>
-    </div>
-    <div>
-      <span>{{ person.citizenship1B ?? "~" }}</span>
-    </div>
+    <span>{{ person.name }}</span>
+    <span>{{ person.birth | dateYear }}</span>
+    <span>{{ person.death | dateYear }}</span>
+    <span>{{ person.gender | gender }}</span>
+    <span>{{ person.level1MainOcc ?? "~" }}</span>
+    <span>{{ person.citizenship1B ?? "~" }}</span>
   </div>
 </div>
