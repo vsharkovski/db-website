@@ -19,7 +19,7 @@ const apiUrl = 'https://en.wikipedia.org/w/api.php';
 @Injectable({
   providedIn: 'root',
 })
-export class WikidataService {
+export class WikiService {
   constructor(private http: HttpClient, private errorService: ErrorService) {}
 
   getImageFromEnglishWiki(person: Person): Observable<string | null> {

@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, of } from 'rxjs';
 import { Person } from '../person.model';
-import { WikidataService } from '../wikidata.service';
+import { WikiService } from '../wiki.service';
 
 @Component({
   selector: 'dbw-person-detail-modal',
@@ -16,12 +16,12 @@ export class PersonDetailModalComponent implements OnInit {
 
   constructor(
     public activeModal: NgbActiveModal,
-    private wikidataService: WikidataService
+    private wikiService: WikiService
   ) {}
 
   ngOnInit(): void {
     this.wikidataUrl = `https://www.wikidata.org/wiki/${this.person.wikidataCode}`;
-    this.wikidataService
+    this.wikiService
       .getImageFromEnglishWiki(this.person)
       .subscribe((source) => (this.imageSource = source));
   }
