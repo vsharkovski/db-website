@@ -10,4 +10,13 @@
 .info-panel > div {
   display: flex;
   justify-content: space-between;
+  padding: 0.25rem 0;
+}
+
+.info-panel > div > span:first-child {
+  font-weight: 600;
+  margin-inline-end: 1rem;
+}
+
+.info-panel > div > span:last-child {
 }
