@@ -1,7 +1,30 @@
 <div class="modal-header">
-  <h5 class="modal-title">{{ person.name }}</h5>
+  <h3 class="modal-title">{{ person.name }}</h3>
   <button type="button" class="btn-close" (click)="activeModal.close()"></button>
 </div>
 <div class="modal-body">
+  <div class="row">
+    <div class="col-auto">
+      <h6>Birth</h6>
+      <p>{{ person.birth | dateYear | unknown }}</p>
+    </div>
+    <div class="col-auto" *ngIf="person.death !== null">
+      <h6>Death</h6>
+      <p>{{ person.death | dateYear | unknown }}</p>
+    </div>
+    <div class="col-auto">
+      <h6>Gender</h6>
+      <p>{{ person.gender | unknown }}</p>
+    </div>
+    <div class="col-auto" *ngIf="person.level1MainOcc !== null">
+      <h6>Occupation</h6>
+      <p>{{ person.level1MainOcc }}</p>
+    </div>
+    <div class="col-auto" *ngIf="person.citizenship1B !== null">
+      <h6>Citizenship</h6>
+      <p>{{ person.citizenship1B }}</p>
+    </div>
+  </div>
+  <div class="row"></div>
   <pre>{{ person | json }}</pre>
 </div>

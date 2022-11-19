@@ -10,7 +10,10 @@ export class ModalService {
   constructor(private ngbModal: NgbModal) {}
 
   openPersonDetailModal(person: Person): void {
-    const modal = this.ngbModal.open(PersonDetailModalComponent);
+    const modal = this.ngbModal.open(PersonDetailModalComponent, {
+      size: 'xl',
+      scrollable: true,
+    });
     modal.componentInstance.person = person;
   }
 }
