@@ -7,7 +7,7 @@
     <div class="col image-container" *ngIf="this.imageSource">
       <img [src]="this.imageSource" class="img-fluid rounded" />
     </div>
-    <div class="col-sm pt-3 info-panel">
+    <div class="col-sm info-panel">
       <div *ngIf="person.birth !== null || person.death !== null">
         <span>Birth</span>
         <span>{{ person.birth | dateYear | unknown: true:false }}</span>
