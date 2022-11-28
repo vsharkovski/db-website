@@ -28,6 +28,11 @@
   border-radius: 2px;
   border-color: rgb(150, 150, 150);
   text-transform: uppercase;
+  cursor: default;
+}
+
+.results-header:hover {
+  background-color: lightgray;
 }
 
 @media (min-width: 960px) {
