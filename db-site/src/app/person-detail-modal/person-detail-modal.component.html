@@ -35,7 +35,7 @@
   <div class="row">
     <p *ngIf="data?.extract" class="mb-0">{{ data!.extract }}</p>
     <div class="d-flex mt-3">
-      <span *ngIf="data?.wikipediaUrl"><a [href]="data!.wikipediaUrl">Wikipedia Page</a></span>
+      <span *ngIf="data?.fullurl"><a [href]="data!.fullurl">Wikipedia Page</a></span>
       <span class="ms-auto"><a [href]="wikidataUrl">Wikidata Page</a></span>
     </div>
   </div>

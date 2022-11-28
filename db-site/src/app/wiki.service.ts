@@ -35,8 +35,9 @@ export class WikiService {
             format: 'json',
             formatversion: 2,
             action: 'query',
-            prop: 'pageimages|pageterms|extracts',
+            prop: 'pageimages|pageterms|extracts|info',
             piprop: 'thumbnail',
+            inprop: 'url',
             pithumbsize: 600,
             explaintext: 1,
             exsectionformat: 'plain',
@@ -52,7 +53,7 @@ export class WikiService {
         switchMap((response) => {
           if (!response || !this.doesPageExistInResponse(response))
             return of(null);
-          return of(this.computeAdditionalPageData(response!.query!.pages![0]));
+          return of(response!.query!.pages![0]);
         })
       );
   }
@@ -61,13 +62,5 @@ export class WikiService {
     const pages = response?.query?.pages;
     if (!pages || pages.length == 0 || pages[0].missing) return false;
     return true;
-  }
-
-  private computeAdditionalPageData(page: WikiApiPage): WikiApiPage {
-    const result = { ...page };
-    if (result.title) {
-      result.wikipediaUrl = `https://en.wikipedia.org/wiki/${result.title}`;
-    }
-    return result;
   }
 }

@@ -24,8 +24,6 @@ export class PersonDetailModalComponent implements OnInit {
     this.wikidataUrl = `https://www.wikidata.org/wiki/${this.person.wikidataCode}`;
     this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
       this.data = data;
-      console.log('person', this.person);
-      console.log('data', data);
     });
   }
 }
