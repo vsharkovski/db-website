@@ -70,7 +70,7 @@
   </select>
   <label for="gender" class="form-label mt-3">Gender</label>
   <select class="form-select" formControlName="gender">
-    <option [ngValue]="">Any</option>
+    <option ngValue="">Any</option>
     <option *ngFor="let gender of genderOptions" [ngValue]="gender.value">{{ gender.label }}</option>
   </select>
   <label for="page" class="form-label mt-3">Result page number</label>
