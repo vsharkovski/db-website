@@ -21,7 +21,7 @@ export class SearchOptionsComponent implements OnInit {
   readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
   readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
   readonly citizenship1BOptions: string[] = citizenship1BData;
-  readonly genderOptions: string[] = genderData;
+  readonly genderOptions: OptionPair[] = genderData;
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
