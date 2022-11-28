@@ -11,6 +11,10 @@
   cursor: pointer;
 }
 
+.search-result:hover {
+  background-color: rgb(240, 240, 240);
+}
+
 .search-result > span {
   text-align: center;
   white-space: nowrap;
