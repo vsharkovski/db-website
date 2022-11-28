@@ -5,4 +5,5 @@ export interface WikiApiPage {
   };
   title?: string;
   extract?: string;
+  wikipediaUrl?: string;
 }

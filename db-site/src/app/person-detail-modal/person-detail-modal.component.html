@@ -32,8 +32,9 @@
       </div>
     </div>
     <p *ngIf="data?.extract">{{ data!.extract }}</p>
-    <div class="d-flex">
-      <span class="ms-auto mt-3"><a [href]="wikidataUrl">Wikidata Page</a></span>
+    <div class="d-flex mt-3">
+      <span *ngIf="data?.wikipediaUrl"><a [href]="data?.wikipediaUrl">Wikipedia Page</a></span>
+      <span class="ms-auto"><a [href]="wikidataUrl">Wikidata Page</a></span>
     </div>
   </div>
 </div>
