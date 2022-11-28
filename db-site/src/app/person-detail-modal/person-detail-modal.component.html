@@ -32,9 +32,10 @@
       </div>
     </div>
   </div>
-  <div class="row">
-    <p *ngIf="data?.extract" class="mb-0">{{ data!.extract }}</p>
-    <div class="d-flex mt-3">
+  <div class="row mt-3">
+    <hr />
+    <p *ngIf="data?.extract">{{ data!.extract }}</p>
+    <div class="d-flex">
       <span *ngIf="data?.fullurl"><a [href]="data!.fullurl">Wikipedia Page</a></span>
       <span class="ms-auto"><a [href]="wikidataUrl">Wikidata Page</a></span>
     </div>
