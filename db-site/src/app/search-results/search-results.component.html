@@ -1,5 +1,5 @@
 <dbw-search-results-page-buttons
-  *ngIf="results"
+  *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
   [results]="results"
   [waitingForResponse]="waitingForResponse"
   (previousPageButtonClicked)="onPreviousPageButtonClick()"
@@ -24,7 +24,7 @@
   </div>
 </div>
 <dbw-search-results-page-buttons
-  *ngIf="results"
+  *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
   [results]="results"
   [waitingForResponse]="waitingForResponse"
   (previousPageButtonClicked)="onPreviousPageButtonClick()"
