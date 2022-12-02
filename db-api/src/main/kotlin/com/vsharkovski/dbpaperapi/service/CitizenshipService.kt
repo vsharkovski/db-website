@@ -2,7 +2,6 @@ package com.vsharkovski.dbpaperapi.service
 
 import com.vsharkovski.dbpaperapi.model.Citizenship
 import com.vsharkovski.dbpaperapi.repository.CitizenshipRepository
-import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -43,12 +42,4 @@ class CitizenshipService(
         }
         logger.info("Citizenship names: finished")
     }
-
-//    fun cleanUpPersonNames() {
-//        logger.info("Person names: processing for readability")
-//        val batchSize = 1000
-//        val slice = personRepository.findAll(PageRequest.of(0, batchSize))
-//        slice.content.forEach { personRepository.save(it.copy(nameReadable = ) }
-//    }
-
 }

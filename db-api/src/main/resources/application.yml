@@ -17,4 +17,5 @@ logging:
 database-management:
   import: false
   clean-up-citizenship-names: false
-#  clean-up-people-names: true
+  clean-up-people-names: false
+  add-wiki-reader-count: false

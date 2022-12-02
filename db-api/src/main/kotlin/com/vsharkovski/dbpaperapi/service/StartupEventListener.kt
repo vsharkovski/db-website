@@ -20,20 +20,24 @@ class StartupEventListener(
     @Value("\${database-management.clean-up-citizenship-names}")
     val cleanUpCitizenshipNames: Boolean = false
 
-//    @Value("\${database-management.clean-up-people-names}")
-//    val cleanUpPeopleNames: Boolean = false
+    @Value("\${database-management.clean-up-people-names}")
+    val cleanUpPeopleNames: Boolean = false
+
+    @Value("\${database-management.add-wiki-reader-count}")
+    val addWikiReaderCount: Boolean = false
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
         if (importDatabase) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.saveFile(resource.file)
+            csvService.addFile(resource.file)
         }
         if (cleanUpCitizenshipNames) {
             citizenshipService.cleanUpCitizenshipNames()
         }
-//        if (cleanUpPeopleNames) {
-//            citizenshipService.cleanUpPersonNames()
-//        }
+        if (addWikiReaderCount) {
+            val resource = ClassPathResource("/static/cross-verified-database.csv")
+            csvService.addFileWikiReaderCounts(resource.file)
+        }
     }
 }

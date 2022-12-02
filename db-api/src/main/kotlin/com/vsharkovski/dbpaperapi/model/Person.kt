@@ -69,5 +69,8 @@ data class Person(
     val deathLongitude: Float?,
 
     @Column(name = "death_latitude")
-    val deathLatitude: Float?
+    val deathLatitude: Float?,
+
+    @Column(name = "wiki_reader_count")
+    val wikiReaderCount: Long?
 )

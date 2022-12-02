@@ -17,6 +17,23 @@ fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
         predicate(this)
     }
 
+fun File.forEachCSVRecordBuffered(predicate: (CSVRecord) -> Unit) {
+    val bufferedReader = this.bufferedReader()
+    val csvParser = CSVParser(
+        bufferedReader,
+        CSVFormat.Builder
+            .create()
+            .setSkipHeaderRecord(true)
+            .setIgnoreHeaderCase(true)
+            .setTrim(true)
+            .setHeader()
+            .build()
+    )
+    for (record in csvParser) {
+        predicate(record)
+    }
+}
+
 @Service
 class CSVService(
     val personRepository: PersonRepository,
@@ -27,29 +44,22 @@ class CSVService(
 ) {
     val logger: Logger = LoggerFactory.getLogger(CSVService::class.java)
 
-    fun saveFile(file: File) {
+    fun addFile(file: File) {
         logger.info("Starting to save file [{}]", file.path)
-        val bufferedReader = file.bufferedReader()
-        val csvParser = CSVParser(
-            bufferedReader,
-            CSVFormat.Builder
-                .create()
-                .setSkipHeaderRecord(true)
-                .setIgnoreHeaderCase(true)
-                .setTrim(true)
-                .setHeader()
-                .build()
-        )
-        for (record in csvParser) {
-            saveRecord(record)
-        }
+        file.forEachCSVRecordBuffered { addRecord(it) }
         logger.info("Finished saving file [{}]", file.path)
     }
 
-    private fun saveRecord(record: CSVRecord) {
+    fun addFileWikiReaderCounts(file: File) {
+        logger.info("Updating database variable wikiReaderCounts from file [{}]", file.path)
+        file.forEachCSVRecordBuffered { addRecordWikiReaderCount(it) }
+        logger.info("Finished updating database from file [{}]", file.path)
+    }
+
+    private fun addRecord(record: CSVRecord) {
         val name = record.get("name").ifEmpty { null }
         val person = Person(
-            wikidataCode = record.get("wikidata_code").substring(1).toInt(),
+            wikidataCode = getRecordWikidataCode(record),
             birth = record.get("birth").toShortOrNull(),
             death = record.get("death").toShortOrNull(),
             name = name,
@@ -69,10 +79,23 @@ class CSVService(
             birthLongitude = record.get("bplo1").toFloatOrNull(),
             birthLatitude = record.get("bpla1").toFloatOrNull(),
             deathLongitude = record.get("dplo1").toFloatOrNull(),
-            deathLatitude = record.get("dpla1").toFloatOrNull()
+            deathLatitude = record.get("dpla1").toFloatOrNull(),
+            wikiReaderCount = getRecordWikiReaderCount(record)
         )
 //        logger.info("Saving person [{}]", person)
         personRepository.save(person)
     }
+
+    private fun addRecordWikiReaderCount(record: CSVRecord) {
+        val wikidataCode = getRecordWikidataCode(record) ?: return
+        val count = getRecordWikiReaderCount(record) ?: return
+        personRepository.updateWikiReaderCount(wikidataCode, count)
+    }
+
+    private fun getRecordWikidataCode(record: CSVRecord): Int? =
+        record.get("wikidata_code").substring(1).toIntOrNull()
+
+    private fun getRecordWikiReaderCount(record: CSVRecord): Long? =
+        record.get("wiki_readers_2015_2018").toLongOrNull()
 
 }
