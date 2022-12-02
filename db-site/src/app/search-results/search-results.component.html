@@ -1,14 +1,11 @@
-<div *ngIf="results" class="row">
-  <div class="col d-flex flex-row">
-    <button *ngIf="results.hasPreviousPage" class="btn btn-outline-primary" (click)="onPreviousPageButtonClick()">
-      Previous
-    </button>
-  </div>
-  <div class="col d-flex flex-row-reverse">
-    <button *ngIf="results.hasNextPage" class="btn btn-outline-primary" (click)="onNextPageButtonClick()">Next</button>
-  </div>
-</div>
-<div *ngIf="results" class="results-table mt-3">
+<dbw-search-results-page-buttons
+  *ngIf="results"
+  [results]="results"
+  [waitingForResponse]="waitingForResponse"
+  (previousPageButtonClicked)="onPreviousPageButtonClick()"
+  (nextPageButtonClicked)="onNextPageButtonClick()"
+></dbw-search-results-page-buttons>
+<div *ngIf="results" class="results-table mt-3 mb-3">
   <div class="search-result results-header">
     <span>Name</span>
     <span>Birth</span>
@@ -26,13 +23,10 @@
     <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
   </div>
 </div>
-<div *ngIf="results" class="row mt-3">
-  <div class="col d-flex flex-row">
-    <button *ngIf="results.hasPreviousPage" class="btn btn-outline-primary" (click)="onPreviousPageButtonClick()">
-      Previous
-    </button>
-  </div>
-  <div class="col d-flex flex-row-reverse">
-    <button *ngIf="results.hasNextPage" class="btn btn-outline-primary" (click)="onNextPageButtonClick()">Next</button>
-  </div>
-</div>
+<dbw-search-results-page-buttons
+  *ngIf="results"
+  [results]="results"
+  [waitingForResponse]="waitingForResponse"
+  (previousPageButtonClicked)="onPreviousPageButtonClick()"
+  (nextPageButtonClicked)="onNextPageButtonClick()"
+></dbw-search-results-page-buttons>

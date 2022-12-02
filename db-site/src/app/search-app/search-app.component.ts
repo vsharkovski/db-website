@@ -21,6 +21,7 @@ import { SearchService } from '../search.service';
 export class SearchAppComponent implements OnInit {
   currentTab = 1;
   results?: SearchResponse;
+  waitingForResponse: boolean = false;
 
   requestedQuery?: SearchQuery;
   latestQuery?: SearchQuery;
@@ -67,6 +68,7 @@ export class SearchAppComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((params) => {
           if (params['term']) {
+            this.waitingForResponse = true;
             return this.searchService.getSearchResults(
               params['term'] ?? '',
               params['page'] ?? 0
@@ -76,6 +78,7 @@ export class SearchAppComponent implements OnInit {
         })
       )
       .subscribe((results) => {
+        this.waitingForResponse = false;
         this.results = results;
       });
   }

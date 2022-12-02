@@ -1,0 +1,22 @@
+<div class="row g-0">
+  <div class="col d-flex flex-row">
+    <button
+      *ngIf="results.hasPreviousPage"
+      class="btn btn-outline-primary"
+      (click)="onPreviousPageButtonClick()"
+      [disabled]="waitingForResponse || clickedWithoutResponse"
+    >
+      Previous
+    </button>
+  </div>
+  <div class="col d-flex flex-row-reverse">
+    <button
+      *ngIf="results.hasNextPage"
+      class="btn btn-outline-primary"
+      (click)="onNextPageButtonClick()"
+      [disabled]="waitingForResponse || clickedWithoutResponse"
+    >
+      Next
+    </button>
+  </div>
+</div>

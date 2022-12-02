@@ -15,6 +15,7 @@ export class SearchResultsComponent implements OnInit {
   citizenships = {} as [number: string];
 
   @Input() results?: SearchResponse;
+  @Input() waitingForResponse: boolean = false;
   @Output() previousPageRequested = new EventEmitter<void>();
   @Output() nextPageRequested = new EventEmitter<void>();
 

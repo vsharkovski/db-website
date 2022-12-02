@@ -29,6 +29,7 @@ import { IntSliderComponent } from './int-slider/int-slider.component';
 import { PersonDetailModalComponent } from './person-detail-modal/person-detail-modal.component';
 import { UnknownPipe } from './unknown.pipe';
 import { ReadableNamePipe } from './readable-name.pipe';
+import { SearchResultsPageButtonsComponent } from './search-results-page-buttons/search-results-page-buttons.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +57,7 @@ import { ReadableNamePipe } from './readable-name.pipe';
     PersonDetailModalComponent,
     UnknownPipe,
     ReadableNamePipe,
+    SearchResultsPageButtonsComponent,
   ],
   imports: [
     BrowserModule,

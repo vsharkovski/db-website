@@ -14,6 +14,7 @@
         <ng-template ngbNavContent>
           <dbw-search-results
             [results]="results"
+            [waitingForResponse]="waitingForResponse"
             (previousPageRequested)="onPreviousPageRequested()"
             (nextPageRequested)="onNextPageRequested()"
           ></dbw-search-results>
