@@ -39,17 +39,17 @@ class PersonSpecificationBuilder {
                 valueToAdd = -value.toInt()
             }
 
-//            logger.info(
-//                "Builder from [key={} operation={} value={} prefix={} suffix={}] added [key={} op={} val={}]",
-//                key,
-//                operation,
-//                value,
-//                prefix,
-//                suffix,
-//                key,
-//                opToAdd,
-//                valueToAdd
-//            )
+            logger.info(
+                "Builder from [key={} operation={} value={} prefix={} suffix={}] added [key={} op={} val={}]",
+                key,
+                operation,
+                value,
+                prefix,
+                suffix,
+                key,
+                opToAdd,
+                valueToAdd
+            )
 
             params.add(SearchCriteria(key, opToAdd, valueToAdd))
         }

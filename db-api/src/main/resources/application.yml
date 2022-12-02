@@ -14,3 +14,7 @@ spring:
 logging:
   file:
     path: logs
+database-management:
+  import: false
+  clean-up-citizenship-names: false
+#  clean-up-people-names: true

@@ -13,7 +13,8 @@ import java.util.regex.Pattern
 
 @Service
 class SearchService(
-    val personRepository: PersonRepository
+    val personRepository: PersonRepository,
+    val personSpecificationBuilderService: PersonSpecificationBuilderService
 ) {
     val logger: Logger = LoggerFactory.getLogger(SearchService::class.java)
 
@@ -21,13 +22,14 @@ class SearchService(
         if (pageNumber < 0) {
             return SearchResult()
         }
-        val builder = PersonSpecificationBuilder()
+        val builder = personSpecificationBuilderService.createBuilder()
         val pattern =
-            Pattern.compile("([\\w-]+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED})(\\p{Punct}?)([\\w-]+?)(\\p{Punct}?),")
+            Pattern.compile("([\\w-]+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED})(\\p{Punct}?)([\\w- ]+?)(\\p{Punct}?),")
         val matcher = pattern.matcher("$term,")
 //        logger.info("Attempting to match term [{}]", term)
         while (matcher.find()) {
-            builder.with(
+            personSpecificationBuilderService.with(
+                builder,
                 matcher.group(1),
                 matcher.group(2),
                 matcher.group(4),
@@ -35,7 +37,8 @@ class SearchService(
                 matcher.group(5)
             )
         }
-        return builder.build()?.let {
+
+        return personSpecificationBuilderService.build(builder)?.let {
             val paging = PageRequest.of(pageNumber, 1000, Sort.by("id"))
             val resultsSlice = personRepository.findAll(it, paging)
             return SearchResult(

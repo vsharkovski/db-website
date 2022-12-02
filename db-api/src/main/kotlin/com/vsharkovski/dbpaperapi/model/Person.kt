@@ -9,37 +9,55 @@ data class Person(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(name = "wikidata_code")
-    val wikidataCode: String?,
+    val wikidataCode: Int?,
 
-    val birth: Int?,
+    val birth: Short?,
 
-    val death: Int?,
-
-    val gender: String?,
+    val death: Short?,
 
     val name: String?,
 
-    @Column(name = "level_1_main_occ")
-    val level1MainOcc: String?,
+    val nameProcessed: String?,
 
-    @Column(name = "level_2_main_occ")
-    val level2MainOcc: String?,
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "gender_id")
+//    val gender: Gender?,
+    val genderId: Int?,
 
-    @Column(name = "level_2_second_occ")
-    val level2SecondOcc: String?,
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "level_1_main_occ_id")
+//    val level1MainOcc: Occupation?,
 
-    @Column(name = "citizenship_1_b")
-    val citizenship1B: String?,
+    @Column(name = "level_1_main_occ_id")
+    val level1MainOccId: Int?,
 
-    @Column(name = "citizenship_2_b")
-    val citizenship2B: String?,
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "level_2_main_occ_id")
+//    val level2MainOcc: Occupation?,
 
-    @Column(name = "area_1_r_attachment")
-    val area1RAttachment: String?,
+    @Column(name = "level_2_main_occ_id")
+    val level2MainOccId: Int?,
 
-    @Column(name = "area_2_r_attachment")
-    val area2RAttachment: String?,
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "level_2_second_occ_id")
+//    val level2SecondOcc: Occupation?,
+
+    @Column(name = "level_2_second_occ_id")
+    val level2SecondOccId: Int?,
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "citizenship_1_b_id")
+//    val citizenship1B: Citizenship?,
+
+    @Column(name = "citizenship_1_b_id")
+    val citizenship1BId: Int?,
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "citizenship_2_b_id")
+//    val citizenship2B: Citizenship?,
+
+    @Column(name = "citizenship_2_b_id")
+    val citizenship2BId: Int?,
 
     @Column(name = "birth_longitude")
     val birthLongitude: Float?,

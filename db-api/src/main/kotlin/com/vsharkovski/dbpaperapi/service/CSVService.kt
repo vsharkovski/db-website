@@ -4,14 +4,31 @@ import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.apache.commons.csv.CSVRecord
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.io.File
 
+fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
+    if (this.isEmpty()) {
+        null
+    } else {
+        predicate(this)
+    }
+
 @Service
 class CSVService(
-    val personRepository: PersonRepository
+    val personRepository: PersonRepository,
+    val genderService: GenderService,
+    val occupationService: OccupationService,
+    val citizenshipService: CitizenshipService,
+    val nameService: NameService
 ) {
-    fun save(file: File) {
+    val logger: Logger = LoggerFactory.getLogger(CSVService::class.java)
+
+    fun saveFile(file: File) {
+        logger.info("Starting to save file [{}]", file.path)
         val bufferedReader = file.bufferedReader()
         val csvParser = CSVParser(
             bufferedReader,
@@ -24,25 +41,38 @@ class CSVService(
                 .build()
         )
         for (record in csvParser) {
-            val person = Person(
-                wikidataCode = record.get("wikidata_code"),
-                birth = record.get("birth").toIntOrNull(),
-                death = record.get("death").toIntOrNull(),
-                gender = record.get("gender").ifEmpty { null },
-                name = record.get("name").ifEmpty { null },
-                level1MainOcc = record.get("level1_main_occ").ifEmpty { null },
-                level2MainOcc = record.get("level2_main_occ").ifEmpty { null },
-                level2SecondOcc = record.get("level2_second_occ").ifEmpty { null },
-                citizenship1B = record.get("citizenship_1_b").ifEmpty { null },
-                citizenship2B = record.get("citizenship_2_b").ifEmpty { null },
-                area1RAttachment = record.get("area1_of_rattachment").ifEmpty { null },
-                area2RAttachment = record.get("area2_of_rattachment").ifEmpty { null },
-                birthLongitude = record.get("bplo1").toFloatOrNull(),
-                birthLatitude = record.get("bpla1").toFloatOrNull(),
-                deathLongitude = record.get("dplo1").toFloatOrNull(),
-                deathLatitude = record.get("dpla1").toFloatOrNull()
-            )
-            personRepository.save(person)
+            saveRecord(record)
         }
+        logger.info("Finished saving file [{}]", file.path)
     }
+
+    private fun saveRecord(record: CSVRecord) {
+        val name = record.get("name").ifEmpty { null }
+        val person = Person(
+            wikidataCode = record.get("wikidata_code").substring(1).toInt(),
+            birth = record.get("birth").toShortOrNull(),
+            death = record.get("death").toShortOrNull(),
+            name = name,
+            nameProcessed = name?.let { nameService.processForSearch(it) },
+            genderId = record.get("gender")
+                .ifNotEmptyOrNull { genderService.findOrAddByName(it).id },
+            level1MainOccId = record.get("level1_main_occ")
+                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
+            level2MainOccId = record.get("level2_main_occ")
+                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
+            level2SecondOccId = record.get("level2_second_occ")
+                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
+            citizenship1BId = record.get("citizenship_1_b")
+                .ifNotEmptyOrNull { citizenshipService.findOrAddByName(it).id },
+            citizenship2BId = record.get("citizenship_2_b")
+                .ifNotEmptyOrNull { citizenshipService.findOrAddByName(it).id },
+            birthLongitude = record.get("bplo1").toFloatOrNull(),
+            birthLatitude = record.get("bpla1").toFloatOrNull(),
+            deathLongitude = record.get("dplo1").toFloatOrNull(),
+            deathLatitude = record.get("dpla1").toFloatOrNull()
+        )
+//        logger.info("Saving person [{}]", person)
+        personRepository.save(person)
+    }
+
 }
