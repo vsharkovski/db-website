@@ -15,4 +15,5 @@ export interface Person {
   birthLatitude?: number;
   deathLongitude?: number;
   deathLatitude?: number;
+  wikiReaderCount?: number;
 }
