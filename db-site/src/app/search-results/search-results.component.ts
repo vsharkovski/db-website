@@ -1,8 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ModalService } from '../modal.service';
 import { Person } from '../person.model';
 import { SearchResponse } from '../search-response.model';
-import { VariablesAllResponse } from '../variables-all-response.model';
 import { VariablesService } from '../variables.service';
 
 @Component({
@@ -16,6 +15,8 @@ export class SearchResultsComponent implements OnInit {
   citizenships = {} as [number: string];
 
   @Input() results?: SearchResponse;
+  @Output() previousPageRequested = new EventEmitter<void>();
+  @Output() nextPageRequested = new EventEmitter<void>();
 
   constructor(
     private modalService: ModalService,
@@ -37,5 +38,17 @@ export class SearchResultsComponent implements OnInit {
 
   openPersonDetail(person: Person): void {
     this.modalService.openPersonDetailModal(person);
+  }
+
+  onPreviousPageButtonClick() {
+    if (this.results?.hasPreviousPage) {
+      this.previousPageRequested.next();
+    }
+  }
+
+  onNextPageButtonClick() {
+    if (this.results?.hasNextPage) {
+      this.nextPageRequested.next();
+    }
   }
 }

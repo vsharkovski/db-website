@@ -1,9 +1,16 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchQuery } from '../search-query.model';
 import { Variable } from '../variable.model';
-import { VariablesAllResponse } from '../variables-all-response.model';
 import { VariablesService } from '../variables.service';
 
 @Component({
@@ -11,7 +18,7 @@ import { VariablesService } from '../variables.service';
   templateUrl: './search-options.component.html',
   styleUrls: ['./search-options.component.css'],
 })
-export class SearchOptionsComponent implements OnInit {
+export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly lifeYearMin: number = -3500;
   readonly lifeYearMax: number = 2020;
   readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
@@ -66,8 +73,7 @@ export class SearchOptionsComponent implements OnInit {
   occupations: Variable[] = [];
   citizenships: Variable[] = [];
 
-  @Input() initialPage: number = 0;
-  @Input() initialTerm: string = '';
+  @Input() requestedQuery?: SearchQuery;
 
   @Output() queryChanged = new EventEmitter<SearchQuery>();
   @Output() submitted = new EventEmitter<void>();
@@ -78,6 +84,20 @@ export class SearchOptionsComponent implements OnInit {
     private formBuilder: FormBuilder,
     private variablesService: VariablesService
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const change = changes['requestedQuery'];
+    if (change && change.currentValue) {
+      // push to options
+      this.pushQueryToOptions(
+        {
+          page: change.currentValue.page,
+          term: change.currentValue.term,
+        },
+        true
+      );
+    }
+  }
 
   ngOnInit(): void {
     // get variables
@@ -92,8 +112,6 @@ export class SearchOptionsComponent implements OnInit {
       this.citizenships = citizenships;
       this.citizenships.sort((a, b) => a.name.localeCompare(b.name));
     });
-    // set initial options
-    this.pushQueryToOptions({ page: this.initialPage, term: this.initialTerm });
     // when things are changed, send signal up
     this.form.valueChanges.subscribe((values) => {
       if (this.form.valid) {
@@ -107,9 +125,12 @@ export class SearchOptionsComponent implements OnInit {
     });
   }
 
-  pushQueryToOptions(query: SearchQuery): void {
+  pushQueryToOptions(query: SearchQuery, notifyUp: boolean = false): void {
     this.compiledTerm = query.term;
     this.pageField.setValue(query.page);
+    if (notifyUp) {
+      this.queryChanged.emit(query);
+    }
   }
 
   pullQueryFromOptions(): SearchQuery {

@@ -2,8 +2,7 @@
   <div class="col-lg-4 mb-3">
     <h1 class="text-center">Find people in history</h1>
     <dbw-search-options
-      [initialTerm]="initialSearchTerm"
-      [initialPage]="initialSearchResultPage"
+      [requestedQuery]="requestedQuery"
       (queryChanged)="this.searchQueryChanged.next($event)"
       (submitted)="this.searchOptionsSubmitted.next()"
     ></dbw-search-options>
@@ -13,7 +12,11 @@
       <li [ngbNavItem]="1">
         <a ngbNavLink>Results</a>
         <ng-template ngbNavContent>
-          <dbw-search-results [results]="results"></dbw-search-results>
+          <dbw-search-results
+            [results]="results"
+            (previousPageRequested)="onPreviousPageRequested()"
+            (nextPageRequested)="onNextPageRequested()"
+          ></dbw-search-results>
         </ng-template>
       </li>
       <li [ngbNavItem]="2">

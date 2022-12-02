@@ -9,10 +9,9 @@ import {
   Subscription,
   switchMap,
 } from 'rxjs';
+import { SearchQuery } from '../search-query.model';
 import { SearchResponse } from '../search-response.model';
 import { SearchService } from '../search.service';
-import { VariablesAllResponse } from '../variables-all-response.model';
-import { VariablesService } from '../variables.service';
 
 @Component({
   selector: 'dbw-search-app',
@@ -23,9 +22,10 @@ export class SearchAppComponent implements OnInit {
   currentTab = 1;
   results?: SearchResponse;
 
-  initialSearchTerm: string = '';
-  initialSearchResultPage: number = 0;
-  searchQueryChanged = new Subject<{ page: number; term: string }>();
+  requestedQuery?: SearchQuery;
+  latestQuery?: SearchQuery;
+
+  searchQueryChanged = new Subject<SearchQuery>();
   searchOptionsSubmitted = new Subject<void>();
 
   searchSubscription?: Subscription;
@@ -39,20 +39,21 @@ export class SearchAppComponent implements OnInit {
   ngOnInit(): void {
     // pass initial params from route to search options
     const initParams = this.route.snapshot.queryParams;
-    this.initialSearchTerm = initParams['term'] ?? '';
-    this.initialSearchResultPage = initParams['page'] ?? 0;
+    this.requestedQuery = {
+      term: initParams['term'] ?? '',
+      page: Number(initParams['page']) ?? 0,
+    };
     // whenever the search options are changed, update the route
-    this.searchQueryChanged.subscribe(
-      (query: { page: number; term: string }) => {
-        this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: {
-            term: query.term,
-            page: query.page,
-          },
-        });
-      }
-    );
+    this.searchQueryChanged.subscribe((query: SearchQuery) => {
+      this.latestQuery = query;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {
+          term: query.term,
+          page: query.page,
+        },
+      });
+    });
     // whenever the route is updated or the search form is submitted,
     // search for it
     this.searchSubscription = merge(
@@ -77,5 +78,27 @@ export class SearchAppComponent implements OnInit {
       .subscribe((results) => {
         this.results = results;
       });
+  }
+
+  onPreviousPageRequested() {
+    if (
+      this.results?.hasPreviousPage &&
+      this.latestQuery &&
+      this.latestQuery.page > 0
+    ) {
+      this.requestedQuery = {
+        term: this.latestQuery.term,
+        page: this.latestQuery.page - 1,
+      };
+    }
+  }
+
+  onNextPageRequested() {
+    if (this.results?.hasNextPage && this.latestQuery) {
+      this.requestedQuery = {
+        term: this.latestQuery.term,
+        page: this.latestQuery.page + 1,
+      };
+    }
   }
 }

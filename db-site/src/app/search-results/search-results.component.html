@@ -1,8 +1,14 @@
-<div *ngIf="results" class="row">
-  <p *ngIf="results.hasPreviousPage" class="col">Previous page</p>
-  <p *ngIf="results.hasNextPage" class="col text-end">Next page</p>
+<div *ngIf="results" class="row mt-3">
+  <div class="col d-flex flex-row">
+    <button *ngIf="results.hasPreviousPage" class="btn btn-primary" (click)="onPreviousPageButtonClick()">
+      Previous
+    </button>
+  </div>
+  <div class="col d-flex flex-row-reverse">
+    <button *ngIf="results.hasNextPage" class="btn btn-primary" (click)="onNextPageButtonClick()">Next</button>
+  </div>
 </div>
-<div *ngIf="results" class="results-table">
+<div *ngIf="results" class="results-table mt-3">
   <div class="search-result results-header">
     <span>Name</span>
     <span>Birth</span>
@@ -18,5 +24,15 @@
     <span>{{ genders[person.genderId ?? -1] }}</span>
     <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
     <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
+  </div>
+</div>
+<div *ngIf="results" class="row mt-3">
+  <div class="col d-flex flex-row">
+    <button *ngIf="results.hasPreviousPage" class="btn btn-primary" (click)="onPreviousPageButtonClick()">
+      Previous
+    </button>
+  </div>
+  <div class="col d-flex flex-row-reverse">
+    <button *ngIf="results.hasNextPage" class="btn btn-primary" (click)="onNextPageButtonClick()">Next</button>
   </div>
 </div>
