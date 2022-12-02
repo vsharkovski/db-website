@@ -23,7 +23,8 @@
 }
 
 .results-header {
-  background-color: lightgray;
+  background-color: rgb(100, 100, 100);
+  color: white;
   border-style: solid;
   border-radius: 2px;
   border-color: rgb(150, 150, 150);
@@ -32,7 +33,7 @@
 }
 
 .results-header:hover {
-  background-color: lightgray;
+  background-color: rgb(100, 100, 100);
 }
 
 @media (min-width: 960px) {
