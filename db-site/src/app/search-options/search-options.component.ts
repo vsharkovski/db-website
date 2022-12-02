@@ -21,7 +21,10 @@ export class SearchOptionsComponent implements OnInit {
     page: [0, [Validators.min(0), Validators.max(10000)]],
     name: [
       '',
-      [Validators.maxLength(200), Validators.pattern(this.safeWildcardPattern)],
+      [
+        Validators.maxLength(200),
+        Validators.pattern(this.safeNonWildcardPattern),
+      ],
     ],
     birthMin: [
       null,
@@ -114,7 +117,7 @@ export class SearchOptionsComponent implements OnInit {
       return { page: 0, term: '' };
     }
     let term = '';
-    if (this.nameField.value) term += `name:${this.nameField.value},`;
+    if (this.nameField.value) term += `name:*${this.nameField.value}*,`;
     if (this.birthMinField.value !== null)
       term += `birth>=${Math.max(this.lifeYearMin, this.birthMinField.value)},`;
     if (this.birthMaxField.value !== null)
