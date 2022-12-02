@@ -12,11 +12,11 @@
     <span>Citizenship</span>
   </div>
   <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
-    <span>{{ person.name }}</span>
+    <span>{{ person.name | readableName }}</span>
     <span>{{ person.birth | dateYear }}</span>
     <span>{{ person.death | dateYear }}</span>
-    <span>{{ person.gender | gender }}</span>
-    <span>{{ person.level1MainOcc ?? "~" }}</span>
-    <span>{{ person.citizenship1B ?? "~" }}</span>
+    <span>{{ genders[person.genderId ?? -1] }}</span>
+    <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
+    <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
   </div>
 </div>

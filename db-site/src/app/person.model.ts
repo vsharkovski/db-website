@@ -1,14 +1,18 @@
 export interface Person {
   id?: number;
-  wikidataCode?: string;
+  wikidataCode?: number;
   birth?: number;
   death?: number;
-  gender?: string;
   name?: string;
-  level1MainOcc?: string;
-  level2MainOcc?: string;
-  level2SecondOcc?: string;
-  citizenship1B?: string;
-  citizenship2B?: string;
-  area1RAttachment?: string;
+  nameProcessed?: string;
+  genderId?: number;
+  level1MainOccId?: number;
+  level2MainOccId?: number;
+  level2SecondOccId?: number;
+  citizenship1BId?: number;
+  citizenship2BId?: number;
+  birthLongitude?: number;
+  birthLatitude?: number;
+  deathLongitude?: number;
+  deathLatitude?: number;
 }

@@ -2,13 +2,9 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchQuery } from '../search-query.model';
-import citizenship1BData from '../../assets/data/citizenship1B.json';
-import genderData from '../../assets/data/gender.json';
-
-interface OptionPair {
-  label: string;
-  value: string;
-}
+import { Variable } from '../variable.model';
+import { VariablesAllResponse } from '../variables-all-response.model';
+import { VariablesService } from '../variables.service';
 
 @Component({
   selector: 'dbw-search-options',
@@ -20,8 +16,6 @@ export class SearchOptionsComponent implements OnInit {
   readonly lifeYearMax: number = 2020;
   readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
   readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
-  readonly citizenship1BOptions: string[] = citizenship1BData;
-  readonly genderOptions: OptionPair[] = genderData;
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
@@ -65,6 +59,10 @@ export class SearchOptionsComponent implements OnInit {
     gender: [''],
   });
 
+  genders: Variable[] = [];
+  occupations: Variable[] = [];
+  citizenships: Variable[] = [];
+
   @Input() initialPage: number = 0;
   @Input() initialTerm: string = '';
 
@@ -73,9 +71,24 @@ export class SearchOptionsComponent implements OnInit {
 
   compiledTerm: string = '';
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(
+    private formBuilder: FormBuilder,
+    private variablesService: VariablesService
+  ) {}
 
   ngOnInit(): void {
+    // get variables
+    this.variablesService.getGenders().subscribe((genders) => {
+      this.genders = genders;
+      this.genders.sort((a, b) => a.name.localeCompare(b.name));
+    });
+    this.variablesService.getOccupations().subscribe((occupations) => {
+      this.occupations = occupations;
+    });
+    this.variablesService.getCitizenships().subscribe((citizenships) => {
+      this.citizenships = citizenships;
+      this.citizenships.sort((a, b) => a.name.localeCompare(b.name));
+    });
     // set initial options
     this.pushQueryToOptions({ page: this.initialPage, term: this.initialTerm });
     // when things are changed, send signal up
@@ -111,8 +124,8 @@ export class SearchOptionsComponent implements OnInit {
     if (this.deathMaxField.value !== null)
       term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
     if (this.citizenshipField.value)
-      term += `citizenship1B:${this.citizenshipField.value},`;
-    if (this.genderField.value) term += `gender:${this.genderField.value},`;
+      term += `citizenship1BId:${this.citizenshipField.value},`;
+    if (this.genderField.value) term += `genderId:${this.genderField.value},`;
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }

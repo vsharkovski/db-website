@@ -11,6 +11,8 @@ import {
 } from 'rxjs';
 import { SearchResponse } from '../search-response.model';
 import { SearchService } from '../search.service';
+import { VariablesAllResponse } from '../variables-all-response.model';
+import { VariablesService } from '../variables.service';
 
 @Component({
   selector: 'dbw-search-app',
