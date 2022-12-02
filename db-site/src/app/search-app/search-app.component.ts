@@ -22,6 +22,7 @@ export class SearchAppComponent implements OnInit {
   currentTab = 1;
   results?: SearchResponse;
   waitingForResponse: boolean = false;
+  pageButtonClickedWithoutResponse: boolean = false;
 
   requestedQuery?: SearchQuery;
   latestQuery?: SearchQuery;
@@ -79,6 +80,7 @@ export class SearchAppComponent implements OnInit {
       )
       .subscribe((results) => {
         this.waitingForResponse = false;
+        this.pageButtonClickedWithoutResponse = false;
         this.results = results;
       });
   }
@@ -93,6 +95,7 @@ export class SearchAppComponent implements OnInit {
         term: this.latestQuery.term,
         page: this.latestQuery.page - 1,
       };
+      this.pageButtonClickedWithoutResponse = true;
     }
   }
 
@@ -102,6 +105,7 @@ export class SearchAppComponent implements OnInit {
         term: this.latestQuery.term,
         page: this.latestQuery.page + 1,
       };
+      this.pageButtonClickedWithoutResponse = true;
     }
   }
 }

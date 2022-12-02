@@ -1,0 +1,9 @@
+.loading-label {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: medium;
+  font-weight: 400;
+}

@@ -26,6 +26,9 @@
           <dbw-map></dbw-map>
         </ng-template>
       </li>
+      <li *ngIf="waitingForResponse || pageButtonClickedWithoutResponse" class="ms-auto loading-label text-primary">
+        <span>Please wait...</span>
+      </li>
     </ul>
     <div [ngbNavOutlet]="nav" class="mt-2"></div>
   </div>
