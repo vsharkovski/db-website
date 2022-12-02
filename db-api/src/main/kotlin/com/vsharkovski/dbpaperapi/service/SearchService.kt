@@ -39,7 +39,7 @@ class SearchService(
         }
 
         return personSpecificationBuilderService.build(builder)?.let {
-            val paging = PageRequest.of(pageNumber, 1000, Sort.by("id"))
+            val paging = PageRequest.of(pageNumber, 1000, Sort.by("wikiReaderCount").descending())
             val resultsSlice = personRepository.findAll(it, paging)
             return SearchResult(
                 results = resultsSlice.content,
