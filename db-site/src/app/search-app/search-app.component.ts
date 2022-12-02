@@ -42,7 +42,7 @@ export class SearchAppComponent implements OnInit {
     const initParams = this.route.snapshot.queryParams;
     this.requestedQuery = {
       term: initParams['term'] ?? '',
-      page: Number(initParams['page']) ?? 0,
+      page: Number(initParams['page'] ?? 0),
     };
     // whenever the search options are changed, update the route
     this.searchQueryChanged.subscribe((query: SearchQuery) => {
