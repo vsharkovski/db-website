@@ -21,6 +21,8 @@ export class PersonDetailModalComponent implements OnInit {
   occupations = {} as [number: string];
   citizenships = {} as [number: string];
 
+  waitingForResponse: boolean = false;
+
   constructor(
     public activeModal: NgbActiveModal,
     private wikiService: WikiService,
@@ -39,8 +41,10 @@ export class PersonDetailModalComponent implements OnInit {
       .getCitizenshipMap()
       .subscribe((citizenships) => (this.citizenships = citizenships));
     // get wiki data
+    this.waitingForResponse = true;
     this.wikidataUrl = `https://www.wikidata.org/wiki/${this.person.wikidataCode}`;
     this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
+      this.waitingForResponse = false;
       this.data = data;
     });
   }
