@@ -118,8 +118,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         this.queryChanged.emit(this.pullQueryFromOptions());
       }
     });
-    // when query is changed inside here, update compiledTerm
-    // (debugging purposes)
+    // when query is changed here, update compiled term (debugging purposes)
     this.queryChanged.subscribe((query) => {
       this.compiledTerm = query.term;
     });
@@ -154,7 +153,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       term = term.substring(0, term.length - 1);
     }
     return {
-      page: this.pageField.value ?? 0,
+      page: 0,
       term: term,
     };
   }

@@ -8,7 +8,21 @@
     ></dbw-search-options>
   </div>
   <div class="col-lg-8">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
+    <div class="d-flex">
+      <h3 *ngIf="results">Results</h3>
+      <span
+        *ngIf="waitingForResponse || pageButtonClickedWithoutResponse"
+        class="ms-auto align-self-center loading-label text-primary"
+        >Please wait...</span
+      >
+    </div>
+    <dbw-search-results
+      [results]="results"
+      [waitingForResponse]="waitingForResponse"
+      (previousPageRequested)="onPreviousPageRequested()"
+      (nextPageRequested)="onNextPageRequested()"
+    ></dbw-search-results>
+    <!-- <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
       <li [ngbNavItem]="1">
         <a ngbNavLink>Results</a>
         <ng-template ngbNavContent>
@@ -30,6 +44,6 @@
         <span>Please wait...</span>
       </li>
     </ul>
-    <div [ngbNavOutlet]="nav" class="mt-2"></div>
+    <div [ngbNavOutlet]="nav" class="mt-2"></div> -->
   </div>
 </div>
