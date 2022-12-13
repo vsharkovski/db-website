@@ -1,4 +1,25 @@
-<div class="row g-0">
+<div class="d-flex">
+  <div class="btn-group ms-auto">
+    <button
+      *ngIf="results.hasPreviousPage"
+      class="btn btn-outline-primary ms-auto"
+      (click)="onPreviousPageButtonClick()"
+      [disabled]="waitingForResponse || clickedWithoutResponse"
+    >
+      <
+    </button>
+    <button
+      *ngIf="results.hasNextPage"
+      class="btn btn-outline-primary"
+      (click)="onNextPageButtonClick()"
+      [disabled]="waitingForResponse || clickedWithoutResponse"
+    >
+      >
+    </button>
+  </div>
+</div>
+
+<!-- <div class="row g-0">
   <div class="col d-flex flex-row">
     <button
       *ngIf="results.hasPreviousPage"
@@ -19,4 +40,4 @@
       >
     </button>
   </div>
-</div>
+</div> -->
