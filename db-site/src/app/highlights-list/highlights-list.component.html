@@ -1,6 +1,23 @@
 <div class="d-flex flex-column align-items-center">
   <div class="text-center">
     <h5>
+      <span class="position-relative"
+        >Explore the database online! <a [routerLink]="['search']" class="stretched-link"></a
+      ></span>
+    </h5>
+    <p>
+      You can finally <a [routerLink]="['search']" class="fw-semibold">search for people in the database</a> by
+      filtering by name, birth and death year, gender, occupation, or citizenship.
+    </p>
+  </div>
+  <div class="position-relative">
+    <img src="assets/highlights/search-app.jpg" class="img-fluid rounded shadow" />
+    <a [routerLink]="['search']" class="stretched-link"></a>
+  </div>
+</div>
+<div class="mt-5 d-flex flex-column align-items-center">
+  <div class="text-center">
+    <h5>
       <span class="position-relative">
         Earth Visualization
         <a [href]="topiLink" class="stretched-link"></a>
@@ -12,29 +29,26 @@
     </p>
   </div>
   <div class="position-relative">
-    <img src="assets/highlights/topi.png" class="img-fluid rounded shadow" />
+    <img src="assets/highlights/topi.jpg" class="img-fluid rounded shadow" />
     <a [href]="topiLink" class="stretched-link"></a>
   </div>
 </div>
 <div class="mt-5 d-flex flex-column align-items-center">
-  <div class="text-center">
-    <h5>
-      <span class="position-relative"
-        >Birthplaces of notable people in Europe from 1000 AD onwards
-        <a
-          href="https://web.archive.org/web/20221024113028/https://twitter.com/Scientific_Bird/status/1584237159006945280"
-          class="stretched-link"
-        ></a
-      ></span>
-    </h5>
-    <p></p>
-  </div>
-  <div>
+  <h5 class="text-center">
+    <span class="position-relative"
+      >Birthplaces of notable people in Europe from 1000 AD onwards
+      <a [href]="inquisitiveBirdTwitterLink" class="stretched-link"></a
+    ></span>
+  </h5>
+  <div class="my-2">
     <video autoplay muted loop class="rounded shadow">
       <source src="assets/highlights/europe-vis-1000ad-onwards.mp4" />
       Download the <a href="assets/highlights/europe-vis-1000ad-onwards.mp4">video.</a>
     </video>
   </div>
+  <p class="text-muted">
+    credit to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird on Twitter</a>
+  </p>
 </div>
 <div class="mt-5">
   <h5 class="text-center mb-3">
