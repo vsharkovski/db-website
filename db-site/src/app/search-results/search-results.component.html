@@ -1,3 +1,6 @@
+<div *ngIf="results && results.persons.length === 0" class="my-3">
+  <h5 class="text-center text-muted">No results.</h5>
+</div>
 <dbw-search-results-page-buttons
   *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
   [results]="results"
@@ -5,7 +8,7 @@
   (previousPageButtonClicked)="onPreviousPageButtonClick()"
   (nextPageButtonClicked)="onNextPageButtonClick()"
 ></dbw-search-results-page-buttons>
-<div *ngIf="results" class="results-table mt-3 mb-3">
+<div *ngIf="results && results.persons.length > 0" class="results-table mt-3 mb-3">
   <div class="search-result results-header">
     <span>Name</span>
     <span>Birth</span>
