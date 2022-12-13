@@ -25,7 +25,6 @@ import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DateYearPipe } from './date-year.pipe';
-import { IntSliderComponent } from './int-slider/int-slider.component';
 import { PersonDetailModalComponent } from './person-detail-modal/person-detail-modal.component';
 import { UnknownPipe } from './unknown.pipe';
 import { ReadableNamePipe } from './readable-name.pipe';
@@ -53,7 +52,6 @@ import { SearchResultsPageButtonsComponent } from './search-results-page-buttons
     MapComponent,
     AboutPageComponent,
     DateYearPipe,
-    IntSliderComponent,
     PersonDetailModalComponent,
     UnknownPipe,
     ReadableNamePipe,
