@@ -23,7 +23,6 @@ export class SearchAppComponent implements OnInit {
   results?: SearchResponse;
   waitingForResponse: boolean = false;
   pageButtonClickedWithoutResponse: boolean = false;
-
   requestedQuery?: SearchQuery;
   latestQuery?: SearchQuery;
 
@@ -45,6 +44,9 @@ export class SearchAppComponent implements OnInit {
       term: initParams['term'] ?? '',
       page: Number(initParams['page'] ?? 0),
     };
+    if (this.requestedQuery.term) {
+      this.waitingForResponse = true;
+    }
     // whenever the search options are changed, update the route
     this.searchQueryChanged.subscribe((query: SearchQuery) => {
       this.latestQuery = query;
