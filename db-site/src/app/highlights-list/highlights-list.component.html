@@ -1,9 +1,7 @@
 <div class="d-flex flex-column align-items-center">
   <div class="text-center">
     <h5>
-      <span class="position-relative"
-        >Explore the database online! <a [routerLink]="['/search']" class="stretched-link"></a
-      ></span>
+      <a [routerLink]="['/search']" class="text-reset">Explore the database online!</a>
     </h5>
     <p>
       You can finally <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
@@ -17,12 +15,7 @@
 </div>
 <div class="mt-5 d-flex flex-column align-items-center">
   <div class="text-center">
-    <h5>
-      <span class="position-relative">
-        Earth Visualization
-        <a [href]="topiLink" class="stretched-link"></a>
-      </span>
-    </h5>
+    <h5><a [href]="topiLink" class="text-reset">Earth Visualization</a></h5>
     <p>
       Topi Tjukanov used our dataset to create an <a [href]="topiLink">interactive visualization</a> of the most notable
       people around the world.
@@ -35,10 +28,9 @@
 </div>
 <div class="mt-5 d-flex flex-column align-items-center">
   <h5 class="text-center">
-    <span class="position-relative"
-      >Birthplaces of notable people in Europe from 1000 AD onwards
-      <a [href]="inquisitiveBirdTwitterLink" class="stretched-link"></a
-    ></span>
+    <a [href]="inquisitiveBirdTwitterLink" class="text-reset"
+      >Birthplaces of notable people in Europe from 1000 AD onwards</a
+    >
   </h5>
   <div class="my-2">
     <video autoplay muted loop class="rounded shadow">
@@ -52,10 +44,7 @@
 </div>
 <div class="mt-5">
   <h5 class="text-center mb-3">
-    <span class="position-relative">
-      Top 0.1% of all scientific papers
-      <a [href]="altmetricLink" class="stretched-link"></a>
-    </span>
+    <a [href]="altmetricLink" class="text-reset"> Top 0.1% of all scientific papers stretched-link"></a>
   </h5>
   <!-- <div class="d-md-flex">
     <p>
