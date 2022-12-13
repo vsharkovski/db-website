@@ -2,7 +2,7 @@
   <div class="btn-group ms-auto">
     <button
       *ngIf="results.hasPreviousPage"
-      class="btn btn-outline-primary ms-auto"
+      class="btn btn-outline-primary"
       (click)="onPreviousPageButtonClick()"
       [disabled]="waitingForResponse || clickedWithoutResponse"
     >
