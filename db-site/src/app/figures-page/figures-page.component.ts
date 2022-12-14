@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FigureData } from '../figure-data.model';
-import FiguresDataFullJson from '../../assets/figures/figures-data-full.json';
+import FiguresDataFullJson from '../../assets/data/figures.json';
 import { FigureSize } from '../figure-size.enum';
 
 @Component({

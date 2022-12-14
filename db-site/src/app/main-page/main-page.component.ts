@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import FiguresDataFullJson from '../../assets/figures/figures-data-full.json';
+import FiguresDataFullJson from '../../assets/data/figures.json';
 import { FigureData } from '../figure-data.model';
 
 @Component({

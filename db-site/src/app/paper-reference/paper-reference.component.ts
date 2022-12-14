@@ -11,4 +11,5 @@ export class PaperReferenceComponent {
   @Input() paperUrl?: string;
   @Input() inlineCitation?: string;
   @Input() bibtexCitation?: string;
+  @Input() shouldBoldPaperTitle: boolean = false;
 }

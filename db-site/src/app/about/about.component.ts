@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { filter, first } from 'rxjs';
 import { ReferenceData } from '../reference-data.model';
-import ReferencesDataJson from '../../assets/references-data.json';
+import ReferencesDataJson from '../../assets/data/paper-references.json';
 
 @Component({
   selector: 'dbw-about',
