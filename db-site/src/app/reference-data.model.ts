@@ -4,4 +4,5 @@ export interface ReferenceData {
   paperUrl: string;
   inlineCitation: string;
   bibtexCitation: string;
+  shouldBoldPaperTitle: boolean;
 }

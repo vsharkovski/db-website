@@ -4,20 +4,23 @@
     "paperTitle": "A cross-verified database of notable people, 3500BC-2018AD",
     "paperUrl": "https://www.nature.com/articles/s41597-022-01369-4",
     "inlineCitation": "Morgane Laouenan, Palaash Bhargava, Jean-Benoît Eyméoud, Olivier Gergaud, Guillaume Plique, Etienne Wasmer (2022) A cross-verified database of notable people, 3500BC-2018AD, Scientific Data, June 2022",
-    "bibtexCitation": "@article{bhht3,\n  author = {Laouenan, Morgane and Bhargava, Palaash and Eyméoud, Jean-Benoît and Gergaud, Olivier and Plique, Guillaume and Wasmer, Etienne},\n  title = {A cross-verified database of notable people, 3500BC-2018AD},\n  journal = {Scientific Data},\n  publisher = {Nature Publishing Group},\n  year = {2022},\n  month = {Jun},\n  day = {09},\n  volume = {9},\n  number = {1},\n  pages = {290},\n  issn = {2052-4463},\n  doi = {10.1038/s41597-022-01369-4},\n  url = {https://doi.org/10.1038/s41597-022-01369-4}\n}"
+    "bibtexCitation": "@article{bhht3,\n  author = {Laouenan, Morgane and Bhargava, Palaash and Eyméoud, Jean-Benoît and Gergaud, Olivier and Plique, Guillaume and Wasmer, Etienne},\n  title = {A cross-verified database of notable people, 3500BC-2018AD},\n  journal = {Scientific Data},\n  publisher = {Nature Publishing Group},\n  year = {2022},\n  month = {Jun},\n  day = {09},\n  volume = {9},\n  number = {1},\n  pages = {290},\n  issn = {2052-4463},\n  doi = {10.1038/s41597-022-01369-4},\n  url = {https://doi.org/10.1038/s41597-022-01369-4}\n}",
+    "shouldBoldPaperTitle": true
   },
   {
     "description": "Version 2.0 (2021)",
     "paperTitle": "A Cross-verified Database of Notable People, 3500BC-2018AD",
     "paperUrl": "https://cepr.org/active/publications/discussion_papers/dp.php?dpno=15852",
     "inlineCitation": "Morgane Laouenan, Palaash Bhargava, Jean-Benoît Eyméoud, Olivier Gergaud, Guillaume Plique, Etienne Wasmer (2021) A Cross-verified Database of Notable People, 3500BC-2018AD, CEPR discussion paper 15582, Feb. 2021",
-    "bibtexCitation": "@TECHREPORT{bhht2,\n  title = {A Cross-verified Database of Notable People, 3500BC-2018AD},\n  author = {Laouenan, Morgane and Bhargava, Palaash and Eyméoud, Jean-Benoît and Gergaud, Olivier and Plique, Guillaume and Wasmer, Etienne},\n  year = {2021},\n  institution = {Centre for Economic Policy Research},\n  type = {Discussion Papers}\n  number = {15852},\n  url = {https://cepr.org/active/publications/discussion_papers/dp.php?dpno=15852}\n}"
+    "bibtexCitation": "@TECHREPORT{bhht2,\n  title = {A Cross-verified Database of Notable People, 3500BC-2018AD},\n  author = {Laouenan, Morgane and Bhargava, Palaash and Eyméoud, Jean-Benoît and Gergaud, Olivier and Plique, Guillaume and Wasmer, Etienne},\n  year = {2021},\n  institution = {Centre for Economic Policy Research},\n  type = {Discussion Papers}\n  number = {15852},\n  url = {https://cepr.org/active/publications/discussion_papers/dp.php?dpno=15852}\n}",
+    "shouldBoldPaperTitle": false
   },
   {
     "description": "Version 1.0 (2016)",
     "paperTitle": "A Brief History of Human Time: Exploring a database of 'notable people'",
     "paperUrl": "https://ideas.repec.org/p/spo/wpecon/infohdl2441-h4tv2ee028raq0ib4dabsqqei.html",
     "inlineCitation": "Gergaud O., Laouenan M., Wasmer, E. (2016) A Brief History of Human Time: Exploring a database of 'notable people, Sciences Po Economics Discussion Papers, 2016-03",
-    "bibtexCitation": "@TECHREPORT{bhht1,\n  title = {A Brief History of Human Time: Exploring a database of 'notable people'},\n  author = {Gergaud, Olivier and Laouenan, Morgane and Wasmer, Etienne},\n  year = {2016},\n  institution = {Sciences Po Department of Economics},\n  type = {Sciences Po Economics Discussion Papers},\n  number = {2016-03},\n  url = {https://EconPapers.repec.org/RePEc:spo:wpecon:info:hdl:2441/h4tv2ee028raq0ib4dabsqqei}\n}"
+    "bibtexCitation": "@TECHREPORT{bhht1,\n  title = {A Brief History of Human Time: Exploring a database of 'notable people'},\n  author = {Gergaud, Olivier and Laouenan, Morgane and Wasmer, Etienne},\n  year = {2016},\n  institution = {Sciences Po Department of Economics},\n  type = {Sciences Po Economics Discussion Papers},\n  number = {2016-03},\n  url = {https://EconPapers.repec.org/RePEc:spo:wpecon:info:hdl:2441/h4tv2ee028raq0ib4dabsqqei}\n}",
+    "shouldBoldPaperTitle": false
   }
 ]
