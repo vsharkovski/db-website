@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   debounceTime,
+  delay,
   distinctUntilChanged,
   merge,
   of,
@@ -18,7 +19,7 @@ import { SearchService } from '../search.service';
   templateUrl: './search-app.component.html',
   styleUrls: ['./search-app.component.css'],
 })
-export class SearchAppComponent implements OnInit {
+export class SearchAppComponent implements OnInit, OnDestroy {
   currentTab = 1;
   results?: SearchResponse;
   waitingForResponse: boolean = false;
@@ -60,31 +61,34 @@ export class SearchAppComponent implements OnInit {
     });
     // whenever the route is updated or the search form is submitted,
     // search for it
-    this.searchSubscription = merge(
+    const results$ = merge(
       this.searchOptionsSubmitted.pipe(
         switchMap(() => of(this.route.snapshot.queryParams))
       ),
       this.route.queryParams
-    )
-      .pipe(
-        debounceTime(1000),
-        distinctUntilChanged(),
-        switchMap((params) => {
-          if (params['term']) {
-            this.waitingForResponse = true;
-            return this.searchService.getSearchResults(
-              params['term'] ?? '',
-              params['page'] ?? 0
-            );
-          }
-          return of(undefined);
-        })
-      )
-      .subscribe((results) => {
-        this.waitingForResponse = false;
-        this.pageButtonClickedWithoutResponse = false;
-        this.results = results;
-      });
+    ).pipe(
+      debounceTime(1000),
+      distinctUntilChanged(),
+      switchMap((params) => {
+        if (params['term']) {
+          this.waitingForResponse = true;
+          return this.searchService.getSearchResults(
+            params['term'] ?? '',
+            params['page'] ?? 0
+          );
+        }
+        return of(undefined);
+      })
+    );
+    this.searchSubscription = results$.subscribe((results) => {
+      this.waitingForResponse = false;
+      this.pageButtonClickedWithoutResponse = false;
+      this.results = results;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubscription?.unsubscribe();
   }
 
   onPreviousPageRequested() {
