@@ -1,6 +1,6 @@
 <p class="title mb-2">
   <span>{{ description }}: </span>
-  <a [href]="paperUrl" class="fw-semibold fst-italic">{{ paperTitle }}</a>
+  <a [href]="paperUrl" class="fst-italic" [class.fw-semibold]="shouldBoldPaperTitle">{{ paperTitle }}</a>
 </p>
 <div class="row g-0 mb-2">
   <div class="col-auto inline-before"></div>
