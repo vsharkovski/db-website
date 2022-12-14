@@ -7,7 +7,9 @@
         (queryChanged)="this.searchQueryChanged.next($event)"
         (submitted)="this.searchOptionsSubmitted.next()"
       ></dbw-search-options>
-      <p class="mt-3 text-center"><a [routerLink]="['/about']">Download the whole dataset here.</a></p>
+      <p class="mt-3 text-center">
+        <a [routerLink]="['/about']" fragment="download">Download the whole dataset here.</a>
+      </p>
     </div>
   </div>
   <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResponse">
