@@ -1,12 +1,14 @@
 <div class="row" [class.d-flex]="!results && !waitingForResponse">
   <div class="col-md-4 col-lg-3 mb-3" [class.mx-auto]="!results && !waitingForResponse">
-    <h1 class="text-center mb-3">Find people in history</h1>
-    <dbw-search-options
-      [requestedQuery]="requestedQuery"
-      (queryChanged)="this.searchQueryChanged.next($event)"
-      (submitted)="this.searchOptionsSubmitted.next()"
-    ></dbw-search-options>
-    <p class="mt-3 text-center"><a [routerLink]="['/about']">Download the whole dataset here.</a></p>
+    <div class="options-container">
+      <h1 class="text-center mb-3">Find people in history</h1>
+      <dbw-search-options
+        [requestedQuery]="requestedQuery"
+        (queryChanged)="this.searchQueryChanged.next($event)"
+        (submitted)="this.searchOptionsSubmitted.next()"
+      ></dbw-search-options>
+      <p class="mt-3 text-center"><a [routerLink]="['/about']">Download the whole dataset here.</a></p>
+    </div>
   </div>
   <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResponse">
     <div class="d-flex">
