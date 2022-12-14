@@ -1,5 +1,9 @@
 <div class="row" [class.d-flex]="!results && !waitingForResponse">
-  <div class="px-5 px-md-0 col-md-4 col-lg-3 mb-3" [class.mx-auto]="!results && !waitingForResponse">
+  <div
+    class="col-md-4 col-lg-3 mb-3 px-5 px-md-0"
+    [class.mx-auto]="!results && !waitingForResponse"
+    [class.px-md-3]="results || waitingForResponse"
+  >
     <div class="options-container">
       <h1 class="text-center mb-3">Find people in history</h1>
       <dbw-search-options
