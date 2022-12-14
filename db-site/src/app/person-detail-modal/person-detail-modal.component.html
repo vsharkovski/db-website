@@ -37,8 +37,12 @@
     <p *ngIf="waitingForResponse">Please wait...</p>
     <p *ngIf="data?.extract">{{ data!.extract }}</p>
     <div class="d-flex">
-      <span *ngIf="data?.fullurl"><a [href]="data!.fullurl">Wikipedia Page</a></span>
-      <span class="ms-auto"><a [href]="wikidataUrl">Wikidata Page</a></span>
+      <div *ngIf="data?.fullurl" class="wiki-container">
+        <a [href]="data!.fullurl"><img src="assets/images/Wikipedia-logo-v2.svg" /><span>Wikipedia Page</span></a>
+      </div>
+      <div class="ms-auto wiki-container">
+        <a [href]="wikidataUrl"><img src="assets/images/Wikidata-logo-en.svg" /><span>Wikidata Page</span></a>
+      </div>
     </div>
   </div>
 </div>

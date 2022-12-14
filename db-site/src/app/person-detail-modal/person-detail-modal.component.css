@@ -18,3 +18,9 @@
   font-weight: 600;
   margin-inline-end: 1rem;
 }
+
+.wiki-container img {
+  max-height: 2rem;
+  width: auto;
+  margin-inline-end: 1rem;
+}
