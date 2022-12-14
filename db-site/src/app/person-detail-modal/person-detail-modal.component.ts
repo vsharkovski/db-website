@@ -42,7 +42,7 @@ export class PersonDetailModalComponent implements OnInit {
       .subscribe((citizenships) => (this.citizenships = citizenships));
     // get wiki data
     this.waitingForResponse = true;
-    this.wikidataUrl = `https://www.wikidata.org/wiki/${this.person.wikidataCode}`;
+    this.wikidataUrl = `https://www.wikidata.org/wiki/Q${this.person.wikidataCode}`;
     this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
       this.waitingForResponse = false;
       this.data = data;
