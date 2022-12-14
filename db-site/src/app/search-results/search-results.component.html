@@ -16,6 +16,7 @@
     <span>Gender</span>
     <span>Occupation</span>
     <span>Citizenship</span>
+    <span>Citizenship (2nd)</span>
   </div>
   <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
     <span>{{ person.name | readableName }}</span>
@@ -24,6 +25,7 @@
     <span>{{ genders[person.genderId ?? -1] }}</span>
     <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
     <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
+    <span>{{ citizenships[person.citizenship2BId ?? -1] }}</span>
   </div>
 </div>
 <dbw-search-results-page-buttons

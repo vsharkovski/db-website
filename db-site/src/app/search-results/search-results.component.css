@@ -1,7 +1,7 @@
 .search-result {
   display: grid;
   /* Hide less essential columns on small screens */
-  grid-template-columns: 2fr 0fr 0fr 0fr 1fr 1fr;
+  grid-template-columns: 2fr 0fr 0fr 0fr 1fr 1fr 0fr;
   column-gap: 0.5rem;
   margin: 0;
   padding: 0 0.25rem 0 0.25rem;
@@ -14,7 +14,7 @@
 
 @media (min-width: 576px) {
   .search-result {
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr;
   }
 }
 
