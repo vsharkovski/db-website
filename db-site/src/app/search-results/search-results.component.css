@@ -1,6 +1,7 @@
 .search-result {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  /* Hide less essential columns on small screens */
+  grid-template-columns: 2fr 0fr 0fr 0fr 1fr 1fr;
   column-gap: 0.5rem;
   margin: 0;
   padding: 0 0.25rem 0 0.25rem;
@@ -9,6 +10,12 @@
   border-color: rgb(150, 150, 150);
   background-color: rgb(250, 250, 250);
   cursor: pointer;
+}
+
+@media (min-width: 576px) {
+  .search-result {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+  }
 }
 
 .search-result:hover {
