@@ -1,8 +1,12 @@
 <div *ngIf="results" class="results-table">
   <div class="search-result results-header">
     <span>Name</span>
-    <span>Birth</span>
-    <span>Death</span>
+    <span
+      >Birth<span class="sort-indicator">{{
+        (results.sort.variable === "birth" ? results.sort.direction : null) | sortDirection
+      }}</span>
+    </span>
+    <span>Death<span class="sort-indicator">-</span></span>
     <span>Gender</span>
     <span>Occupation</span>
     <span>Citizenship</span>
