@@ -22,6 +22,7 @@ import { SearchService } from '../search.service';
 export class SearchAppComponent implements OnInit, OnDestroy {
   currentTab = 1;
   results?: SearchResponse;
+  hasAskedForResponse: boolean = false;
   waitingForResponse: boolean = false;
   pageButtonClickedWithoutResponse: boolean = false;
   requestedQuery?: SearchQuery;
@@ -72,6 +73,7 @@ export class SearchAppComponent implements OnInit, OnDestroy {
       switchMap((params) => {
         if (params['term']) {
           this.waitingForResponse = true;
+          this.hasAskedForResponse = true;
           return this.searchService.getSearchResults(
             params['term'] ?? '',
             params['page'] ?? 0
@@ -91,7 +93,7 @@ export class SearchAppComponent implements OnInit, OnDestroy {
     this.searchSubscription?.unsubscribe();
   }
 
-  onPreviousPageRequested() {
+  onPreviousPageButtonClick() {
     if (
       this.results?.hasPreviousPage &&
       this.latestQuery &&
@@ -105,7 +107,7 @@ export class SearchAppComponent implements OnInit, OnDestroy {
     }
   }
 
-  onNextPageRequested() {
+  onNextPageButtonClick() {
     if (this.results?.hasNextPage && this.latestQuery) {
       this.requestedQuery = {
         term: this.latestQuery.term,

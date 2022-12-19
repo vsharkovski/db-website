@@ -1,14 +1,4 @@
-<div *ngIf="results && results.persons.length === 0" class="my-3">
-  <h5 class="text-center text-muted">No results.</h5>
-</div>
-<dbw-search-results-page-buttons
-  *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
-  [results]="results"
-  [waitingForResponse]="waitingForResponse"
-  (previousPageButtonClicked)="onPreviousPageButtonClick()"
-  (nextPageButtonClicked)="onNextPageButtonClick()"
-></dbw-search-results-page-buttons>
-<div *ngIf="results && results.persons.length > 0" class="results-table mt-3 mb-3">
+<div *ngIf="results" class="results-table">
   <div class="search-result results-header">
     <span>Name</span>
     <span>Birth</span>
@@ -17,6 +7,9 @@
     <span>Occupation</span>
     <span>Citizenship</span>
     <span>Citizenship (2nd)</span>
+  </div>
+  <div *ngIf="results.persons.length === 0" class="my-3">
+    <h5 class="text-center text-muted">No results.</h5>
   </div>
   <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
     <span>{{ person.name | readableName }}</span>
@@ -28,10 +21,3 @@
     <span>{{ citizenships[person.citizenship2BId ?? -1] }}</span>
   </div>
 </div>
-<dbw-search-results-page-buttons
-  *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
-  [results]="results"
-  [waitingForResponse]="waitingForResponse"
-  (previousPageButtonClicked)="onPreviousPageButtonClick()"
-  (nextPageButtonClicked)="onNextPageButtonClick()"
-></dbw-search-results-page-buttons>

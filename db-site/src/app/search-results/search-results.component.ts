@@ -16,8 +16,6 @@ export class SearchResultsComponent implements OnInit {
 
   @Input() results?: SearchResponse;
   @Input() waitingForResponse: boolean = false;
-  @Output() previousPageRequested = new EventEmitter<void>();
-  @Output() nextPageRequested = new EventEmitter<void>();
 
   constructor(
     private modalService: ModalService,
@@ -39,17 +37,5 @@ export class SearchResultsComponent implements OnInit {
 
   openPersonDetail(person: Person): void {
     this.modalService.openPersonDetailModal(person);
-  }
-
-  onPreviousPageButtonClick() {
-    if (this.results?.hasPreviousPage) {
-      this.previousPageRequested.next();
-    }
-  }
-
-  onNextPageButtonClick() {
-    if (this.results?.hasNextPage) {
-      this.nextPageRequested.next();
-    }
   }
 }
