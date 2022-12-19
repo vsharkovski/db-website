@@ -22,14 +22,16 @@ import { SearchService } from '../search.service';
 export class SearchAppComponent implements OnInit, OnDestroy {
   currentTab = 1;
   results?: SearchResponse;
-  hasAskedForResponse: boolean = false;
-  waitingForResponse: boolean = false;
-  pageButtonClickedWithoutResponse: boolean = false;
   requestedQuery?: SearchQuery;
   latestQuery?: SearchQuery;
 
   searchQueryChanged = new Subject<SearchQuery>();
   searchOptionsSubmitted = new Subject<void>();
+
+  hasAskedForResponse: boolean = false;
+  waitingForResponse: boolean = false;
+  pageButtonClickedWithoutResponse: boolean = false;
+
 
   searchSubscription?: Subscription;
 

@@ -1,6 +1,7 @@
 .results-table {
-  height: 100%;
+  max-height: calc(100vh - 11rem);
   overflow-y: auto;
+  margin-bottom: 1rem;
 }
 
 .search-result {
@@ -42,6 +43,8 @@
   border-color: rgb(150, 150, 150);
   text-transform: uppercase;
   cursor: default;
+  position: sticky;
+  top: 0;
 }
 
 .results-header:hover {
