@@ -30,6 +30,7 @@ import { UnknownPipe } from './unknown.pipe';
 import { ReadableNamePipe } from './readable-name.pipe';
 import { SearchResultsPageButtonsComponent } from './search-results-page-buttons/search-results-page-buttons.component';
 import { SortDirectionPipe } from './sort-direction.pipe';
+import { SortVariablePipe } from './sort-variable.pipe';
 
 @NgModule({
   declarations: [
@@ -58,6 +59,7 @@ import { SortDirectionPipe } from './sort-direction.pipe';
     ReadableNamePipe,
     SearchResultsPageButtonsComponent,
     SortDirectionPipe,
+    SortVariablePipe,
   ],
   imports: [
     BrowserModule,

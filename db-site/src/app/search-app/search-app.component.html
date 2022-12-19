@@ -19,7 +19,12 @@
   <div class="col-md-8 col-lg-9" *ngIf="results || hasAskedForResults">
     <div class="d-flex mb-3">
       <h3 *ngIf="results">Results</h3>
-      <span *ngIf="waitingForResults" class="ms-3 align-self-center loading-label text-primary">Please wait...</span>
+      <span *ngIf="results && results.persons.length > 0" class="header-label"
+        >Showing results {{ results.pageNumber * results.maxSliceSize }} -
+        {{ results.pageNumber * results.maxSliceSize + results.persons.length - 1 }} (page {{ results.pageNumber }}),
+        sorted by {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
+      </span>
+      <span *ngIf="waitingForResults" class="ms-3 header-label loading-label text-primary">Please wait...</span>
       <dbw-search-results-page-buttons
         *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
         [results]="results"

@@ -1,18 +1,11 @@
-.loading-label {
+.header-label {
   padding-left: 1rem;
   padding-right: 1rem;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  font-size: medium;
-  font-weight: 400;
+  align-self: center;
 }
 
-@media (min-width: 768px) {
-  /* .options-container {
-    position: sticky;
-    top: 5rem;
-  } */
+.loading-label {
+  font-weight: 600;
 }
 
 .blurred {

@@ -70,3 +70,7 @@
 .sortable-variable:hover {
   font-weight: 600;
 }
+
+.highlighted-variable {
+  text-decoration: underline;
+}

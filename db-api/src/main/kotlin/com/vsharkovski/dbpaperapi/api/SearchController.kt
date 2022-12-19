@@ -40,6 +40,8 @@ class SearchController(
                 persons = result.results,
                 hasPreviousPage = result.hasPreviousPage,
                 hasNextPage = result.hasNextPage,
+                pageNumber = page,
+                maxSliceSize = result.maxSliceSize,
                 sort = PublicSortState(
                     variable = result.sortState.variable,
                     direction = sortDirectionEnumToString[result.sortState.direction]!!

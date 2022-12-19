@@ -57,6 +57,8 @@ class SearchService(
                 results = resultsSlice.content,
                 hasPreviousPage = resultsSlice.hasPrevious(),
                 hasNextPage = resultsSlice.hasNext(),
+                pageNumber = pageNumber,
+                maxSliceSize = resultsPerPage,
                 sortState = sortState
             )
         } ?: SearchResult()

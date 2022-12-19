@@ -35,6 +35,8 @@ export class SearchService {
             persons: [],
             hasNextPage: false,
             hasPreviousPage: false,
+            pageNumber: 0,
+            maxSliceSize: 0,
             sort: {
               variable: 'notabilityRank' as SortState['variable'],
               direction: 'ascending' as SortState['direction'],
