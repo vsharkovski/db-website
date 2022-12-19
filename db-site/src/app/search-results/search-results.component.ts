@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ModalService } from '../modal.service';
 import { Person } from '../person.model';
 import { SearchResponse } from '../search-response.model';
+import { SortState } from '../sort-state.model';
 import { VariablesService } from '../variables.service';
 
 @Component({
@@ -16,6 +17,7 @@ export class SearchResultsComponent implements OnInit {
 
   @Input() results?: SearchResponse;
   @Input() waitingForResponse: boolean = false;
+  @Output() sortStateChanged = new EventEmitter<SortState>();
 
   constructor(
     private modalService: ModalService,
@@ -37,5 +39,28 @@ export class SearchResultsComponent implements OnInit {
 
   openPersonDetail(person: Person): void {
     this.modalService.openPersonDetailModal(person);
+  }
+
+  onSortIndicatorClick(variable: SortState['variable']): void {
+    if (!this.results) {
+      return;
+    }
+    if (this.results.sort.variable == variable) {
+      // same variable clicked, flip direction
+      const newDirection: SortState['direction'] =
+        this.results.sort.direction === 'ascending'
+          ? 'descending'
+          : 'ascending';
+      this.sortStateChanged.emit({
+        variable: variable,
+        direction: newDirection,
+      });
+    } else {
+      // sort by new variable
+      this.sortStateChanged.emit({
+        variable: variable,
+        direction: 'ascending',
+      });
+    }
   }
 }

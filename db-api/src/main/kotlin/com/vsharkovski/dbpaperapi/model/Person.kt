@@ -71,6 +71,6 @@ data class Person(
     @Column(name = "death_latitude")
     val deathLatitude: Float?,
 
-    @Column(name = "wiki_reader_count")
-    val wikiReaderCount: Long?
+    @Column(name = "notability_rank")
+    val notabilityRank: Long?
 )

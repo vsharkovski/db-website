@@ -1,6 +1,6 @@
 <div class="row" [class.d-flex]="!results && !waitingForResponse && !hasAskedForResponse">
   <div
-    class="col-md-4 col-lg-3 mb-3 px-5 px-md-0"
+    class="col-md-4 col-lg-3 mb-3 px-3 px-md-0"
     [class.mx-auto]="!results && !waitingForResponse && !hasAskedForResponse"
     [class.px-md-3]="results || waitingForResponse || hasAskedForResponse"
   >
@@ -19,11 +19,7 @@
   <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResponse || hasAskedForResponse">
     <div class="d-flex mb-3">
       <h3 *ngIf="results">Results</h3>
-      <span
-        *ngIf="waitingForResponse || pageButtonClickedWithoutResponse"
-        class="ms-3 align-self-center loading-label text-primary"
-        >Please wait...</span
-      >
+      <span *ngIf="waitingForResponse" class="ms-3 align-self-center loading-label text-primary">Please wait...</span>
       <dbw-search-results-page-buttons
         *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
         [results]="results"
@@ -33,7 +29,11 @@
         class="ms-auto"
       ></dbw-search-results-page-buttons>
     </div>
-    <dbw-search-results [results]="results"></dbw-search-results>
+    <dbw-search-results
+      [results]="results"
+      (sortStateChanged)="onSortStateChanged($event)"
+      [class.blurred]="waitingForResponse"
+    ></dbw-search-results>
     <!-- <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
       <li [ngbNavItem]="1">
         <a ngbNavLink>Results</a>

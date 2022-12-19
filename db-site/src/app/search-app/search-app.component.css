@@ -14,3 +14,8 @@
     top: 5rem;
   } */
 }
+
+.blurred {
+  transition: filter 500ms ease-in-out;
+  filter: blur(1px) brightness(0.95);
+}

@@ -1,12 +1,21 @@
 <div *ngIf="results" class="results-table">
   <div class="search-result results-header">
+    <span class="sortable-variable" (click)="onSortIndicatorClick('notabilityRank')"
+      >Rank<span class="sort-indicator">{{
+        (results.sort.variable === "notabilityRank" ? results.sort.direction : null) | sortDirection
+      }}</span></span
+    >
     <span>Name</span>
-    <span
-      >Birth<span class="sort-indicator">{{
+    <span class="sortable-variable" (click)="onSortIndicatorClick('birth')"
+      >Birth<span class="sort-indicator" (click)="onSortIndicatorClick('birth')">{{
         (results.sort.variable === "birth" ? results.sort.direction : null) | sortDirection
       }}</span>
     </span>
-    <span>Death<span class="sort-indicator">-</span></span>
+    <span class="sortable-variable" (click)="onSortIndicatorClick('death')"
+      >Death<span class="sort-indicator" (click)="onSortIndicatorClick('death')">{{
+        (results.sort.variable === "death" ? results.sort.direction : null) | sortDirection
+      }}</span></span
+    >
     <span>Gender</span>
     <span>Occupation</span>
     <span>Citizenship</span>
@@ -16,6 +25,7 @@
     <h5 class="text-center text-muted">No results.</h5>
   </div>
   <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
+    <span>{{ person.notabilityRank }}</span>
     <span>{{ person.name | readableName }}</span>
     <span>{{ person.birth | dateYear }}</span>
     <span>{{ person.death | dateYear }}</span>

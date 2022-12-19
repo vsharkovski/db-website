@@ -23,8 +23,8 @@ class StartupEventListener(
     @Value("\${database-management.clean-up-people-names}")
     val cleanUpPeopleNames: Boolean = false
 
-    @Value("\${database-management.add-wiki-reader-count}")
-    val addWikiReaderCount: Boolean = false
+    @Value("\${database-management.add-notability-rank}")
+    val addNotabilityRank: Boolean = false
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
@@ -35,9 +35,9 @@ class StartupEventListener(
         if (cleanUpCitizenshipNames) {
             citizenshipService.cleanUpCitizenshipNames()
         }
-        if (addWikiReaderCount) {
+        if (addNotabilityRank) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.addFileWikiReaderCounts(resource.file)
+            csvService.addFileNotabilityRanks(resource.file)
         }
     }
 }

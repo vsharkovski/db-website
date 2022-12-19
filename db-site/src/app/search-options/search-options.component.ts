@@ -89,13 +89,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     const change = changes['requestedQuery'];
     if (change && change.currentValue) {
       // push to options
-      this.pushQueryToOptions(
-        {
-          page: change.currentValue.page,
-          term: change.currentValue.term,
-        },
-        true
-      );
+      this.pushQueryToOptions({ ...change.currentValue }, true);
     }
   }
 
@@ -134,7 +128,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
   pullQueryFromOptions(): SearchQuery {
     if (!this.form.valid) {
-      return { page: 0, term: '' };
+      return { page: 0, term: '', sort: null };
     }
     let term = '';
     if (this.nameField.value) term += `name:*${this.nameField.value}*,`;
@@ -153,8 +147,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       term = term.substring(0, term.length - 1);
     }
     return {
-      page: 0,
       term: term,
+      page: 0,
+      sort: { variable: 'notabilityRank', direction: 'descending' },
     };
   }
 

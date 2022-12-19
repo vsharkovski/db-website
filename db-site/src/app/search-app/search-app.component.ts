@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   debounceTime,
-  delay,
   distinctUntilChanged,
   merge,
   of,
@@ -13,6 +12,7 @@ import {
 import { SearchQuery } from '../search-query.model';
 import { SearchResponse } from '../search-response.model';
 import { SearchService } from '../search.service';
+import { SortState } from '../sort-state.model';
 
 @Component({
   selector: 'dbw-search-app',
@@ -30,8 +30,6 @@ export class SearchAppComponent implements OnInit, OnDestroy {
 
   hasAskedForResponse: boolean = false;
   waitingForResponse: boolean = false;
-  pageButtonClickedWithoutResponse: boolean = false;
-
 
   searchSubscription?: Subscription;
 
@@ -47,20 +45,24 @@ export class SearchAppComponent implements OnInit, OnDestroy {
     this.requestedQuery = {
       term: initParams['term'] ?? '',
       page: Number(initParams['page'] ?? 0),
+      sort: null,
     };
     if (this.requestedQuery.term) {
       this.waitingForResponse = true;
     }
     // whenever the search options are changed, update the route
     this.searchQueryChanged.subscribe((query: SearchQuery) => {
-      this.latestQuery = query;
+      this.latestQuery = this.mergeQueries(query, this.latestQuery);
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {
-          term: query.term,
-          page: query.page,
+          term: this.latestQuery.term,
+          page: this.latestQuery.page,
+          sortVariable: this.latestQuery.sort?.variable ?? 'notabilityRank',
+          sortDirection: this.latestQuery.sort?.direction ?? 'ascending',
         },
       });
+      this.waitingForResponse = true;
     });
     // whenever the route is updated or the search form is submitted,
     // search for it
@@ -78,7 +80,9 @@ export class SearchAppComponent implements OnInit, OnDestroy {
           this.hasAskedForResponse = true;
           return this.searchService.getSearchResults(
             params['term'] ?? '',
-            params['page'] ?? 0
+            params['page'] ?? 0,
+            params['sortVariable'] ?? 'notabilityRank',
+            params['sortDirection'] ?? 'ascending'
           );
         }
         return of(undefined);
@@ -86,7 +90,6 @@ export class SearchAppComponent implements OnInit, OnDestroy {
     );
     this.searchSubscription = results$.subscribe((results) => {
       this.waitingForResponse = false;
-      this.pageButtonClickedWithoutResponse = false;
       this.results = results;
     });
   }
@@ -104,8 +107,8 @@ export class SearchAppComponent implements OnInit, OnDestroy {
       this.requestedQuery = {
         term: this.latestQuery.term,
         page: this.latestQuery.page - 1,
+        sort: this.latestQuery.sort,
       };
-      this.pageButtonClickedWithoutResponse = true;
     }
   }
 
@@ -114,8 +117,26 @@ export class SearchAppComponent implements OnInit, OnDestroy {
       this.requestedQuery = {
         term: this.latestQuery.term,
         page: this.latestQuery.page + 1,
+        sort: this.latestQuery.sort,
       };
-      this.pageButtonClickedWithoutResponse = true;
     }
+  }
+
+  onSortStateChanged(sortState: SortState): void {
+    if (this.latestQuery) {
+      this.searchQueryChanged.next({
+        term: this.latestQuery.term,
+        page: this.latestQuery.page,
+        sort: sortState,
+      });
+    }
+  }
+
+  mergeQueries(newQuery: SearchQuery, oldQuery?: SearchQuery): SearchQuery {
+    return {
+      term: newQuery.term,
+      page: newQuery.page,
+      sort: newQuery.sort ?? oldQuery?.sort ?? null,
+    };
   }
 }

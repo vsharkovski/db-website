@@ -3,9 +3,11 @@ package com.vsharkovski.dbpaperapi.service
 import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.SearchOperation
 import com.vsharkovski.dbpaperapi.model.SearchResult
+import com.vsharkovski.dbpaperapi.model.SortState
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -18,7 +20,14 @@ class SearchService(
 ) {
     val logger: Logger = LoggerFactory.getLogger(SearchService::class.java)
 
-    fun findPeopleBySearchTerm(term: String, pageNumber: Int): SearchResult<Person> {
+    @Value("\${search.results-per-page}")
+    val resultsPerPage: Int = 1000
+
+    fun findPeopleBySearchTerm(
+        term: String,
+        pageNumber: Int,
+        sortState: SortState,
+    ): SearchResult<Person> {
         if (pageNumber < 0) {
             return SearchResult()
         }
@@ -39,12 +48,16 @@ class SearchService(
         }
 
         return personSpecificationBuilderService.build(builder)?.let {
-            val paging = PageRequest.of(pageNumber, 1000, Sort.by("wikiReaderCount").descending())
+            val paging = PageRequest.of(
+                pageNumber, resultsPerPage,
+                Sort.by(sortState.direction, sortState.variable)
+            )
             val resultsSlice = personRepository.findAll(it, paging)
             return SearchResult(
                 results = resultsSlice.content,
                 hasPreviousPage = resultsSlice.hasPrevious(),
-                hasNextPage = resultsSlice.hasNext()
+                hasNextPage = resultsSlice.hasNext(),
+                sortState = sortState
             )
         } ?: SearchResult()
     }

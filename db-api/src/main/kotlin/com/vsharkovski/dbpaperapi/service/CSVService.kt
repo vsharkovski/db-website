@@ -50,9 +50,9 @@ class CSVService(
         logger.info("Finished saving file [{}]", file.path)
     }
 
-    fun addFileWikiReaderCounts(file: File) {
-        logger.info("Updating database variable wikiReaderCounts from file [{}]", file.path)
-        file.forEachCSVRecordBuffered { addRecordWikiReaderCount(it) }
+    fun addFileNotabilityRanks(file: File) {
+        logger.info("Updating database variable notabilityRank from file [{}]", file.path)
+        file.forEachCSVRecordBuffered { setRecordNotabilityRank(it) }
         logger.info("Finished updating database from file [{}]", file.path)
     }
 
@@ -80,22 +80,22 @@ class CSVService(
             birthLatitude = record.get("bpla1").toFloatOrNull(),
             deathLongitude = record.get("dplo1").toFloatOrNull(),
             deathLatitude = record.get("dpla1").toFloatOrNull(),
-            wikiReaderCount = getRecordWikiReaderCount(record)
+            notabilityRank = getNotabilityRank(record)
         )
 //        logger.info("Saving person [{}]", person)
         personRepository.save(person)
     }
 
-    private fun addRecordWikiReaderCount(record: CSVRecord) {
+    private fun setRecordNotabilityRank(record: CSVRecord) {
         val wikidataCode = getRecordWikidataCode(record) ?: return
-        val count = getRecordWikiReaderCount(record) ?: return
-        personRepository.updateWikiReaderCount(wikidataCode, count)
+        val rank = getNotabilityRank(record) ?: return
+        personRepository.setNotabilityRank(wikidataCode, rank)
     }
 
     private fun getRecordWikidataCode(record: CSVRecord): Int? =
         record.get("wikidata_code").substring(1).toIntOrNull()
 
-    private fun getRecordWikiReaderCount(record: CSVRecord): Long? =
-        record.get("wiki_readers_2015_2018").toLongOrNull()
+    private fun getNotabilityRank(record: CSVRecord): Long? =
+        record.get("ranking_visib_5criteria").toLongOrNull()
 
 }
