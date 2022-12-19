@@ -1,8 +1,8 @@
-<div class="row" [class.d-flex]="!results && !waitingForResponse && !hasAskedForResponse">
+<div class="row" [class.d-flex]="!results && !waitingForResults && !hasAskedForResults">
   <div
     class="col-md-4 col-lg-3 mb-3 px-3 px-md-0"
-    [class.mx-auto]="!results && !waitingForResponse && !hasAskedForResponse"
-    [class.px-md-3]="results || waitingForResponse || hasAskedForResponse"
+    [class.mx-auto]="!results && !waitingForResults && !hasAskedForResults"
+    [class.px-md-3]="results || waitingForResults || hasAskedForResults"
   >
     <div class="options-container">
       <h1 class="text-center mb-3">Find people in history</h1>
@@ -16,14 +16,14 @@
       </p>
     </div>
   </div>
-  <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResponse || hasAskedForResponse">
+  <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResults || hasAskedForResults">
     <div class="d-flex mb-3">
       <h3 *ngIf="results">Results</h3>
-      <span *ngIf="waitingForResponse" class="ms-3 align-self-center loading-label text-primary">Please wait...</span>
+      <span *ngIf="waitingForResults" class="ms-3 align-self-center loading-label text-primary">Please wait...</span>
       <dbw-search-results-page-buttons
         *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
         [results]="results"
-        [waitingForResponse]="waitingForResponse"
+        [disabled]="waitingForResults"
         (previousPageButtonClicked)="onPreviousPageButtonClick()"
         (nextPageButtonClicked)="onNextPageButtonClick()"
         class="ms-auto"
@@ -32,30 +32,7 @@
     <dbw-search-results
       [results]="results"
       (sortStateChanged)="onSortStateChanged($event)"
-      [class.blurred]="waitingForResponse"
+      [class.blurred]="waitingForResults"
     ></dbw-search-results>
-    <!-- <ul ngbNav #nav="ngbNav" [(activeId)]="currentTab" [destroyOnHide]="false" class="nav nav-pills">
-      <li [ngbNavItem]="1">
-        <a ngbNavLink>Results</a>
-        <ng-template ngbNavContent>
-          <dbw-search-results
-            [results]="results"
-            [waitingForResponse]="waitingForResponse"
-            (previousPageRequested)="onPreviousPageRequested()"
-            (nextPageRequested)="onNextPageRequested()"
-          ></dbw-search-results>
-        </ng-template>
-      </li>
-      <li [ngbNavItem]="2">
-        <a ngbNavLink>Map</a>
-        <ng-template ngbNavContent>
-          <dbw-map></dbw-map>
-        </ng-template>
-      </li>
-      <li *ngIf="waitingForResponse || pageButtonClickedWithoutResponse" class="ms-auto loading-label text-primary">
-        <span>Please wait...</span>
-      </li>
-    </ul>
-    <div [ngbNavOutlet]="nav" class="mt-2"></div> -->
   </div>
 </div>

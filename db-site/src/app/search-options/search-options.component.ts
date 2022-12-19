@@ -109,6 +109,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     // when things are changed, send signal up
     this.form.valueChanges.subscribe((values) => {
       if (this.form.valid) {
+        // console.log('search options: emitting queryChanged');
         this.queryChanged.emit(this.pullQueryFromOptions());
       }
     });
