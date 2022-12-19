@@ -1,8 +1,8 @@
-<div class="row" [class.d-flex]="!results && !waitingForResults && !hasAskedForResults">
+<div class="row" [class.d-flex]="!hasAskedForResults">
   <div
     class="col-md-4 col-lg-3 mb-3 px-3 px-md-0"
-    [class.mx-auto]="!results && !waitingForResults && !hasAskedForResults"
-    [class.px-md-3]="results || waitingForResults || hasAskedForResults"
+    [class.mx-auto]="!hasAskedForResults"
+    [class.px-md-3]="hasAskedForResults"
   >
     <div class="options-container">
       <h1 class="text-center mb-3">Find people in history</h1>
@@ -16,7 +16,7 @@
       </p>
     </div>
   </div>
-  <div class="col-md-8 col-lg-9" *ngIf="results || waitingForResults || hasAskedForResults">
+  <div class="col-md-8 col-lg-9" *ngIf="results || hasAskedForResults">
     <div class="d-flex mb-3">
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="waitingForResults" class="ms-3 align-self-center loading-label text-primary">Please wait...</span>
