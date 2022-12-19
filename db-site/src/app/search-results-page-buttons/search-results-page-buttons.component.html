@@ -2,7 +2,7 @@
   <div class="btn-group ms-auto">
     <button
       *ngIf="results.hasPreviousPage"
-      class="btn btn-outline-secondary"
+      class="btn btn-secondary"
       (click)="onPreviousPageButtonClick()"
       [disabled]="disabled"
     >
@@ -10,7 +10,7 @@
     </button>
     <button
       *ngIf="results.hasNextPage"
-      class="btn btn-outline-secondary"
+      class="btn btn-secondary"
       (click)="onNextPageButtonClick()"
       [disabled]="disabled"
     >

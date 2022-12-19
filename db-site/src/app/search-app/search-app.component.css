@@ -1,7 +1,7 @@
-.header-label {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  align-self: center;
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .loading-label {
