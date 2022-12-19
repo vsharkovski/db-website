@@ -19,7 +19,7 @@
   <div class="col-md-8 col-lg-9" *ngIf="results || hasAskedForResults">
     <div class="mb-3 results-header">
       <h3 *ngIf="results">Results</h3>
-      <span *ngIf="results && results.persons.length > 0"
+      <span *ngIf="results && results.persons.length > 0 && !waitingForResults"
         >Showing results {{ results.pageNumber * results.maxSliceSize }} -
         {{ results.pageNumber * results.maxSliceSize + results.persons.length - 1 }} (page {{ results.pageNumber }}),
         sorted by {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
