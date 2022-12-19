@@ -10,18 +10,19 @@ import org.springframework.stereotype.Component
 @Component
 class StartupEventListener(
     val csvService: CSVService,
-    val citizenshipService: CitizenshipService
+    val citizenshipService: CitizenshipService,
+    val personService: PersonService
 ) {
     private val logger = LoggerFactory.getLogger(StartupEventListener::class.java)
 
     @Value("\${database-management.import}")
     val importDatabase: Boolean = false
 
-    @Value("\${database-management.clean-up-citizenship-names}")
-    val cleanUpCitizenshipNames: Boolean = false
+    @Value("\${database-management.process-citizenship-names}")
+    val shouldProcessCitizenshipNames: Boolean = false
 
-    @Value("\${database-management.clean-up-people-names}")
-    val cleanUpPeopleNames: Boolean = false
+    @Value("\${database-management.process-person-names}")
+    val shouldProcessPersonNames: Boolean = false
 
     @Value("\${database-management.add-notability-rank}")
     val addNotabilityRank: Boolean = false
@@ -32,12 +33,15 @@ class StartupEventListener(
             val resource = ClassPathResource("/static/cross-verified-database.csv")
             csvService.addFile(resource.file)
         }
-        if (cleanUpCitizenshipNames) {
-            citizenshipService.cleanUpCitizenshipNames()
-        }
         if (addNotabilityRank) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
             csvService.addFileNotabilityRanks(resource.file)
+        }
+        if (shouldProcessCitizenshipNames) {
+            citizenshipService.processCitizenshipNamesForReadability()
+        }
+        if (shouldProcessPersonNames) {
+            personService.processPersonNamesForSearch()
         }
     }
 }

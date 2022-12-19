@@ -6,13 +6,13 @@ import java.text.Normalizer
 @Service
 class NameService {
     val nonAsciiRegex = Regex("[^\\x00-\\x7F]+")
-    val nonLowercaseLetterOrDigitRegex = Regex("[^a-z0-9]")
+    val nonLowercaseLetterOrDigitOrSpaceRegex = Regex("[^a-z0-9 ]")
     val nonSpacingMarksRegex = Regex("\\p{Mn}+}")
 
     fun processForSearch(text: String): String =
         text
             .lowercase()
-            .replace(nonLowercaseLetterOrDigitRegex, "")
+            .replace(nonLowercaseLetterOrDigitOrSpaceRegex, "")
 
 //    fun process(text: String): String =
 //        Normalizer

@@ -24,7 +24,7 @@ class CitizenshipService(
 
     fun findAll(): List<Citizenship> = citizenshipRepository.findAll()
 
-    fun cleanUpCitizenshipNames() {
+    fun processCitizenshipNamesForReadability() {
         logger.info("Citizenship names: processing for readability")
         citizenshipRepository.findAll().forEach {
             citizenshipRepository.save(it.copy(nameReadable = nameService.processForReadability(it.name)))
