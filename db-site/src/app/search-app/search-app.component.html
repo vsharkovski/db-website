@@ -29,8 +29,8 @@
         *ngIf="results && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)"
         [results]="results"
         [disabled]="waitingForResults"
-        (previousPageButtonClicked)="onPreviousPageButtonClick()"
-        (nextPageButtonClicked)="onNextPageButtonClick()"
+        (previousPageButtonClicked)="onPageButtonClick(-1)"
+        (nextPageButtonClicked)="onPageButtonClick(+1)"
         class="ms-auto"
       ></dbw-search-results-page-buttons>
     </div>

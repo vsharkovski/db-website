@@ -98,29 +98,18 @@ export class SearchAppComponent implements OnInit {
     });
   }
 
-  onPreviousPageButtonClick() {
+  onPageButtonClick(pageChange: number): void {
     if (
-      this.results?.hasPreviousPage &&
+      ((pageChange === -1 && this.results?.hasPreviousPage) ||
+        (pageChange === 1 && this.results?.hasNextPage)) &&
       this.latestQuery &&
-      this.latestQuery.page > 0
+      this.latestQuery.page + pageChange >= 0
     ) {
       // Update the search options component with the new query
       // This will afterwards be captured in the searchQueryChanged event
       this.requestedQuery = {
         term: this.latestQuery.term,
-        page: this.latestQuery.page - 1,
-        sort: this.latestQuery.sort,
-      };
-    }
-  }
-
-  onNextPageButtonClick() {
-    if (this.results?.hasNextPage && this.latestQuery) {
-      // Update the search options component with the new query
-      // This will afterwards be captured in the searchQueryChanged event
-      this.requestedQuery = {
-        term: this.latestQuery.term,
-        page: this.latestQuery.page + 1,
+        page: this.latestQuery.page + pageChange,
         sort: this.latestQuery.sort,
       };
     }
