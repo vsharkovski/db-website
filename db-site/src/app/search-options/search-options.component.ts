@@ -30,7 +30,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       '',
       [
         Validators.maxLength(200),
-        Validators.pattern(this.safeNonWildcardPattern),
+        // Validators.pattern(this.safeNonWildcardPattern),
       ],
     ],
     birthMin: [
