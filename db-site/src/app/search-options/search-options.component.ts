@@ -21,18 +21,15 @@ import { VariablesService } from '../variables.service';
 export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly lifeYearMin: number = -3500;
   readonly lifeYearMax: number = 2020;
-  readonly safeWildcardPattern = '^[*A-Za-z\\d\\s_()]+$';
-  readonly safeNonWildcardPattern = '^[A-Za-z\\d\\s_()]+$';
+  readonly safeNamePattern = '^[^,:!=><~]+$';
 
   form = this.formBuilder.group({
     page: [0, [Validators.min(0), Validators.max(10000)]],
     name: [
       '',
-      [
-        Validators.maxLength(200),
-        // Validators.pattern(this.safeNonWildcardPattern),
-      ],
+      [Validators.maxLength(200), Validators.pattern(this.safeNamePattern)],
     ],
+    nameSearchMode: ['start'],
     birthMin: [
       null,
       [
@@ -132,7 +129,13 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       return { page: 0, term: '', sort: null };
     }
     let term = '';
-    if (this.nameField.value) term += `name:*${this.nameField.value}*,`;
+    if (this.nameField.value) {
+      const shouldMatchAnyBefore =
+        this.nameSearchModeField.value === 'anywhere';
+      term += `name:${shouldMatchAnyBefore ? '*' : ''}${
+        this.nameField.value
+      }*,`;
+    }
     if (this.birthMinField.value !== null)
       term += `birth>=${Math.max(this.lifeYearMin, this.birthMinField.value)},`;
     if (this.birthMaxField.value !== null)
@@ -160,6 +163,10 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
   get nameField(): AbstractControl {
     return this.form.get('name')!;
+  }
+
+  get nameSearchModeField(): AbstractControl {
+    return this.form.get('nameSearchMode')!;
   }
 
   get birthMinField(): AbstractControl {

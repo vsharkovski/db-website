@@ -1,4 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="this.submitted.next()">
+  <!--
+    Name
+  -->
   <label for="term" class="form-label">Name</label>
   <input
     type="text"
@@ -6,9 +9,43 @@
     formControlName="name"
     placeholder="Enter name..."
     [class.is-invalid]="nameField.invalid"
+    [ngbPopover]="nameTipsPopover"
+    placement="top"
+    autoClose="outside"
   />
+  <ng-template #nameTipsPopover> Use <code>?</code> to match any character </ng-template>
+
+  <!-- Name search mode -->
+  <div class="mt-3">
+    <span class="mx-3">Mode:</span>
+    <div class="form-check form-check-inline">
+      <input
+        class="form-check-input"
+        type="radio"
+        formControlName="nameSearchMode"
+        name="nameSearchMode"
+        value="start"
+      />
+      <label class="form-check-label">Start of name</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input
+        class="form-check-input"
+        type="radio"
+        formControlName="nameSearchMode"
+        name="nameSearchMode"
+        value="anywhere"
+      />
+      <label class="form-check-label">Anywhere inside</label>
+    </div>
+  </div>
+
   <div *ngIf="nameField.errors?.['pattern']" class="invalid-feedback">The name contains invalid characters.</div>
   <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
+
+  <!--
+    Birth year
+  -->
   <div class="row mt-3">
     <label class="form-label">Birth year</label>
     <div class="col">
@@ -37,6 +74,10 @@
       <div *ngIf="birthMaxField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
   </div>
+
+  <!--
+    Death year
+  -->
   <div class="row mt-3">
     <label class="form-label">Death year</label>
     <div class="col">
@@ -63,22 +104,33 @@
       <div *ngIf="deathMaxField.errors?.['isIntegerOrNull']" class="invalid-feedback">Years must be whole numbers</div>
     </div>
   </div>
+
+  <!--
+    Citizenship
+  -->
   <label for="citizenship" class="form-label mt-3">Citizenship</label>
   <select class="form-select" formControlName="citizenship">
     <option ngValue="">Any</option>
     <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
   </select>
+
+  <!--
+    Gender
+  -->
   <label for="gender" class="form-label mt-3">Gender</label>
   <select class="form-select" formControlName="gender">
     <option ngValue="">Any</option>
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
   </select>
+
   <!-- <label for="page" class="form-label mt-3">Result page number</label>
   <input type="number" class="form-control" formControlName="page" /> -->
+
   <div class="d-flex">
     <button type="submit" class="btn btn-secondary mt-3 ms-auto">Search</button>
   </div>
 </form>
+
 <!-- <div class="row">
   <h6 class="mt-3">Compiled search term:</h6>
   <pre>{{ compiledTerm }}</pre>

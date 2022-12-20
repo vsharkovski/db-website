@@ -1,6 +1,7 @@
 package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
+import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.domain.Specification
@@ -16,6 +17,8 @@ import javax.transaction.Transactional
 interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
     fun findAll(specification: Specification<Person>, pageable: Pageable): Slice<Person>
 
+    fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
+
     fun findByWikidataCode(wikidataCode: Int): Person?
 
     @Transactional
@@ -24,5 +27,13 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
     fun setNotabilityRank(
         @Param(value = "wikidataCode") wikidataCode: Int,
         @Param(value = "notabilityRank") notabilityRank: Long
+    )
+
+    @Transactional
+    @Modifying
+    @Query("update Person p set p.nameProcessed = :nameProcessed where p.id = :id")
+    fun setNameProcessed(
+        @Param(value = "id") id: Long,
+        @Param(value = "nameProcessed") nameProcessed: String
     )
 }

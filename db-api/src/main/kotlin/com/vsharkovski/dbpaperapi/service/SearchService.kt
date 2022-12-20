@@ -23,6 +23,8 @@ class SearchService(
     @Value("\${search.results-per-page}")
     val resultsPerPage: Int = 1000
 
+    val forbiddenCharacters = ",${SearchOperation.SIMPLE_OPERATION_SET.joinToString("")}"
+
     fun findPeopleBySearchTerm(
         term: String,
         pageNumber: Int,
@@ -32,10 +34,11 @@ class SearchService(
             return SearchResult()
         }
         val builder = personSpecificationBuilderService.createBuilder()
+        // Note: If the string has forbidden characters, the pattern matcher will either
+        // not match it or match it incorrectly. Either case is good.
         val pattern =
-            Pattern.compile("([\\w-]+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED})(\\p{Punct}?)([\\w- ]+?)(\\p{Punct}?),")
+            Pattern.compile("(\\w+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED_OR})(\\p{Punct}?)([^$forbiddenCharacters]+?)(\\p{Punct}?),")
         val matcher = pattern.matcher("$term,")
-//        logger.info("Attempting to match term [{}]", term)
         while (matcher.find()) {
             personSpecificationBuilderService.with(
                 builder,
@@ -46,7 +49,6 @@ class SearchService(
                 matcher.group(5)
             )
         }
-
         return personSpecificationBuilderService.build(builder)?.let {
             val paging = PageRequest.of(
                 pageNumber, resultsPerPage,

@@ -6,8 +6,8 @@ enum class SearchOperation {
 
     companion object {
         // Important: >= before >, and <= before <
-        private val SIMPLE_OPERATION_SET = listOf(":", "!", ">=", ">", "<=", "<", "~")
-        val SIMPLE_OPERATION_SET_JOINED = SIMPLE_OPERATION_SET.joinToString("|")
+        val SIMPLE_OPERATION_SET = listOf(":", "!", ">=", ">", "<=", "<", "~")
+        val SIMPLE_OPERATION_SET_JOINED_OR = SIMPLE_OPERATION_SET.joinToString("|")
 
         fun getSimpleOperation(input: String): SearchOperation? = when (input) {
             ":" -> EQUALITY

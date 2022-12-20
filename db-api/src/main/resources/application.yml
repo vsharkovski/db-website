@@ -16,8 +16,9 @@ logging:
     path: logs
 database-management:
   import: false
-  process-citizenship-names: false
-  process-person-names: true
   add-notability-rank: false
+  process-citizenship-names-readability: false
+  process-citizenship-names-search: false
+  process-person-names-search: false
 search:
   results-per-page: 1000

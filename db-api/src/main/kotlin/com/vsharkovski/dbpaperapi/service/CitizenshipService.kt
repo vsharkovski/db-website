@@ -13,33 +13,51 @@ class CitizenshipService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(CitizenshipService::class.java)
 
-    fun findOrAddByName(name: String): Citizenship =
-        citizenshipRepository.findByName(name) ?: citizenshipRepository.save(
-            Citizenship(
-                name = name,
-                nameProcessed = nameService.processForSearch(name),
-                nameReadable = nameService.processForReadability(name)
-            )
-        )
-
+    val resultsThisSession: MutableMap<String, Citizenship> = mutableMapOf()
     fun findAll(): List<Citizenship> = citizenshipRepository.findAll()
 
-    fun processCitizenshipNamesForReadability() {
-        logger.info("Citizenship names: processing for readability")
+    fun findOrAddByName(name: String): Citizenship {
+        var result: Citizenship? = resultsThisSession[name]
+        if (result == null) {
+            result = citizenshipRepository.findByName(name)
+            if (result == null) {
+                result = citizenshipRepository.save(
+                    Citizenship(
+                        name = name,
+                        nameProcessed = nameService.processForSearch(name),
+                        nameReadable = nameService.processForReadability(name)
+                    )
+                )
+            }
+            resultsThisSession[name] = result
+        }
+        return result
+    }
+
+    fun processAllCitizenshipNamesForReadability() {
+        logger.info("Citizenship name processing for readability: starting")
         citizenshipRepository.findAll().forEach {
             citizenshipRepository.save(it.copy(nameReadable = nameService.processForReadability(it.name)))
         }
-        logger.info("Citizenship names: updating special cases")
+        logger.info("Citizenship name processing for readability: updating special cases")
         val processedToReadablePairs = listOf(
-            "sotomandprncipe" to "Sao Tome and Principe",
-            "polishlithuaniancommonwealth" to "Polish–Lithuanian Commonwealth"
+            "s_o tom_ and pr_ncipe" to "Sao Tome and Principe",
+            "polish_lithuanian commonwealth" to "Polish–Lithuanian Commonwealth"
         )
         processedToReadablePairs.forEach { (processed, readable) ->
             citizenshipRepository.findAllByNameProcessed(processed).forEach {
-                logger.info("Found special [{}]", it)
+                logger.info("Citizenship name processing for readability: found special [{}]", it)
                 citizenshipRepository.save(it.copy(nameReadable = readable))
             }
         }
-        logger.info("Citizenship names: finished")
+        logger.info("Citizenship name processing for readability: finished")
+    }
+
+    fun processAllCitizenshipNamesForSearch() {
+        logger.info("Citizenship name processing for search: starting")
+        citizenshipRepository.findAll().forEach {
+            citizenshipRepository.save(it.copy(nameProcessed = nameService.processForSearch(it.name)))
+        }
+        logger.info("Citizenship name processing for search: finished")
     }
 }

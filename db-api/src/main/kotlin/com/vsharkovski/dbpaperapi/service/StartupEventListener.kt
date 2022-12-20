@@ -18,14 +18,17 @@ class StartupEventListener(
     @Value("\${database-management.import}")
     val importDatabase: Boolean = false
 
-    @Value("\${database-management.process-citizenship-names}")
-    val shouldProcessCitizenshipNames: Boolean = false
-
-    @Value("\${database-management.process-person-names}")
-    val shouldProcessPersonNames: Boolean = false
-
     @Value("\${database-management.add-notability-rank}")
     val addNotabilityRank: Boolean = false
+
+    @Value("\${database-management.process-citizenship-names-readability}")
+    val shouldProcessCitizenshipNamesReadability: Boolean = false
+
+    @Value("\${database-management.process-citizenship-names-search}")
+    val shouldProcessCitizenshipNamesSearch: Boolean = false
+
+    @Value("\${database-management.process-person-names-search}")
+    val shouldProcessPersonNamesSearch: Boolean = false
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
@@ -37,11 +40,14 @@ class StartupEventListener(
             val resource = ClassPathResource("/static/cross-verified-database.csv")
             csvService.addFileNotabilityRanks(resource.file)
         }
-        if (shouldProcessCitizenshipNames) {
-            citizenshipService.processCitizenshipNamesForReadability()
+        if (shouldProcessCitizenshipNamesSearch) {
+            citizenshipService.processAllCitizenshipNamesForSearch()
         }
-        if (shouldProcessPersonNames) {
-            personService.processPersonNamesForSearch()
+        if (shouldProcessCitizenshipNamesReadability) {
+            citizenshipService.processAllCitizenshipNamesForReadability()
+        }
+        if (shouldProcessPersonNamesSearch) {
+            personService.processAllPersonNamesForSearch()
         }
     }
 }
