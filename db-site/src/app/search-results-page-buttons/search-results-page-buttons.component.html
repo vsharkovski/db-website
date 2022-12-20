@@ -1,18 +1,17 @@
 <div class="d-flex">
   <div class="btn-group ms-auto">
     <button
-      *ngIf="results.hasPreviousPage"
       class="btn btn-secondary"
       (click)="onPreviousPageButtonClick()"
-      [disabled]="disabled"
+      [disabled]="disabled || !results.hasPreviousPage"
     >
       <
     </button>
+    <!-- prettier-ignore -->
     <button
-      *ngIf="results.hasNextPage"
       class="btn btn-secondary"
       (click)="onNextPageButtonClick()"
-      [disabled]="disabled"
+      [disabled]="disabled || !results.hasNextPage"
     >
       >
     </button>
