@@ -6,7 +6,6 @@ import {
   filter,
   map,
   merge,
-  of,
   Subject,
   switchMap,
 } from 'rxjs';
@@ -65,7 +64,7 @@ export class SearchAppComponent implements OnInit {
     // search for it
     const routeChangedOrSubmitted = merge(
       this.searchOptionsSubmitted.pipe(
-        switchMap(() => of(this.route.snapshot.queryParams))
+        map(() => this.route.snapshot.queryParams)
       ),
       this.route.queryParams
     );
@@ -85,7 +84,7 @@ export class SearchAppComponent implements OnInit {
     results$.subscribe((results) => (this.results = results));
 
     // Whenever the route is changed or the search results are received,
-    //  update the wait status
+    // update the wait status
     merge(
       routeChangedOrSubmitted.pipe(
         map((params) => (params['term'] ? true : false))
