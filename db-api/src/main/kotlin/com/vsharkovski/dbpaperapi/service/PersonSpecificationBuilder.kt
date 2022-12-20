@@ -39,18 +39,6 @@ class PersonSpecificationBuilder {
                 valueToAdd = -value.toInt()
             }
 
-//            logger.info(
-//                "Builder from [key={} operation={} value={} prefix={} suffix={}] added [key={} op={} val={}]",
-//                key,
-//                operation,
-//                value,
-//                prefix,
-//                suffix,
-//                key,
-//                opToAdd,
-//                valueToAdd
-//            )
-
             params.add(SearchCriteria(key, opToAdd, valueToAdd))
         }
         return this
@@ -68,13 +56,6 @@ class PersonSpecificationBuilder {
                 } else {
                     Specification.where(result).and(PersonSpecification(curr))
                 }
-//                if (index == 0) {
-//                    result
-//                } else if (curr.orPredicate) {
-//                    Specification.where(result).or(PersonSpecification(curr)) as PersonSpecification
-//                } else {
-//                    Specification.where(result).and(PersonSpecification(curr)) as PersonSpecification
-//                }
             }
         }
 }
