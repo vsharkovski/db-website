@@ -1,6 +1,6 @@
 html,
-body {
-  width: 100%;
+body,
+app-root {
   height: 100%;
 }
 
