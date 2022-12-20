@@ -16,7 +16,7 @@
       </p>
     </div>
   </div>
-  <div class="col-md-8 col-lg-9" *ngIf="results || hasAskedForResults">
+  <div id="results" class="col-md-8 col-lg-9" *ngIf="results || hasAskedForResults">
     <div class="results-header">
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="results && results.persons.length > 0 && !waitingForResults"

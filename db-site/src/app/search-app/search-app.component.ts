@@ -1,3 +1,4 @@
+import { ViewportScroller } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -34,7 +35,8 @@ export class SearchAppComponent implements OnInit {
   constructor(
     private searchService: SearchService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private viewportScroller: ViewportScroller
   ) {}
 
   ngOnInit(): void {
@@ -83,7 +85,10 @@ export class SearchAppComponent implements OnInit {
         )
       )
     );
-    results$.subscribe((results) => (this.results = results));
+    results$.subscribe((results) => {
+      this.results = results;
+      this.viewportScroller.scrollToAnchor('results');
+    });
 
     // Whenever the route is changed or the search results are received,
     // update the wait status
