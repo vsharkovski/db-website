@@ -20,8 +20,8 @@
     <div class="mb-3 results-header">
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="results && results.persons.length > 0 && !waitingForResults"
-        >Showing results {{ results.pageNumber * results.maxSliceSize }} -
-        {{ results.pageNumber * results.maxSliceSize + results.persons.length - 1 }} (page {{ results.pageNumber }}),
+        >Showing results {{ results.pageNumber * results.maxSliceSize + 1 }} -
+        {{ results.pageNumber * results.maxSliceSize + results.persons.length }} (page {{ results.pageNumber + 1 }}),
         sorted by {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
       </span>
       <span *ngIf="waitingForResults" class="ms-3 loading-label text-primary">Please wait...</span>
