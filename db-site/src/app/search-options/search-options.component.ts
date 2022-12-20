@@ -29,7 +29,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       '',
       [Validators.maxLength(200), Validators.pattern(this.safeNamePattern)],
     ],
-    nameSearchMode: ['start'],
+    nameSearchMode: ['anywhere'],
     birthMin: [
       null,
       [
