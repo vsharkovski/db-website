@@ -68,10 +68,12 @@ export class SearchAppComponent implements OnInit {
       ),
       this.route.queryParams
     );
-    const results$ = routeChangedOrSubmitted.pipe(
+    const routeParamsReadyToGetSearchResults = routeChangedOrSubmitted.pipe(
       debounceTime(1000),
       distinctUntilChanged(),
-      filter((params) => params['term']),
+      filter((params) => params['term'])
+    );
+    const results$ = routeParamsReadyToGetSearchResults.pipe(
       switchMap((params) =>
         this.searchService.getSearchResults(
           params['term'] ?? '',
@@ -89,7 +91,7 @@ export class SearchAppComponent implements OnInit {
       routeChangedOrSubmitted.pipe(
         map((params) => (params['term'] ? true : false))
       ),
-      results$.pipe(map(() => false))
+      routeParamsReadyToGetSearchResults.pipe(map(() => false))
     ).subscribe((newWaitStatus) => {
       this.waitingForResults = newWaitStatus;
       if (newWaitStatus) {
