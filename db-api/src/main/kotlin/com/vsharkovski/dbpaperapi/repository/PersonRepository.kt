@@ -23,10 +23,10 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
 
     @Transactional
     @Modifying
-    @Query("update Person p set p.notabilityRank = :notabilityRank where p.wikidataCode = :wikidataCode")
-    fun setNotabilityRank(
+    @Query("update Person p set p.notabilityIndex = :notabilityIndex where p.wikidataCode = :wikidataCode")
+    fun setNotabilityIndex(
         @Param(value = "wikidataCode") wikidataCode: Int,
-        @Param(value = "notabilityRank") notabilityRank: Long
+        @Param(value = "notabilityIndex") notabilityIndex: Float
     )
 
     @Transactional

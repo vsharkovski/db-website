@@ -6,8 +6,8 @@ import { SortState } from './sort-state.model';
 })
 export class SortVariablePipe implements PipeTransform {
   transform(value: SortState['variable']): string {
-    if (value === 'notabilityRank') {
-      return 'notability rank';
+    if (value === 'notabilityIndex') {
+      return 'notability index';
     } else if (value === 'birth') {
       return 'birth year';
     } else if (value === 'death') {

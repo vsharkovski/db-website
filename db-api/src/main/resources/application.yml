@@ -15,8 +15,8 @@ logging:
   file:
     path: logs
 database-management:
-  import: false
-  add-notability-rank: false
+  import-all: false
+  import-notability-index: false
   process-citizenship-names-readability: false
   process-citizenship-names-search: false
   process-person-names-search: false

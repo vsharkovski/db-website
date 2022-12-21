@@ -24,15 +24,15 @@ class SearchController(
     fun findAllBySpecification(
         @RequestParam term: String,
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "notabilityRank") sortVariable: String,
-        @RequestParam(defaultValue = "ascending") sortDirection: String,
+        @RequestParam(defaultValue = "notabilityIndex") sortVariable: String,
+        @RequestParam(defaultValue = "descending") sortDirection: String,
     ): ResponseEntity<SearchResponse> {
         val result = searchService.findPeopleBySearchTerm(
             term,
             page,
             SortState(
                 variable = sortVariable,
-                direction = sortDirectionStringToEnum[sortDirection] ?: Sort.Direction.ASC
+                direction = sortDirectionStringToEnum[sortDirection] ?: Sort.Direction.DESC
             )
         )
         return ResponseEntity.ok(

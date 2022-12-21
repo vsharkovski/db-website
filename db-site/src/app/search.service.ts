@@ -38,8 +38,8 @@ export class SearchService {
             pageNumber: 0,
             maxSliceSize: 0,
             sort: {
-              variable: 'notabilityRank' as SortState['variable'],
-              direction: 'ascending' as SortState['direction'],
+              variable: 'notabilityIndex' as SortState['variable'],
+              direction: 'descending' as SortState['direction'],
             },
           })
         )

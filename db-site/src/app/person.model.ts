@@ -15,5 +15,5 @@ export interface Person {
   birthLatitude?: number;
   deathLongitude?: number;
   deathLatitude?: number;
-  notabilityRank?: number;
+  notabilityIndex?: number;
 }

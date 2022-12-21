@@ -54,8 +54,8 @@ export class SearchAppComponent implements OnInit {
         queryParams: {
           term: this.latestQuery.term,
           page: this.latestQuery.page,
-          sortVariable: this.latestQuery.sort?.variable ?? 'notabilityRank',
-          sortDirection: this.latestQuery.sort?.direction ?? 'ascending',
+          sortVariable: this.latestQuery.sort?.variable ?? 'notabilityIndex',
+          sortDirection: this.latestQuery.sort?.direction ?? 'descending',
         },
       });
     });
@@ -81,8 +81,8 @@ export class SearchAppComponent implements OnInit {
         this.searchService.getSearchResults(
           params['term'] ?? '',
           params['page'] ?? 0,
-          params['sortVariable'] ?? 'notabilityRank',
-          params['sortDirection'] ?? 'ascending'
+          params['sortVariable'] ?? 'notabiliyIndex',
+          params['sortDirection'] ?? 'descending'
         )
       )
     );

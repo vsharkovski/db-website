@@ -153,7 +153,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     return {
       term: term,
       page: 0,
-      sort: { variable: 'notabilityRank', direction: 'ascending' },
+      sort: { variable: 'notabilityIndex', direction: 'descending' },
     };
   }
 

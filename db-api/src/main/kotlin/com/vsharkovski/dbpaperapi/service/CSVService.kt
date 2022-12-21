@@ -50,10 +50,10 @@ class CSVService(
         logger.info("Finished saving file [{}]", file.path)
     }
 
-    fun addFileNotabilityRanks(file: File) {
-        logger.info("Updating database variable notabilityRank from file [{}]", file.path)
-        file.forEachCSVRecordBuffered { setRecordNotabilityRank(it) }
-        logger.info("Finished updating database from file [{}]", file.path)
+    fun addNotabilityIndices(file: File) {
+        logger.info("Add notabilityIndex from file: starting [{}]", file.path)
+        file.forEachCSVRecordBuffered { setRecordNotabilityIndex(it) }
+        logger.info("Add notabilityIndex from file: finished [{}]", file.path)
     }
 
     private fun addRecord(record: CSVRecord) {
@@ -80,22 +80,22 @@ class CSVService(
             birthLatitude = record.get("bpla1").toFloatOrNull(),
             deathLongitude = record.get("dplo1").toFloatOrNull(),
             deathLatitude = record.get("dpla1").toFloatOrNull(),
-            notabilityRank = getNotabilityRank(record)
+            notabilityIndex = getNotabilityIndex(record)
         )
 //        logger.info("Saving person [{}]", person)
         personRepository.save(person)
     }
 
-    private fun setRecordNotabilityRank(record: CSVRecord) {
+    private fun setRecordNotabilityIndex(record: CSVRecord) {
         val wikidataCode = getRecordWikidataCode(record) ?: return
-        val rank = getNotabilityRank(record) ?: return
-        personRepository.setNotabilityRank(wikidataCode, rank)
+        val notability = getNotabilityIndex(record) ?: return
+        personRepository.setNotabilityIndex(wikidataCode, notability)
     }
 
     private fun getRecordWikidataCode(record: CSVRecord): Int? =
         record.get("wikidata_code").substring(1).toIntOrNull()
 
-    private fun getNotabilityRank(record: CSVRecord): Long? =
-        record.get("ranking_visib_5criteria").toLongOrNull()
+    private fun getNotabilityIndex(record: CSVRecord): Float? =
+        record.get("sum_visib_ln_5criteria").toFloatOrNull()
 
 }

@@ -1,4 +1,4 @@
 export interface SortState {
-  variable: 'notabilityRank' | 'birth' | 'death';
+  variable: 'notabilityIndex' | 'birth' | 'death';
   direction: 'ascending' | 'descending';
 }

@@ -59,7 +59,7 @@ export class SearchResultsComponent implements OnInit {
       // sort by new variable
       this.sortStateChanged.emit({
         variable: variable,
-        direction: 'ascending',
+        direction: 'descending',
       });
     }
   }

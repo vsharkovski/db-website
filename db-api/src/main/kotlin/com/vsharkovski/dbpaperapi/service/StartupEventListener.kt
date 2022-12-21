@@ -15,11 +15,11 @@ class StartupEventListener(
 ) {
     private val logger = LoggerFactory.getLogger(StartupEventListener::class.java)
 
-    @Value("\${database-management.import}")
+    @Value("\${database-management.import-all}")
     val importDatabase: Boolean = false
 
-    @Value("\${database-management.add-notability-rank}")
-    val addNotabilityRank: Boolean = false
+    @Value("\${database-management.import-notability-index}")
+    val importNotabilityIndex: Boolean = false
 
     @Value("\${database-management.process-citizenship-names-readability}")
     val shouldProcessCitizenshipNamesReadability: Boolean = false
@@ -36,9 +36,9 @@ class StartupEventListener(
             val resource = ClassPathResource("/static/cross-verified-database.csv")
             csvService.addFile(resource.file)
         }
-        if (addNotabilityRank) {
+        if (importNotabilityIndex) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.addFileNotabilityRanks(resource.file)
+            csvService.addNotabilityIndices(resource.file)
         }
         if (shouldProcessCitizenshipNamesSearch) {
             citizenshipService.processAllCitizenshipNamesForSearch()
