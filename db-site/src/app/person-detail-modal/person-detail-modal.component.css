@@ -7,15 +7,6 @@
 .image-container img {
   max-height: 40vh;
 }
-.wiki-container img {
-  max-height: 1.75rem;
-  width: auto;
-  margin-inline-end: 1rem;
-}
-
-.info-panel-2 > .row > span:first-child {
-  font-weight: 600;
-}
 
 .info-panel {
   display: grid;
@@ -27,4 +18,19 @@
 
 .info-panel > span:nth-child(odd) {
   font-weight: 600;
+}
+
+.info-panel > span:nth-child(even) {
+  text-align: center;
+}
+
+.wiki-container a {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.wiki-container img {
+  max-height: 1.75rem;
+  width: auto;
+  margin-inline-end: 0.5rem;
 }

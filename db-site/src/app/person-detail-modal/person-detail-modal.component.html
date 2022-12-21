@@ -26,8 +26,8 @@
       <span *ngIf="person.citizenship2BId">{{ citizenships[person.citizenship2BId] }}</span>
     </div>
   </div>
-  <div class="row mt-3">
-    <hr />
+  <div class="row">
+    <hr class="my-2" />
     <p *ngIf="waitingForResponse">Please wait...</p>
     <p *ngIf="data?.extract">{{ data!.extract }}</p>
     <div class="d-flex">
