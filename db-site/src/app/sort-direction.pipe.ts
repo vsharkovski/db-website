@@ -7,9 +7,9 @@ import { SortState } from './sort-state.model';
 export class SortDirectionPipe implements PipeTransform {
   transform(value: SortState['direction'] | null): string {
     if (value === 'ascending') {
-      return '^';
+      return '▲';
     } else if (value === 'descending') {
-      return 'v';
+      return '▼';
     } else {
       return '-';
     }

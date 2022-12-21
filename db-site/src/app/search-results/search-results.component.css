@@ -61,6 +61,7 @@
   margin-inline-start: 0.25rem;
   text-transform: lowercase;
   color: rgb(200, 200, 200);
+  font-size: 0.9rem;
 }
 
 .sortable-variable {
