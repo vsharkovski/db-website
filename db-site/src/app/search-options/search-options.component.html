@@ -16,7 +16,7 @@
     <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
   </div>
 
-  <label class="form-label">Mode</label>
+  <label class="form-label"></label>
   <div class="ms-1">
     <div class="form-check form-check-inline">
       <input
@@ -102,7 +102,7 @@
     <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
   </select>
 
-  <label for="gender" class="form-label">Gender</label>
+  <label for="gender" class="form-labe">Gender</label>
   <select class="form-select" formControlName="gender">
     <option ngValue="">Any</option>
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>

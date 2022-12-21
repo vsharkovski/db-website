@@ -3,6 +3,7 @@ form {
   grid-template-columns: auto 1fr;
   gap: 1rem;
   align-items: center;
+  max-width: 20rem;
 }
 
 .form-label {
@@ -11,7 +12,7 @@ form {
 
 .number-range {
   display: grid;
-  grid-template-columns: 6rem max-content 6rem;
+  grid-template-columns: auto max-content auto;
   column-gap: 1rem;
 }
 
