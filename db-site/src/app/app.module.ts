@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -32,6 +31,9 @@ import { SearchResultsPageButtonsComponent } from './search-results-page-buttons
 import { SortDirectionPipe } from './sort-direction.pipe';
 import { SortVariablePipe } from './sort-variable.pipe';
 import { FooterComponent } from './footer/footer.component';
+import { Event, NavigationEnd, Router, Scroll } from '@angular/router';
+import { ViewportScroller } from '@angular/common';
+import { filter, pairwise } from 'rxjs';
 
 @NgModule({
   declarations: [
@@ -73,4 +75,42 @@ import { FooterComponent } from './footer/footer.component';
   providers: [],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(router: Router, viewportScroller: ViewportScroller) {
+    router.events
+      .pipe(
+        filter((e: Event): e is Scroll => e instanceof Scroll),
+        pairwise()
+      )
+      .subscribe(([previousEvent, currentEvent]) => {
+        if (currentEvent.position) {
+          // backward navigation
+          viewportScroller.scrollToPosition(currentEvent.position);
+        } else if (currentEvent.anchor) {
+          // anchor navigation
+          viewportScroller.scrollToAnchor(currentEvent.anchor);
+        } else {
+          // check if the route is different
+          if (
+            !this.areOnlyUrlQueryParamStringsDifferent(
+              previousEvent,
+              currentEvent
+            )
+          ) {
+            // true forward navigation, not just query parameters changing
+            // so scroll to top
+            viewportScroller.scrollToPosition([0, 0]);
+          }
+        }
+      });
+  }
+
+  private areOnlyUrlQueryParamStringsDifferent(
+    event1: Scroll,
+    event2: Scroll
+  ): boolean {
+    const [route1, query1] = event1.routerEvent.urlAfterRedirects.split('?');
+    const [route2, query2] = event2.routerEvent.urlAfterRedirects.split('?');
+    return route1 === route2 && query1 != query2;
+  }
+}

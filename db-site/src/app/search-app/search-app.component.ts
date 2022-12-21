@@ -1,4 +1,3 @@
-import { ViewportScroller } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -35,8 +34,7 @@ export class SearchAppComponent implements OnInit {
   constructor(
     private searchService: SearchService,
     private router: Router,
-    private route: ActivatedRoute,
-    private viewportScroller: ViewportScroller
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -93,7 +91,6 @@ export class SearchAppComponent implements OnInit {
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: this.route.snapshot.queryParams,
-        fragment: 'results',
       });
       resultsReceived.next();
     });
