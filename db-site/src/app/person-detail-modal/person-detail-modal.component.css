@@ -7,20 +7,24 @@
 .image-container img {
   max-height: 40vh;
 }
-
-.info-panel > div {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.25rem 0;
-}
-
-.info-panel > div > span:first-child {
-  font-weight: 600;
-  margin-inline-end: 1rem;
-}
-
 .wiki-container img {
   max-height: 1.75rem;
   width: auto;
   margin-inline-end: 1rem;
+}
+
+.info-panel-2 > .row > span:first-child {
+  font-weight: 600;
+}
+
+.info-panel {
+  display: grid;
+  grid-template-rows: repeat(5, minmax(min-content, max-content));
+  grid-template-columns: auto 1fr;
+  column-gap: 2rem;
+  padding: 0.25rem 1rem;
+}
+
+.info-panel > span:nth-child(odd) {
+  font-weight: 600;
 }

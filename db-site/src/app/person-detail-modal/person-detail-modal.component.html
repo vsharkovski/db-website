@@ -10,30 +10,20 @@
       </a>
     </div>
     <div class="col-sm info-panel">
-      <div *ngIf="person.birth !== null || person.death !== null">
-        <span>Birth</span>
-        <span>{{ person.birth | dateYear | unknown : true : false }}</span>
-      </div>
-      <div *ngIf="person.death !== null">
-        <span>Death</span>
-        <span>{{ person.death | dateYear }}</span>
-      </div>
-      <div>
-        <span>Gender</span>
-        <span>{{ genders[person.genderId ?? -1] | unknown }}</span>
-      </div>
-      <div>
-        <span>Occupation</span>
-        <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
-      </div>
-      <div>
-        <span>Citizenship</span>
-        <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
-      </div>
-      <div *ngIf="person.citizenship2BId">
-        <span>Citizenship (2nd)</span>
-        <span>{{ citizenships[person.citizenship2BId] }}</span>
-      </div>
+      <span *ngIf="person.birth !== null || person.death !== null">Birth</span>
+      <span *ngIf="person.birth !== null || person.death !== null">{{
+        person.birth | dateYear | unknown : true : false
+      }}</span>
+      <span *ngIf="person.death !== null">Death</span>
+      <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
+      <span>Gender</span>
+      <span>{{ genders[person.genderId ?? -1] | unknown }}</span>
+      <span>Occupation</span>
+      <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
+      <span>Citizenship</span>
+      <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
+      <span *ngIf="person.citizenship2BId">Citizenship (2nd)</span>
+      <span *ngIf="person.citizenship2BId">{{ citizenships[person.citizenship2BId] }}</span>
     </div>
   </div>
   <div class="row mt-3">
