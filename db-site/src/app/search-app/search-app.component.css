@@ -1,7 +1,8 @@
 .results-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0 1rem;
 }
 
 .loading-label {
