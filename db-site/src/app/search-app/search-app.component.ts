@@ -87,7 +87,11 @@ export class SearchAppComponent implements OnInit {
     );
     results$.subscribe((results) => {
       this.results = results;
-      this.viewportScroller.scrollToAnchor('results');
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: this.route.snapshot.queryParams,
+        fragment: 'results',
+      });
     });
 
     // Whenever the route is changed or the search results are received,
