@@ -63,19 +63,22 @@ export class SearchAppComponent implements OnInit {
     });
 
     // Whenever the route is updated or the search form is submitted,
-    // search for it
-    const routeChangedOrSubmitted = merge(
+    // search for it.
+    const resultsReceived = new Subject<void>();
+    const readyToAskForResults = merge(
       this.searchOptionsSubmitted.pipe(
         map(() => this.route.snapshot.queryParams)
       ),
       this.route.queryParams
-    );
-    const routeParamsReadyToGetSearchResults = routeChangedOrSubmitted.pipe(
+    ).pipe(
       debounceTime(1000),
-      distinctUntilChanged(),
+      // Necessary to convert to string because otherwise the objects coming from
+      // each source observable in routeChangedOrSubmitted would be considered different
+      // although they represent the same thing.
+      distinctUntilChanged((a, b) => JSON.stringify(a) == JSON.stringify(b)),
       filter((params) => params['term'])
     );
-    const results$ = routeParamsReadyToGetSearchResults.pipe(
+    const results$ = readyToAskForResults.pipe(
       switchMap((params) =>
         this.searchService.getSearchResults(
           params['term'] ?? '',
@@ -92,21 +95,22 @@ export class SearchAppComponent implements OnInit {
         queryParams: this.route.snapshot.queryParams,
         fragment: 'results',
       });
+      resultsReceived.next();
     });
 
     // Whenever the route is changed or the search results are received,
-    // update the wait status
+    // update the wait status.
     merge(
-      routeChangedOrSubmitted.pipe(
-        map((params) => (params['term'] ? true : false))
-      ),
-      routeParamsReadyToGetSearchResults.pipe(map(() => false))
-    ).subscribe((newWaitStatus) => {
-      this.waitingForResults = newWaitStatus;
-      if (newWaitStatus) {
-        this.hasAskedForResults = true;
-      }
-    });
+      readyToAskForResults,
+      resultsReceived.pipe(map(() => this.route.snapshot.params))
+    )
+      .pipe(map((params) => (params['term'] ? true : false)))
+      .subscribe((newWaitStatus) => {
+        this.waitingForResults = newWaitStatus;
+        if (newWaitStatus) {
+          this.hasAskedForResults = true;
+        }
+      });
   }
 
   onPageButtonClick(pageChange: number): void {
