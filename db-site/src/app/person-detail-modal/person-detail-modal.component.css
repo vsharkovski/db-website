@@ -5,24 +5,31 @@
 }
 
 .image-container img {
-  max-height: 40vh;
+  max-height: 30vmin;
 }
 
 .info-panel {
   display: grid;
   grid-template-rows: repeat(5, minmax(min-content, max-content));
-  grid-template-columns: auto 1fr;
-  column-gap: 2rem;
-  padding: 0.25rem 1rem;
+  grid-template-columns: auto auto;
+  column-gap: 1rem;
+  padding: 0.5rem 1rem;
 }
 
 .info-panel > span:nth-child(odd) {
   font-weight: 600;
+  text-align: end;
 }
 
 .info-panel > span:nth-child(even) {
-  text-align: center;
+  text-align: start;
 }
+/*
+@media (min-width: 576px) {
+  .info-panel > span:nth-child(even) {
+    text-align: start;
+  }
+} */
 
 .wiki-container a {
   display: grid;

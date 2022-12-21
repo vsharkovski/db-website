@@ -9,7 +9,7 @@
         <img [src]="data!.thumbnail!.source" class="img-fluid rounded shadow" />
       </a>
     </div>
-    <div class="col-sm info-panel">
+    <div class="col info-panel">
       <span *ngIf="person.birth !== null || person.death !== null">Birth</span>
       <span *ngIf="person.birth !== null || person.death !== null">{{
         person.birth | dateYear | unknown : true : false
