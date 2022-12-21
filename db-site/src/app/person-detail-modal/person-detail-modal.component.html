@@ -24,19 +24,21 @@
       <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
       <span *ngIf="person.citizenship2BId">Citizenship (2nd)</span>
       <span *ngIf="person.citizenship2BId">{{ citizenships[person.citizenship2BId] }}</span>
+      <span>Notability</span>
+      <span>{{ person.notabilityIndex | number : "1.2-2" }}</span>
     </div>
   </div>
-  <div class="row">
-    <hr class="my-2" />
-    <p *ngIf="waitingForResponse">Please wait...</p>
-    <p *ngIf="data?.extract">{{ data!.extract }}</p>
-    <div class="d-flex">
-      <div *ngIf="data?.fullurl" class="wiki-container">
-        <a [href]="data!.fullurl"><img src="assets/images/Wikipedia-logo-v2.svg" /><span>Wikipedia</span></a>
-      </div>
-      <div class="ms-auto wiki-container">
-        <a [href]="wikidataUrl"><img src="assets/images/Wikidata-logo-en.svg" /><span>Wikidata</span></a>
-      </div>
+  <div class="divider-top mt-3 py-2">
+    <p *ngIf="waitingForResponse" class="my-0 fst-italic">Please wait...</p>
+    <p *ngIf="data?.extract" class="my-0">{{ data!.extract }}</p>
+  </div>
+  <div class="divider-top pt-2 wiki-container">
+    <span class="ms-auto text-muted fst-italic">see on...</span>
+    <div *ngIf="data?.fullurl">
+      <a [href]="data!.fullurl"><img src="assets/images/Wikipedia-logo-v2.svg" /><span>Wikipedia</span></a>
+    </div>
+    <div class="wiki-container">
+      <a [href]="wikidataUrl"><img src="assets/images/Wikidata-logo-en.svg" /><span>Wikidata</span></a>
     </div>
   </div>
 </div>
