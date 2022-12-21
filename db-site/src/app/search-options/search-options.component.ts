@@ -143,7 +143,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     if (this.deathMinField.value !== null)
       term += `death>=${Math.max(this.lifeYearMin, this.deathMinField.value)},`;
     if (this.deathMaxField.value !== null)
-      term += `death<=${Math.max(this.lifeYearMax, this.deathMaxField.value)},`;
+      term += `death<=${Math.min(this.lifeYearMax, this.deathMaxField.value)},`;
     if (this.citizenshipField.value)
       term += `citizenship1BId:${this.citizenshipField.value},`;
     if (this.genderField.value) term += `genderId:${this.genderField.value},`;
