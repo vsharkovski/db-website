@@ -20,10 +20,11 @@
       <span>{{ genders[person.genderId ?? -1] | unknown }}</span>
       <span>Occupation</span>
       <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
-      <span>Citizenship</span>
-      <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
-      <span *ngIf="person.citizenship2BId">Citizenship (2nd)</span>
-      <span *ngIf="person.citizenship2BId">{{ citizenships[person.citizenship2BId] }}</span>
+      <span>Citizenship{{ person.citizenship2BId ? "s" : "" }}</span>
+      <span
+        >{{ citizenships[person.citizenship1BId ?? -1]
+        }}{{ person.citizenship2BId ? ", " + citizenships[person.citizenship2BId] : "" }}</span
+      >
       <span>Notability</span>
       <span>{{ person.notabilityIndex | number : "1.2-2" }}</span>
     </div>
