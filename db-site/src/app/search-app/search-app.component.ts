@@ -48,7 +48,10 @@ export class SearchAppComponent implements OnInit {
     this.requestedQuery = {
       term: initParams['term'] ?? '',
       page: Number(initParams['page'] ?? 0),
-      sort: null,
+      sort: {
+        variable: initParams['sortVariable'] ?? 'notabilityIndex',
+        direction: initParams['sortDirection'] ?? 'descending',
+      },
     };
 
     // Whenever the search query is changed, either from the search-options element
