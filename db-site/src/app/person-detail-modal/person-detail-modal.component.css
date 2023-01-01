@@ -1,3 +1,37 @@
+.person-info {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.person-info.image-present {
+  grid-template-columns: minmax(auto, 1fr) 1fr;
+}
+
+.details-panel {
+  display: grid;
+  grid-template-rows: repeat(6, minmax(min-content, max-content));
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0.75rem;
+  padding: 0rem 1rem;
+}
+
+.details-panel > span:nth-child(odd) {
+  font-weight: 600;
+  text-align: end;
+}
+
+.details-panel > span:nth-child(even) {
+  text-align: start;
+}
+
+.details-panel.image-present > span:nth-child(odd) {
+  text-align: start;
+}
+
+.details-panel.image-present > span:nth-child(even) {
+  text-align: end;
+}
+
 .image-container {
   display: flex;
   justify-content: center;
@@ -7,29 +41,6 @@
 .image-container img {
   max-height: 30vh;
 }
-
-.info-panel {
-  display: grid;
-  grid-template-rows: repeat(6, minmax(min-content, max-content));
-  grid-template-columns: 1fr 1fr;
-  column-gap: 0.75rem;
-  padding: 1rem;
-}
-
-.info-panel > span:nth-child(odd) {
-  font-weight: 600;
-  text-align: end;
-}
-
-.info-panel > span:nth-child(even) {
-  text-align: start;
-}
-
-/* @media (min-width: 576px) {
-  .info-panel > span:nth-child(even) {
-    text-align: start;
-  }
-} */
 
 .wiki-container {
   display: flex;
@@ -44,7 +55,6 @@
 .wiki-container img {
   max-height: 1.5rem;
   width: auto;
-  margin-inline-end: 0.5rem;
 }
 
 .divider-top {
