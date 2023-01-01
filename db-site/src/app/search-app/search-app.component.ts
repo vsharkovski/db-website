@@ -8,7 +8,6 @@ import {
   filter,
   map,
   merge,
-  skip,
   Subject,
   switchMap,
 } from 'rxjs';
@@ -28,7 +27,6 @@ const DEFAULT_SORT_STATE: SortState = {
 })
 export class SearchAppComponent implements OnInit {
   results?: SearchResponse;
-  latestPage!: number;
 
   termChanged = new BehaviorSubject<string>('');
   pageChanged = new BehaviorSubject<number>(0);
@@ -46,25 +44,47 @@ export class SearchAppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Whenever the search term, page, or sort state is changed, update the
-    // route with the new parameters.
-    combineLatest([
+    // Read initial parameters from the route.
+    const initialParams = this.route.snapshot.queryParams;
+    if (initialParams['term'] !== null) {
+      this.termChanged.next(initialParams['term']);
+    }
+    if (initialParams['page'] !== null) {
+      this.pageChanged.next(Number(initialParams['page']));
+    }
+    if (initialParams['sortVariable'] || initialParams['sortDirection']) {
+      this.sortStateChanged.next({
+        variable: initialParams['sortVariable'] ?? DEFAULT_SORT_STATE.variable,
+        direction:
+          initialParams['sortDirection'] ?? DEFAULT_SORT_STATE.direction,
+      });
+    }
+
+    // Whenever the search term, page, or sort state is changed, and the
+    // term is non-empty, update the route with the new parameters.
+    const queryChanged = combineLatest([
       this.termChanged,
       this.pageChanged,
       this.sortStateChanged,
-    ]).subscribe(([term, page, sortState]) => {
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: {
-          term: term,
-          page: page,
-          sortVariable: sortState.variable,
-          sortDirection: sortState.direction,
-        },
-      });
-    });
+    ]);
 
-    const resultsReceived = new Subject<void>();
+    queryChanged
+      .pipe(
+        filter(([term, _, __]) =>
+          term === undefined ? false : term.length > 0
+        )
+      )
+      .subscribe(([term, page, sortState]) => {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            term: term,
+            page: page ?? 0, // Catch NaN.
+            sortVariable: sortState.variable,
+            sortDirection: sortState.direction,
+          },
+        });
+      });
 
     // Observable which, whenever the route is updated or the search form is
     // submitted, filters unnecessary options using debounceTime,
@@ -98,6 +118,8 @@ export class SearchAppComponent implements OnInit {
     // Subscribe to the observable described above. Whenever results are received,
     // update the internal results object and emit from resultsReceived
     // to update the wait status for UI effects.
+    const resultsReceived = new Subject<void>();
+
     results$.subscribe((results) => {
       this.results = results;
       resultsReceived.next();
@@ -112,10 +134,8 @@ export class SearchAppComponent implements OnInit {
     merge(
       readyToAskForResults.pipe(map(() => true)),
       resultsReceived.pipe(map(() => false)),
-      merge(this.pageChanged, this.sortStateChanged).pipe(
-        // Skip the two initial emmissions, one from each observable.
-        skip(2),
-        map(() => true)
+      queryChanged.pipe(
+        map(([term, _, __]) => (term === undefined ? false : term.length > 0))
       )
     ).subscribe((newWaitStatus) => {
       this.waitingForResults = newWaitStatus;
@@ -128,12 +148,13 @@ export class SearchAppComponent implements OnInit {
   onPageButtonClick(pageChange: number): void {
     // Whenever the page is changed and it is possible to move to the new page,
     // emit from the appropriate observable.
+    const latestPage = Number(this.route.snapshot.queryParams['page'] ?? '0');
     if (
       ((pageChange === -1 && this.results?.hasPreviousPage) ||
         (pageChange === 1 && this.results?.hasNextPage)) &&
-      this.latestPage + pageChange >= 0
+      latestPage + pageChange >= 0
     ) {
-      this.pageChanged.next(this.latestPage + pageChange);
+      this.pageChanged.next(latestPage + pageChange);
     }
   }
 
@@ -141,6 +162,13 @@ export class SearchAppComponent implements OnInit {
     // Whenever the sort state is changed, emit from the appropriate observable.
     // The page is also reset to 0.
     this.sortStateChanged.next(sortState);
+    this.pageChanged.next(0);
+  }
+
+  onTermChanged(term: string): void {
+    // Whenever the term is changed, emit from the appropriate observable.
+    // The page is also reset to 0.
+    this.termChanged.next(term);
     this.pageChanged.next(0);
   }
 }
