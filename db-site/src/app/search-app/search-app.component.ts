@@ -116,7 +116,6 @@ export class SearchAppComponent implements OnInit {
       resultsReceived.pipe(map(() => false)),
       this.pageOrSortChanged.pipe(map(() => true))
     ).subscribe((newWaitStatus) => {
-      console.log('Got wait status', newWaitStatus);
       this.waitingForResults = newWaitStatus;
       if (newWaitStatus) {
         this.hasAskedForResults = true;
