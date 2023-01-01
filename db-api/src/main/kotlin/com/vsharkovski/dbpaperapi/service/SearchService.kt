@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import java.util.regex.Pattern
 
@@ -25,6 +26,8 @@ class SearchService(
 
     val forbiddenCharacters = ",${SearchOperation.SIMPLE_OPERATION_SET.joinToString("")}"
 
+    val sortableNullableVariables = listOf("birth", "death")
+
     fun findPeopleBySearchTerm(
         term: String,
         pageNumber: Int,
@@ -34,6 +37,7 @@ class SearchService(
             return SearchResult()
         }
         val builder = personSpecificationBuilderService.createBuilder()
+
         // Note: If the string has forbidden characters, the pattern matcher will either
         // not match it or match it incorrectly. Either case is good.
         val pattern =
@@ -49,12 +53,21 @@ class SearchService(
                 matcher.group(5)
             )
         }
-        return personSpecificationBuilderService.build(builder)?.let {
+
+        return personSpecificationBuilderService.build(builder)?.let { builtSpecification ->
+            val specification = if (sortState.variable in sortableNullableVariables) {
+                addNonNullSpecificationForVariable(builtSpecification, sortState.variable)
+            } else {
+                builtSpecification
+            }
+
             val paging = PageRequest.of(
                 pageNumber, resultsPerPage,
                 Sort.by(sortState.direction, sortState.variable)
             )
-            val resultsSlice = personRepository.findAll(it, paging)
+
+            val resultsSlice = personRepository.findAll(specification, paging)
+
             return SearchResult(
                 results = resultsSlice.content,
                 hasPreviousPage = resultsSlice.hasPrevious(),
@@ -65,4 +78,12 @@ class SearchService(
             )
         } ?: SearchResult()
     }
+
+    private fun addNonNullSpecificationForVariable(
+        specification: Specification<Person>,
+        variable: String
+    ): Specification<Person> =
+        Specification.where(specification).and { root, _, builder ->
+            builder.isNotNull(root.get<Any>(variable))
+        }
 }
