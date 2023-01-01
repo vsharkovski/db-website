@@ -20,7 +20,7 @@ export class AboutComponent {
   ) {}
 
   ngAfterViewInit(): void {
-    // Scroll to fragment on page load, if fragment is present
+    // Scroll to fragment on page load, if fragment is present.
     this.route.fragment
       .pipe(
         filter((fragment) => fragment !== null),

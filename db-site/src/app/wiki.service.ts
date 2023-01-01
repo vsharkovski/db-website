@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, of, switchMap } from 'rxjs';
+import { catchError, map, Observable, of, switchMap } from 'rxjs';
 import { ErrorService } from './error.service';
 import { Person } from './person.model';
 import { WikiApiPage } from './wiki-api-page.model';
@@ -50,17 +50,20 @@ export class WikiService {
         catchError(
           this.errorService.handleError('getDataFromEnglishWiki', null)
         ),
-        switchMap((response) => {
-          if (!response || !this.doesPageExistInResponse(response))
-            return of(null);
-          return of(response!.query!.pages![0]);
+        map((response) => {
+          if (!response || !this.doesPageExistInResponse(response)) {
+            return null;
+          }
+          return response!.query!.pages![0];
         })
       );
   }
 
   private doesPageExistInResponse(response: WikiApiResponse): boolean {
     const pages = response?.query?.pages;
-    if (!pages || pages.length == 0 || pages[0].missing) return false;
+    if (!pages || pages.length == 0 || pages[0].missing) {
+      return false;
+    }
     return true;
   }
 }

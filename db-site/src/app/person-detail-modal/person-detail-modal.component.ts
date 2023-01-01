@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Observable, of } from 'rxjs';
 import { Person } from '../person.model';
 import { VariablesService } from '../variables.service';
 import { WikiApiPage } from '../wiki-api-page.model';

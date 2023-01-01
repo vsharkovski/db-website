@@ -1,9 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'unknown',
+  name: 'unknownYear',
 })
-export class UnknownPipe implements PipeTransform {
+export class UnknownYearPipe implements PipeTransform {
   transform(
     value: string | undefined | null,
     useUnknownOrMissing = true,

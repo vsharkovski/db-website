@@ -12,12 +12,12 @@
     <div class="details-panel" [class.image-present]="data?.thumbnail?.source">
       <span *ngIf="person.birth !== null || person.death !== null">Birth</span>
       <span *ngIf="person.birth !== null || person.death !== null">{{
-        person.birth | dateYear | unknown : true : false
+        person.birth | dateYear | unknownYear : true : false
       }}</span>
       <span *ngIf="person.death !== null">Death</span>
       <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
       <span>Gender</span>
-      <span>{{ genders[person.genderId ?? -1] | unknown }}</span>
+      <span>{{ genders[person.genderId ?? -1] | unknownYear }}</span>
       <span>Occupation</span>
       <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
       <span>Citizenship{{ person.citizenship2BId ? "s" : "" }}</span>

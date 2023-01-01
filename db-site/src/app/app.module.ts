@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavbarComponent } from './navbar/navbar.component';
-import { HomeComponent } from './home/home.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { MainPageComponent } from './main-page/main-page.component';
 import { HighlightsListComponent } from './highlights-list/highlights-list.component';
@@ -20,18 +19,17 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { SearchAppComponent } from './search-app/search-app.component';
 import { SearchOptionsComponent } from './search-options/search-options.component';
 import { SearchResultsComponent } from './search-results/search-results.component';
-import { MapComponent } from './map/map.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { DateYearPipe } from './date-year.pipe';
 import { PersonDetailModalComponent } from './person-detail-modal/person-detail-modal.component';
-import { UnknownPipe } from './unknown.pipe';
+import { UnknownYearPipe } from './unknown-year.pipe';
 import { ReadableNamePipe } from './readable-name.pipe';
 import { SearchResultsPageButtonsComponent } from './search-results-page-buttons/search-results-page-buttons.component';
 import { SortDirectionPipe } from './sort-direction.pipe';
 import { SortVariablePipe } from './sort-variable.pipe';
 import { FooterComponent } from './footer/footer.component';
-import { Event, NavigationEnd, Router, Scroll } from '@angular/router';
+import { Event, Router, Scroll } from '@angular/router';
 import { ViewportScroller } from '@angular/common';
 import { filter, pairwise } from 'rxjs';
 
@@ -39,7 +37,6 @@ import { filter, pairwise } from 'rxjs';
   declarations: [
     AppComponent,
     NavbarComponent,
-    HomeComponent,
     NotFoundComponent,
     MainPageComponent,
     HighlightsListComponent,
@@ -54,11 +51,10 @@ import { filter, pairwise } from 'rxjs';
     SearchAppComponent,
     SearchOptionsComponent,
     SearchResultsComponent,
-    MapComponent,
     AboutPageComponent,
     DateYearPipe,
     PersonDetailModalComponent,
-    UnknownPipe,
+    UnknownYearPipe,
     ReadableNamePipe,
     SearchResultsPageButtonsComponent,
     SortDirectionPipe,
