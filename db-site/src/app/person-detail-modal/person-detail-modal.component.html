@@ -16,13 +16,13 @@
       }}</span>
       <span *ngIf="person.death !== null">Death</span>
       <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
-      <span>Gender</span>
-      <span>{{ genders[person.genderId ?? -1] | unknownYear }}</span>
-      <span>Occupation</span>
-      <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
-      <span>Citizenship{{ person.citizenship2BId ? "s" : "" }}</span>
-      <span
-        >{{ citizenships[person.citizenship1BId ?? -1]
+      <span *ngIf="person.genderId !== null">Gender</span>
+      <span *ngIf="person.genderId !== null">{{ genders[person.genderId] }}</span>
+      <span *ngIf="person.level1MainOccId !== null">Occupation</span>
+      <span *ngIf="person.level1MainOccId !== null">{{ occupations[person.level1MainOccId] }}</span>
+      <span *ngIf="person.citizenship1BId !== null">Citizenship{{ person.citizenship2BId ? "s" : "" }}</span>
+      <span *ngIf="person.citizenship1BId !== null"
+        >{{ citizenships[person.citizenship1BId]
         }}{{ person.citizenship2BId ? ", " + citizenships[person.citizenship2BId] : "" }}</span
       >
       <span>Notability</span>

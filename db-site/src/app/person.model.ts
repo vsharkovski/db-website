@@ -1,19 +1,19 @@
 export interface Person {
-  id?: number;
-  wikidataCode?: number;
-  birth?: number;
-  death?: number;
-  name?: string;
-  nameProcessed?: string;
-  genderId?: number;
-  level1MainOccId?: number;
-  level2MainOccId?: number;
-  level2SecondOccId?: number;
-  citizenship1BId?: number;
-  citizenship2BId?: number;
-  birthLongitude?: number;
-  birthLatitude?: number;
-  deathLongitude?: number;
-  deathLatitude?: number;
-  notabilityIndex?: number;
+  id: number;
+  wikidataCode: number;
+  birth: number | null;
+  death: number | null;
+  name: string | null;
+  nameProcessed: string | null;
+  genderId: number | null;
+  level1MainOccId: number | null;
+  level2MainOccId: number | null;
+  level2SecondOccId: number | null;
+  citizenship1BId: number | null;
+  citizenship2BId: number | null;
+  birthLongitude: number | null;
+  birthLatitude: number | null;
+  deathLongitude: number | null;
+  deathLatitude: number | null;
+  notabilityIndex: number | null;
 }
