@@ -147,10 +147,11 @@ export class SearchAppComponent implements OnInit {
 
   onSortStateChanged(sortState: SortState): void {
     // Whenever the sort state is changed, emit from searchQueryChanged.
+    // The page is reset to 0.
     if (this.latestQuery) {
       this.searchQueryChanged.next({
         term: this.latestQuery.term,
-        page: this.latestQuery.page,
+        page: 0,
         sort: sortState,
       });
       this.pageOrSortChanged.next();
