@@ -38,9 +38,9 @@ export class SearchService {
             pageNumber: 0,
             maxSliceSize: 0,
             sort: {
-              variable: 'notabilityIndex' as SortState['variable'],
-              direction: 'descending' as SortState['direction'],
-            },
+              variable: 'notabilityIndex',
+              direction: 'descending',
+            } as SortState,
           })
         )
       );

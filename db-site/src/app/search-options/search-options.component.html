@@ -48,7 +48,7 @@
         step="1"
         class="form-control"
         formControlName="birthMin"
-        [placeholder]="lifeYearMin"
+        [placeholder]="LIFE_YEAR_MIN"
         [class.is-invalid]="birthMinField.invalid"
       />
       <span>to</span>
@@ -57,7 +57,7 @@
         step="1"
         class="form-control"
         formControlName="birthMax"
-        [placeholder]="lifeYearMax"
+        [placeholder]="LIFE_YEAR_MAX"
         [class.is-invalid]="birthMaxField.invalid"
       />
     </div>
@@ -77,7 +77,7 @@
         class="form-control"
         formControlName="deathMin"
         [class.is-invalid]="deathMinField.invalid"
-        [placeholder]="lifeYearMin"
+        [placeholder]="LIFE_YEAR_MIN"
       />
       <span>to</span>
       <input
@@ -85,7 +85,7 @@
         class="form-control"
         formControlName="deathMax"
         [class.is-invalid]="deathMaxField.invalid"
-        [placeholder]="lifeYearMax"
+        [placeholder]="LIFE_YEAR_MAX"
       />
     </div>
     <div
@@ -98,25 +98,17 @@
 
   <label for="citizenship" class="form-label">Citizenship</label>
   <select class="form-select" formControlName="citizenship">
-    <option ngValue="">Any</option>
+    <option [ngValue]="null">Any</option>
     <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
   </select>
 
   <label for="gender" class="form-labe">Gender</label>
   <select class="form-select" formControlName="gender">
-    <option ngValue="">Any</option>
+    <option [ngValue]="null">Any</option>
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
   </select>
-
-  <!-- <label for="page" class="form-label mt-3">Result page number</label>
-  <input type="number" class="form-control" formControlName="page" /> -->
 
   <div class="full-row d-flex">
     <button type="submit" class="btn btn-secondary ms-auto">Search</button>
   </div>
 </form>
-
-<!-- <div class="row">
-  <h6 class="mt-3">Compiled search term:</h6>
-  <pre>{{ compiledTerm }}</pre>
-</div> -->

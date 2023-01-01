@@ -1,67 +1,40 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
-import { SearchQuery } from '../search-query.model';
 import { Variable } from '../variable.model';
 import { VariablesService } from '../variables.service';
+
+interface FormValues {
+  name: string;
+  nameSearchMode: 'anywhere' | 'start';
+  birthMin: number | null;
+  birthMax: number | null;
+  deathMin: number | null;
+  deathMax: number | null;
+  citizenship: number | null;
+  gender: number | null;
+}
 
 @Component({
   selector: 'dbw-search-options',
   templateUrl: './search-options.component.html',
   styleUrls: ['./search-options.component.css'],
 })
-export class SearchOptionsComponent implements OnInit, OnChanges {
-  readonly lifeYearMin: number = -3500;
-  readonly lifeYearMax: number = 2020;
-  readonly safeNamePattern = '^[^,:!=><~]+$';
+export class SearchOptionsComponent implements OnInit {
+  readonly LIFE_YEAR_MIN = -3500;
+  readonly LIFE_YEAR_MAX = 2020;
+  readonly SAFE_NAME_PATTERN = '^[^,:!=><~]+$';
 
   form = this.formBuilder.group({
-    page: [0, [Validators.min(0), Validators.max(10000)]],
     name: [
       '',
-      [Validators.maxLength(200), Validators.pattern(this.safeNamePattern)],
+      [Validators.maxLength(200), Validators.pattern(this.SAFE_NAME_PATTERN)],
     ],
     nameSearchMode: ['anywhere'],
-    birthMin: [
-      null,
-      [
-        // Validators.min(this.lifeYearMin),
-        // Validators.max(this.lifeYearMax),
-        isIntegerOrNullValidator,
-      ],
-    ],
-    birthMax: [
-      null,
-      [
-        // Validators.min(this.lifeYearMin),
-        // Validators.max(this.lifeYearMax),
-        isIntegerOrNullValidator,
-      ],
-    ],
-    deathMin: [
-      null,
-      [
-        // Validators.min(this.lifeYearMin),
-        // Validators.max(this.lifeYearMax),
-        isIntegerOrNullValidator,
-      ],
-    ],
-    deathMax: [
-      null,
-      [
-        // Validators.min(this.lifeYearMin),
-        // Validators.max(this.lifeYearMax),
-        isIntegerOrNullValidator,
-      ],
-    ],
+    birthMin: [null, [isIntegerOrNullValidator]],
+    birthMax: [null, [isIntegerOrNullValidator]],
+    deathMin: [null, [isIntegerOrNullValidator]],
+    deathMax: [null, [isIntegerOrNullValidator]],
     citizenship: [''],
     gender: [''],
   });
@@ -70,28 +43,26 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   occupations: Variable[] = [];
   citizenships: Variable[] = [];
 
-  @Input() requestedQuery?: SearchQuery;
+  // @Input() requestedQuery?: SearchQuery;
 
-  @Output() queryChanged = new EventEmitter<SearchQuery>();
+  @Output() termChanged = new EventEmitter<string>();
   @Output() submitted = new EventEmitter<void>();
-
-  compiledTerm: string = '';
 
   constructor(
     private formBuilder: FormBuilder,
     private variablesService: VariablesService
   ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    const change = changes['requestedQuery'];
-    if (change && change.currentValue) {
-      // push to options
-      this.pushQueryToOptions({ ...change.currentValue }, true);
-    }
-  }
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   const change = changes['requestedQuery'];
+  //   if (change && change.currentValue) {
+  //     // push to options
+  //     this.pushQueryToOptions({ ...change.currentValue }, true);
+  //   }
+  // }
 
   ngOnInit(): void {
-    // get variables
+    // Get the variable lists from the API, and sort them by name.
     this.variablesService.getGenders().subscribe((genders) => {
       this.genders = genders;
       this.genders.sort((a, b) => a.name.localeCompare(b.name));
@@ -103,58 +74,52 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       this.citizenships = citizenships;
       this.citizenships.sort((a, b) => a.name.localeCompare(b.name));
     });
-    // when things are changed, send signal up
+
+    // Whenever the form is changed, emit the new term.
     this.form.valueChanges.subscribe((values) => {
       if (this.form.valid) {
-        // console.log('search options: emitting queryChanged');
-        this.queryChanged.emit(this.pullQueryFromOptions());
+        this.termChanged.emit(
+          this.compileTermFromFormValues(values as FormValues)
+        );
       }
     });
-    // when query is changed here, update compiled term (debugging purposes)
-    this.queryChanged.subscribe((query) => {
-      this.compiledTerm = query.term;
-    });
   }
 
-  pushQueryToOptions(query: SearchQuery, notifyUp: boolean = false): void {
-    this.compiledTerm = query.term;
-    this.pageField.setValue(query.page);
-    if (notifyUp) {
-      this.queryChanged.emit(query);
-    }
-  }
-
-  pullQueryFromOptions(): SearchQuery {
-    if (!this.form.valid) {
-      return { page: 0, term: '', sort: null };
-    }
+  compileTermFromFormValues(values: FormValues): string {
     let term = '';
-    if (this.nameField.value) {
-      const shouldMatchAnyBefore =
-        this.nameSearchModeField.value === 'anywhere';
-      term += `name:${shouldMatchAnyBefore ? '*' : ''}${
-        this.nameField.value
-      }*,`;
+    if (values.name) {
+      if (values.nameSearchMode === 'anywhere') {
+        term += `name:*${values.name}`;
+      } else {
+        term += `name:${values.name}`;
+      }
     }
-    if (this.birthMinField.value !== null)
-      term += `birth>=${Math.max(this.lifeYearMin, this.birthMinField.value)},`;
-    if (this.birthMaxField.value !== null)
-      term += `birth<=${Math.min(this.lifeYearMax, this.birthMaxField.value)},`;
-    if (this.deathMinField.value !== null)
-      term += `death>=${Math.max(this.lifeYearMin, this.deathMinField.value)},`;
-    if (this.deathMaxField.value !== null)
-      term += `death<=${Math.min(this.lifeYearMax, this.deathMaxField.value)},`;
-    if (this.citizenshipField.value)
-      term += `citizenship1BId:${this.citizenshipField.value},`;
-    if (this.genderField.value) term += `genderId:${this.genderField.value},`;
+    if (values.birthMin !== null) {
+      term += `birth>=${this.clampLifeYear(values.birthMin)},`;
+    }
+    if (values.birthMax !== null) {
+      term += `birth<=${this.clampLifeYear(values.birthMax)},`;
+    }
+    if (values.deathMin !== null) {
+      term += `death>=${this.clampLifeYear(values.deathMin)},`;
+    }
+    if (values.deathMax !== null) {
+      term += `death<=${this.clampLifeYear(values.deathMax)},`;
+    }
+    if (values.citizenship) {
+      term += `citizenship1BId:${values.citizenship},`;
+    }
+    if (values.gender) {
+      term += `genderId:${values.gender},`;
+    }
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
-    return {
-      term: term,
-      page: 0,
-      sort: { variable: 'notabilityIndex', direction: 'descending' },
-    };
+    return term;
+  }
+
+  private clampLifeYear(year: number): number {
+    return Math.min(Math.max(this.LIFE_YEAR_MIN, year), this.LIFE_YEAR_MAX);
   }
 
   get pageField(): AbstractControl {
