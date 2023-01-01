@@ -25,7 +25,7 @@ export class SearchResultsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // get variables
+    // Get the variable maps of form "id to name" from the API.
     this.variablesService
       .getGenderMap()
       .subscribe((genders) => (this.genders = genders));
@@ -46,7 +46,7 @@ export class SearchResultsComponent implements OnInit {
       return;
     }
     if (this.results.sort.variable == variable) {
-      // same variable clicked, flip direction
+      // Currently selected variable was clicked. Flip direction.
       const newDirection: SortState['direction'] =
         this.results.sort.direction === 'ascending'
           ? 'descending'
@@ -56,7 +56,7 @@ export class SearchResultsComponent implements OnInit {
         direction: newDirection,
       });
     } else {
-      // sort by new variable
+      // Sort by the variable clicked.
       this.sortStateChanged.emit({
         variable: variable,
         direction: 'descending',
