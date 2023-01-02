@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
   BehaviorSubject,
   combineLatest,
@@ -13,7 +13,11 @@ import {
 } from 'rxjs';
 import { SearchResponse } from '../search-response.model';
 import { SearchService } from '../search.service';
-import { SortState } from '../sort-state.model';
+import {
+  SortState,
+  SortStateVariableArray,
+  SortStateDirectionArray,
+} from '../sort-state.model';
 
 const DEFAULT_SORT_STATE: SortState = {
   variable: 'notabilityIndex',
@@ -27,6 +31,7 @@ const DEFAULT_SORT_STATE: SortState = {
 })
 export class SearchAppComponent implements OnInit {
   results?: SearchResponse;
+  termPushedToOptions?: string;
 
   termChanged = new BehaviorSubject<string>('');
   pageChanged = new BehaviorSubject<number>(0);
@@ -45,20 +50,7 @@ export class SearchAppComponent implements OnInit {
 
   ngOnInit(): void {
     // Read initial parameters from the route.
-    const initialParams = this.route.snapshot.queryParams;
-    if (initialParams['term'] !== null) {
-      this.termChanged.next(initialParams['term']);
-    }
-    if (initialParams['page'] !== null) {
-      this.pageChanged.next(Number(initialParams['page']));
-    }
-    if (initialParams['sortVariable'] || initialParams['sortDirection']) {
-      this.sortStateChanged.next({
-        variable: initialParams['sortVariable'] ?? DEFAULT_SORT_STATE.variable,
-        direction:
-          initialParams['sortDirection'] ?? DEFAULT_SORT_STATE.direction,
-      });
-    }
+    this.readQueryParams(this.route.snapshot.queryParams);
 
     // Whenever the search term, page, or sort state is changed, and the
     // term is non-empty, update the route with the new parameters.
@@ -77,7 +69,7 @@ export class SearchAppComponent implements OnInit {
           relativeTo: this.route,
           queryParams: {
             term: term,
-            page: page ?? 0, // Catch NaN.
+            page: page,
             sortVariable: sortState.variable,
             sortDirection: sortState.direction,
           },
@@ -141,6 +133,30 @@ export class SearchAppComponent implements OnInit {
         this.hasAskedForResults = true;
       }
     });
+  }
+
+  private readQueryParams(params: Params): void {
+    if (params['term'] !== null) {
+      this.termChanged.next(params['term']);
+      this.termPushedToOptions = params['term'];
+    }
+
+    if (params['page'] !== null) {
+      const page = Number(params['page']);
+      if (Number.isInteger(page) && page >= 0) {
+        this.pageChanged.next(page);
+      }
+    }
+
+    if (params['sortVariable'] || params['sortDirection']) {
+      const variable = SortStateVariableArray.includes(params['sortVariable'])
+        ? params['sortVariable']
+        : DEFAULT_SORT_STATE.variable;
+      const dir = SortStateDirectionArray.includes(params['sortDirection'])
+        ? params['sortDirection']
+        : DEFAULT_SORT_STATE.direction;
+      this.sortStateChanged.next({ variable: variable, direction: dir });
+    }
   }
 
   onPageButtonClick(pageChange: number): void {

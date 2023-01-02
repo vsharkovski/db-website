@@ -7,21 +7,16 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  NonNullableFormBuilder,
+  Validators,
+} from '@angular/forms';
+import { delayWhen, ReplaySubject, skip } from 'rxjs';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { Variable } from '../variable.model';
 import { VariablesService } from '../variables.service';
-
-interface FormValues {
-  name: string;
-  nameSearchMode: 'anywhere' | 'start';
-  birthMin: number | null;
-  birthMax: number | null;
-  deathMin: number | null;
-  deathMax: number | null;
-  citizenship: number | null;
-  gender: number | null;
-}
 
 @Component({
   selector: 'dbw-search-options',
@@ -32,47 +27,82 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly LIFE_YEAR_MIN = -3500;
   readonly LIFE_YEAR_MAX = 2020;
   readonly SAFE_NAME_PATTERN = '^[^,:!=><~]+$';
+  readonly termRegex: RegExp;
 
-  form = this.formBuilder.group({
-    name: [
-      '',
-      [Validators.maxLength(200), Validators.pattern(this.SAFE_NAME_PATTERN)],
-    ],
-    nameSearchMode: ['anywhere'],
-    birthMin: [null, [isIntegerOrNullValidator]],
-    birthMax: [null, [isIntegerOrNullValidator]],
-    deathMin: [null, [isIntegerOrNullValidator]],
-    deathMax: [null, [isIntegerOrNullValidator]],
-    citizenship: [''],
-    gender: [''],
-  });
+  form: FormGroup;
 
   genders: Variable[] = [];
   occupations: Variable[] = [];
   citizenships: Variable[] = [];
 
-  @Input() requestedTerm?: string;
+  variablesLoaded = new ReplaySubject<void>();
+  pushedTerms = new ReplaySubject<string>();
+
+  @Input('pushedTerm') recentmostPushedTerm?: string;
   @Output() termChanged = new EventEmitter<string>();
   @Output() submitted = new EventEmitter<void>();
 
   constructor(
-    private formBuilder: FormBuilder,
+    fb: NonNullableFormBuilder,
     private variablesService: VariablesService
-  ) {}
+  ) {
+    // Create the form.
+    this.form = fb.group({
+      name: fb.control('', [
+        Validators.maxLength(200),
+        Validators.pattern(this.SAFE_NAME_PATTERN),
+      ]),
+      nameSearchMode: fb.control<'anywhere' | 'start'>('anywhere'),
+      birthMin: fb.control<number | null>(null, [isIntegerOrNullValidator]),
+      birthMax: fb.control<number | null>(null, [isIntegerOrNullValidator]),
+      deathMin: fb.control<number | null>(null, [isIntegerOrNullValidator]),
+      deathMax: fb.control<number | null>(null, [isIntegerOrNullValidator]),
+      citizenship: fb.control<number | null>(null),
+      gender: fb.control<number | null>(null),
+    });
+
+    // Create the regular expression for terms.
+    const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
+    const searchOperatorsJoinedOr = searchOperators.join('|');
+    const forbiddenCharacters = `,${searchOperators.join('')}`;
+    const punctuation = `!"#$%&'()*+,-./:;<=>?@[]^_{|}~\``;
+    const punctuationEscaped = punctuation.replace(
+      /[.*+?^${}()|[\]\\\/]/g,
+      '\\$&'
+    );
+    const regexpString = [
+      `(\\w+?)`,
+      `(${searchOperatorsJoinedOr})`,
+      `([${punctuationEscaped}]?)`,
+      `([^${forbiddenCharacters}]+?)`,
+      `([${punctuationEscaped}]?)`,
+      `,`,
+    ].join('');
+    this.termRegex = new RegExp(regexpString, 'g');
+  }
 
   ngOnInit(): void {
     // Get the variable lists from the API, and sort them by name.
     this.variablesService.getGenders().subscribe((genders) => {
       this.genders = genders;
       this.genders.sort((a, b) => a.name.localeCompare(b.name));
+      this.variablesLoaded.next();
     });
     this.variablesService.getOccupations().subscribe((occupations) => {
       this.occupations = occupations;
+      this.variablesLoaded.next();
     });
     this.variablesService.getCitizenships().subscribe((citizenships) => {
       this.citizenships = citizenships;
       this.citizenships.sort((a, b) => a.name.localeCompare(b.name));
+      this.variablesLoaded.next();
     });
+
+    // Consume any pushed term strings, but only after all variables
+    // have been loaded.
+    this.pushedTerms
+      .pipe(delayWhen(() => this.variablesLoaded.pipe(skip(2))))
+      .subscribe((term) => this.pushTermToForm(term));
 
     // Whenever the form is changed, emit the new term.
     this.form.valueChanges.subscribe((values) => {
@@ -85,8 +115,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['requestedTerm']) {
-      this.pushTermToForm(changes['requestedTerm'].currentValue);
+    if (changes['recentmostPushedTerm']) {
+      const term = changes['recentmostPushedTerm'].currentValue;
+      if (term !== null && term !== undefined) {
+        this.pushedTerms.next(term);
+      }
     }
   }
 
@@ -94,9 +127,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     let term = '';
     if (values.name) {
       if (values.nameSearchMode === 'anywhere') {
-        term += `name:*${values.name}*`;
+        term += `name:*${values.name}*,`;
       } else {
-        term += `name:${values.name}*`;
+        term += `name:${values.name}*,`;
       }
     }
     if (values.birthMin !== null) {
@@ -123,7 +156,71 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     return term;
   }
 
-  private pushTermToForm(term: string): void {}
+  private pushTermToForm(term: string): void {
+    const criteria = [...`${term},`.matchAll(this.termRegex)].map((match) => ({
+      key: match[1],
+      operation: match[2],
+      value: match[4],
+      prefix: match[3],
+      suffix: match[5],
+    }));
+
+    const values: FormValues = {
+      name: '',
+      nameSearchMode: 'anywhere',
+      birthMin: null,
+      birthMax: null,
+      deathMin: null,
+      deathMax: null,
+      citizenship: null,
+      gender: null,
+    };
+
+    for (let c of criteria) {
+      if (c.key == 'name' && c.operation == ':') {
+        if (!c.prefix.includes('*')) {
+          values.nameSearchMode = 'start';
+        }
+        values.name = c.value;
+      } else if (c.key == 'birth') {
+        let num = Number(c.value);
+        if (Number.isInteger(num)) {
+          if (c.prefix == '-') {
+            num = -num;
+          }
+          if (c.operation == '>=') {
+            values.birthMin = num;
+          } else if (c.operation == '<=') {
+            values.birthMax = num;
+          }
+        }
+      } else if (c.key == 'death') {
+        let num = Number(c.value);
+        if (Number.isInteger(num)) {
+          if (c.prefix == '-') {
+            num = -num;
+          }
+          if (c.operation == '>=') {
+            values.deathMin = num;
+          } else if (c.operation == '<=') {
+            values.deathMax = num;
+          }
+        }
+      } else if (c.key == 'citizenship1BId' && c.operation == ':') {
+        const id = Number(c.value);
+        if (this.citizenships.find((item) => item.id === id)) {
+          values.citizenship = id;
+        }
+      } else if (c.key == 'genderId' && c.operation == ':') {
+        const id = Number(c.value);
+        if (this.genders.find((item) => item.id === id)) {
+          values.gender = id;
+        }
+      }
+    }
+
+    this.form.setValue(values);
+  }
 
   private clampLifeYear(year: number): number {
     return Math.min(Math.max(this.LIFE_YEAR_MIN, year), this.LIFE_YEAR_MAX);
@@ -164,4 +261,15 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   get genderField(): AbstractControl {
     return this.form.get('gender')!;
   }
+}
+
+interface FormValues {
+  name: string;
+  nameSearchMode: 'anywhere' | 'start';
+  birthMin: number | null;
+  birthMax: number | null;
+  deathMin: number | null;
+  deathMax: number | null;
+  citizenship: number | null;
+  gender: number | null;
 }
