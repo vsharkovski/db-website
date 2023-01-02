@@ -3,7 +3,7 @@
     <h2 class="text-center mb-3">Find people in history</h2>
     <dbw-search-options
       [pushedTerm]="termPushedToOptions"
-      (termChanged)="onTermChanged($event)"
+      (termChanged)="onTermSet($event)"
       (submitted)="searchOptionsSubmitted.next()"
     ></dbw-search-options>
     <p class="mt-3 text-center">
@@ -32,7 +32,7 @@
     </div>
     <dbw-search-results
       [results]="results"
-      (sortStateChanged)="onSortStateChanged($event)"
+      (sortStateChanged)="onSortStateSet($event)"
       [class.blurred]="waitingForResults"
     ></dbw-search-results>
   </div>

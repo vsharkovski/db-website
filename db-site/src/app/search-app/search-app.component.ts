@@ -33,9 +33,9 @@ export class SearchAppComponent implements OnInit {
   results?: SearchResponse;
   termPushedToOptions?: string;
 
-  termChanged = new BehaviorSubject<string>('');
-  pageChanged = new BehaviorSubject<number>(0);
-  sortStateChanged = new BehaviorSubject<SortState>(DEFAULT_SORT_STATE);
+  termSet = new BehaviorSubject<string>('');
+  pageSet = new BehaviorSubject<number>(0);
+  sortStateSet = new BehaviorSubject<SortState>(DEFAULT_SORT_STATE);
 
   searchOptionsSubmitted = new Subject<void>();
 
@@ -54,13 +54,13 @@ export class SearchAppComponent implements OnInit {
 
     // Whenever the search term, page, or sort state is changed, and the
     // term is non-empty, update the route with the new parameters.
-    const queryChanged = combineLatest([
-      this.termChanged,
-      this.pageChanged,
-      this.sortStateChanged,
+    const querySet = combineLatest([
+      this.termSet.pipe(distinctUntilChanged()),
+      this.pageSet.pipe(distinctUntilChanged()),
+      this.sortStateSet.pipe(distinctUntilChanged()),
     ]);
 
-    queryChanged
+    querySet
       .pipe(
         filter((data) => (data[0] === undefined ? false : data[0].length > 0))
       )
@@ -87,7 +87,7 @@ export class SearchAppComponent implements OnInit {
     ).pipe(
       debounceTime(1000),
       // Necessary to convert to string because otherwise the objects coming from
-      // each source observable in routeChangedOrSubmitted would be considered different
+      // each source observable would be considered different
       // although they represent the same thing.
       distinctUntilChanged((a, b) => JSON.stringify(a) == JSON.stringify(b)),
       filter((params) => params['term'])
@@ -124,10 +124,11 @@ export class SearchAppComponent implements OnInit {
     merge(
       readyToAskForResults.pipe(map(() => true)),
       resultsReceived.pipe(map(() => false)),
-      queryChanged.pipe(
+      querySet.pipe(
         map((data) => (data[0] === undefined ? false : data[0].length > 0))
       )
     ).subscribe((newWaitStatus) => {
+      console.log('got wait', newWaitStatus);
       this.waitingForResults = newWaitStatus;
       if (newWaitStatus) {
         this.hasAskedForResults = true;
@@ -137,14 +138,14 @@ export class SearchAppComponent implements OnInit {
 
   private readQueryParams(params: Params): void {
     if (params['term'] !== null) {
-      this.termChanged.next(params['term']);
+      this.termSet.next(params['term']);
       this.termPushedToOptions = params['term'];
     }
 
     if (params['page'] !== null) {
       const page = Number(params['page']);
       if (Number.isInteger(page) && page >= 0) {
-        this.pageChanged.next(page);
+        this.pageSet.next(page);
       }
     }
 
@@ -155,7 +156,7 @@ export class SearchAppComponent implements OnInit {
       const dir = SortStateDirectionArray.includes(params['sortDirection'])
         ? params['sortDirection']
         : DEFAULT_SORT_STATE.direction;
-      this.sortStateChanged.next({ variable: variable, direction: dir });
+      this.sortStateSet.next({ variable: variable, direction: dir });
     }
   }
 
@@ -168,21 +169,21 @@ export class SearchAppComponent implements OnInit {
         (pageChange === 1 && this.results?.hasNextPage)) &&
       latestPage + pageChange >= 0
     ) {
-      this.pageChanged.next(latestPage + pageChange);
+      this.pageSet.next(latestPage + pageChange);
     }
   }
 
-  onSortStateChanged(sortState: SortState): void {
+  onSortStateSet(sortState: SortState): void {
     // Whenever the sort state is changed, emit from the appropriate observable.
     // The page is also reset to 0.
-    this.sortStateChanged.next(sortState);
-    this.pageChanged.next(0);
+    this.sortStateSet.next(sortState);
+    this.pageSet.next(0);
   }
 
-  onTermChanged(term: string): void {
+  onTermSet(term: string): void {
     // Whenever the term is changed, emit from the appropriate observable.
     // The page is also reset to 0.
-    this.termChanged.next(term);
-    this.pageChanged.next(0);
+    this.termSet.next(term);
+    this.pageSet.next(0);
   }
 }
