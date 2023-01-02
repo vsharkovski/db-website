@@ -128,7 +128,6 @@ export class SearchAppComponent implements OnInit {
         map((data) => (data[0] === undefined ? false : data[0].length > 0))
       )
     ).subscribe((newWaitStatus) => {
-      console.log('got wait', newWaitStatus);
       this.waitingForResults = newWaitStatus;
       if (newWaitStatus) {
         this.hasAskedForResults = true;

@@ -219,7 +219,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       }
     }
 
-    this.form.setValue(values);
+    // Do not emit an event to not trigger the default behavior that happens
+    // when the user changes the form.
+    this.form.setValue(values, { emitEvent: false });
   }
 
   private clampLifeYear(year: number): number {
