@@ -70,9 +70,7 @@ export class SearchAppComponent implements OnInit {
 
     queryChanged
       .pipe(
-        filter(([term, _, __]) =>
-          term === undefined ? false : term.length > 0
-        )
+        filter((data) => (data[0] === undefined ? false : data[0].length > 0))
       )
       .subscribe(([term, page, sortState]) => {
         this.router.navigate([], {
@@ -135,7 +133,7 @@ export class SearchAppComponent implements OnInit {
       readyToAskForResults.pipe(map(() => true)),
       resultsReceived.pipe(map(() => false)),
       queryChanged.pipe(
-        map(([term, _, __]) => (term === undefined ? false : term.length > 0))
+        map((data) => (data[0] === undefined ? false : data[0].length > 0))
       )
     ).subscribe((newWaitStatus) => {
       this.waitingForResults = newWaitStatus;
