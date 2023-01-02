@@ -29,7 +29,7 @@ export class PersonDetailModalComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // get variables
+    // Get variables data.
     this.variablesService
       .getGenderMap()
       .subscribe((genders) => (this.genders = genders));
@@ -39,7 +39,8 @@ export class PersonDetailModalComponent implements OnInit {
     this.variablesService
       .getCitizenshipMap()
       .subscribe((citizenships) => (this.citizenships = citizenships));
-    // get wiki data
+
+    // Get wiki data.
     this.waitingForResponse = true;
     this.wikidataUrl = `https://www.wikidata.org/wiki/Q${this.person.wikidataCode}`;
     this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
