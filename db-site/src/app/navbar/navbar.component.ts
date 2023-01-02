@@ -3,21 +3,18 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'dbw-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
+export class NavbarComponent implements OnInit, AfterViewInit {
   isNavbarCollapsed: boolean = true;
-  routerSubscription?: Subscription;
 
   @ViewChild('navbar') navbarElement?: ElementRef;
 
@@ -27,8 +24,8 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Collapse navbar (if vertical) every time navigation happens
-    this.routerSubscription = this.router.events.subscribe((event) => {
+    // Collapse navbar (if vertical) every time navigation happens.
+    this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.isNavbarCollapsed = true;
       }
@@ -36,16 +33,12 @@ export class NavbarComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Set viewport scroller offset to this height
+    // Set viewport scroller offset to this height.
     if (this.navbarElement?.nativeElement) {
       this.viewportScroller.setOffset([
         0,
         this.navbarElement.nativeElement.offsetHeight,
       ]);
     }
-  }
-
-  ngOnDestroy(): void {
-    this.routerSubscription?.unsubscribe();
   }
 }
