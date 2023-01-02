@@ -20,9 +20,22 @@ class SearchService(
     @Value("\${search.results-per-page}")
     val resultsPerPage: Int = 1000
 
-    private final val forbiddenCharacters = ",${SearchOperation.SIMPLE_OPERATION_SET.joinToString("")}"
-    val criteriaPattern: Pattern =
-        Pattern.compile("(\\w+?)(${SearchOperation.SIMPLE_OPERATION_SET_JOINED_OR})(\\p{Punct}?)([^$forbiddenCharacters]+?)(\\p{Punct}?),")
+    private final val criteriaPattern: Pattern
+
+    init {
+        val searchOperatorsJoinedOr = SearchOperation.SIMPLE_OPERATION_SET.joinToString("|")
+        val forbiddenCharacters = ",${SearchOperation.SIMPLE_OPERATION_SET.joinToString("")}"
+
+        criteriaPattern = Pattern.compile(
+            """
+            (\w+?)
+            ($searchOperatorsJoinedOr)
+            (\p{Punct}?)
+            ([^$forbiddenCharacters]+?)
+            (\p{Punct}?),
+            """.trimIndent().replace("\n", "")
+        )
+    }
 
     fun findPeopleBySearchTerm(
         term: String,
