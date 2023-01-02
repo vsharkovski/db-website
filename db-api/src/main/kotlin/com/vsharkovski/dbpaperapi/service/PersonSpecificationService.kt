@@ -4,6 +4,7 @@ import com.vsharkovski.dbpaperapi.model.*
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.typeOf
 
 @Service
 class PersonSpecificationService(val nameService: NameService) {
@@ -43,13 +44,21 @@ class PersonSpecificationService(val nameService: NameService) {
         // Get the SearchOperation enum value from the string form.
         var operation = SearchOperation.getSimpleOperation(criterion.operation) ?: return null
 
-        // Handle the key not being a valid variable.
         var key = criterion.key
-        if (Person::class.memberProperties.none { it.name == key }) {
-            return null
-        }
+        var value = criterion.value
 
-        var value: Any = criterion.value
+        // Ensure the key corresponds to a valid variable.
+        val personProperty = Person::class.memberProperties.find { it.name == key } ?: return null
+
+        // Ensure the value can be cast to the variable's type in the case of numeric operators.
+        if (SearchOperation.isOperationNumeric(operation)) {
+            when (personProperty.returnType) {
+                typeOf<Int?>() -> if (value.toIntOrNull() == null) return null
+                typeOf<Short?>() -> if (value.toShortOrNull() == null) return null
+                typeOf<Long?>() -> if (value.toLongOrNull() == null) return null
+                typeOf<Float?>() -> if (value.toFloatOrNull() == null) return null
+            }
+        }
 
         // If the criterion specifies to search for a specific name, we actually process the value
         // being searched for and compare it with the nameProcessed variable.
@@ -71,14 +80,13 @@ class PersonSpecificationService(val nameService: NameService) {
             }
         }
 
-        // Parse minus.
+        // Parse minus in the case of numeric operators.
         if (
             SearchOperation.isOperationNumeric(operation)
             && criterion.prefix == "-"
-            && criterion.value.toIntOrNull() != null
         ) {
             // Negate the value.
-            value = -criterion.value.toInt()
+            value = "-${value}"
         }
 
         // TODO: Ensure values being cast are OK (short thing)
