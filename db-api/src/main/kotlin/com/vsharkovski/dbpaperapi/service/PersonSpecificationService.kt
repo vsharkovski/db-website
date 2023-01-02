@@ -3,6 +3,7 @@ package com.vsharkovski.dbpaperapi.service
 import com.vsharkovski.dbpaperapi.model.*
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
+import kotlin.reflect.full.memberProperties
 
 @Service
 class PersonSpecificationService(val nameService: NameService) {
@@ -42,7 +43,12 @@ class PersonSpecificationService(val nameService: NameService) {
         // Get the SearchOperation enum value from the string form.
         var operation = SearchOperation.getSimpleOperation(criterion.operation) ?: return null
 
+        // Handle the key not being a valid variable.
         var key = criterion.key
+        if (Person::class.memberProperties.none { it.name == key }) {
+            return null
+        }
+
         var value: Any = criterion.value
 
         // If the criterion specifies to search for a specific name, we actually process the value
@@ -75,6 +81,7 @@ class PersonSpecificationService(val nameService: NameService) {
             value = -criterion.value.toInt()
         }
 
+        // TODO: Ensure values being cast are OK (short thing)
         return SearchCriterion(key, operation, value)
     }
 }
