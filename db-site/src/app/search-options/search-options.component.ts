@@ -1,4 +1,12 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { Variable } from '../variable.model';
@@ -20,7 +28,7 @@ interface FormValues {
   templateUrl: './search-options.component.html',
   styleUrls: ['./search-options.component.css'],
 })
-export class SearchOptionsComponent implements OnInit {
+export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly LIFE_YEAR_MIN = -3500;
   readonly LIFE_YEAR_MAX = 2020;
   readonly SAFE_NAME_PATTERN = '^[^,:!=><~]+$';
@@ -43,8 +51,7 @@ export class SearchOptionsComponent implements OnInit {
   occupations: Variable[] = [];
   citizenships: Variable[] = [];
 
-  // @Input() requestedQuery?: SearchQuery;
-
+  @Input() requestedTerm?: string;
   @Output() termChanged = new EventEmitter<string>();
   @Output() submitted = new EventEmitter<void>();
 
@@ -52,14 +59,6 @@ export class SearchOptionsComponent implements OnInit {
     private formBuilder: FormBuilder,
     private variablesService: VariablesService
   ) {}
-
-  // ngOnChanges(changes: SimpleChanges): void {
-  //   const change = changes['requestedQuery'];
-  //   if (change && change.currentValue) {
-  //     // push to options
-  //     this.pushQueryToOptions({ ...change.currentValue }, true);
-  //   }
-  // }
 
   ngOnInit(): void {
     // Get the variable lists from the API, and sort them by name.
@@ -85,13 +84,19 @@ export class SearchOptionsComponent implements OnInit {
     });
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['requestedTerm']) {
+      this.pushTermToForm(changes['requestedTerm'].currentValue);
+    }
+  }
+
   compileTermFromFormValues(values: FormValues): string {
     let term = '';
     if (values.name) {
       if (values.nameSearchMode === 'anywhere') {
-        term += `name:*${values.name}`;
+        term += `name:*${values.name}*`;
       } else {
-        term += `name:${values.name}`;
+        term += `name:${values.name}*`;
       }
     }
     if (values.birthMin !== null) {
@@ -117,6 +122,8 @@ export class SearchOptionsComponent implements OnInit {
     }
     return term;
   }
+
+  private pushTermToForm(term: string): void {}
 
   private clampLifeYear(year: number): number {
     return Math.min(Math.max(this.LIFE_YEAR_MIN, year), this.LIFE_YEAR_MAX);
