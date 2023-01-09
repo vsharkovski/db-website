@@ -52,7 +52,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         Validators.maxLength(200),
         Validators.pattern(this.SAFE_NAME_PATTERN),
       ]),
-      nameSearchMode: fb.control<'anywhere' | 'start'>('anywhere'),
       birthMin: fb.control<number | null>(null, [isIntegerOrNullValidator]),
       birthMax: fb.control<number | null>(null, [isIntegerOrNullValidator]),
       deathMin: fb.control<number | null>(null, [isIntegerOrNullValidator]),
@@ -65,17 +64,10 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
     const searchOperatorsJoinedOr = searchOperators.join('|');
     const forbiddenCharacters = `,${searchOperators.join('')}`;
-    const punctuation = `!"#$%&'()*+,-./:;<=>?@[]^_{|}~\``;
-    const punctuationEscaped = punctuation.replace(
-      /[.*+?^${}()|[\]\\\/]/g,
-      '\\$&'
-    );
     const regexpString = [
       `(\\w+?)`,
       `(${searchOperatorsJoinedOr})`,
-      `([${punctuationEscaped}]?)`,
       `([^${forbiddenCharacters}]+?)`,
-      `([${punctuationEscaped}]?)`,
       `,`,
     ].join('');
     this.termRegex = new RegExp(regexpString, 'g');
@@ -126,11 +118,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   compileTermFromFormValues(values: FormValues): string {
     let term = '';
     if (values.name) {
-      if (values.nameSearchMode === 'anywhere') {
-        term += `name:*${values.name}*,`;
-      } else {
-        term += `name:${values.name}*,`;
+      let operator = ':';
+      if (values.name.includes('*') || values.name.includes('_')) {
+        operator = '~';
       }
+      term += `name${operator}${values.name},`;
     }
     if (values.birthMin !== null) {
       term += `birth>=${this.clampLifeYear(values.birthMin)},`;
@@ -160,14 +152,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     const criteria = [...`${term},`.matchAll(this.termRegex)].map((match) => ({
       key: match[1],
       operation: match[2],
-      value: match[4],
-      prefix: match[3],
-      suffix: match[5],
+      value: match[3],
     }));
 
     const values: FormValues = {
       name: '',
-      nameSearchMode: 'anywhere',
       birthMin: null,
       birthMax: null,
       deathMin: null,
@@ -177,17 +166,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     };
 
     for (let c of criteria) {
-      if (c.key == 'name' && c.operation == ':') {
-        if (!c.prefix.includes('*')) {
-          values.nameSearchMode = 'start';
-        }
+      if (c.key == 'name' && (c.operation == ':' || c.operation == '~')) {
         values.name = c.value;
       } else if (c.key == 'birth') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          if (c.prefix == '-') {
-            num = -num;
-          }
           if (c.operation == '>=') {
             values.birthMin = num;
           } else if (c.operation == '<=') {
@@ -197,9 +180,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'death') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          if (c.prefix == '-') {
-            num = -num;
-          }
           if (c.operation == '>=') {
             values.deathMin = num;
           } else if (c.operation == '<=') {
@@ -236,10 +216,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     return this.form.get('name')!;
   }
 
-  get nameSearchModeField(): AbstractControl {
-    return this.form.get('nameSearchMode')!;
-  }
-
   get birthMinField(): AbstractControl {
     return this.form.get('birthMin')!;
   }
@@ -267,7 +243,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
 interface FormValues {
   name: string;
-  nameSearchMode: 'anywhere' | 'start';
   birthMin: number | null;
   birthMax: number | null;
   deathMin: number | null;

@@ -42,7 +42,7 @@ class PersonSpecificationService(val nameService: NameService) {
 
     private fun createCriterion(criterion: UnprocessedSearchCriterion): SearchCriterion? {
         // Get the SearchOperation enum value from the string form.
-        var operation = SearchOperation.getSimpleOperation(criterion.operation) ?: return null
+        val operation = SearchOperation.getSimpleOperation(criterion.operation) ?: return null
 
         var key = criterion.key
         var value = criterion.value
@@ -67,29 +67,6 @@ class PersonSpecificationService(val nameService: NameService) {
             value = nameService.processForSearch(criterion.value)
         }
 
-        // Parse starting and ending wildcards.
-        if (operation == SearchOperation.EQUALITY) {
-            val startsWithAsterisk = criterion.prefix.contains("*")
-            val endsWithAsterisk = criterion.suffix.contains("*")
-            if (startsWithAsterisk && endsWithAsterisk) {
-                operation = SearchOperation.CONTAINS
-            } else if (startsWithAsterisk) {
-                operation = SearchOperation.ENDS_WITH
-            } else if (endsWithAsterisk) {
-                operation = SearchOperation.STARTS_WITH
-            }
-        }
-
-        // Parse minus in the case of numeric operators.
-        if (
-            SearchOperation.isOperationNumeric(operation)
-            && criterion.prefix == "-"
-        ) {
-            // Negate the value.
-            value = "-${value}"
-        }
-
-        // TODO: Ensure values being cast are OK (short thing)
         return SearchCriterion(key, operation, value)
     }
 }

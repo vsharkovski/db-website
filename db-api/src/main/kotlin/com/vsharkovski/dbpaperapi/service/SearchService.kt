@@ -30,9 +30,7 @@ class SearchService(
             """
             (\w+?)
             ($searchOperatorsJoinedOr)
-            (\p{Punct}?)
-            ([^$forbiddenCharacters]+?)
-            (\p{Punct}?),
+            ([^$forbiddenCharacters]+?),
             """.trimIndent().replace("\n", "")
         )
     }
@@ -58,9 +56,7 @@ class SearchService(
                 UnprocessedSearchCriterion(
                     key = matcher.group(1),
                     operation = matcher.group(2),
-                    value = matcher.group(4),
-                    prefix = matcher.group(3),
-                    suffix = matcher.group(5)
+                    value = matcher.group(3),
                 )
             )
         }

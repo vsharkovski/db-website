@@ -19,20 +19,14 @@ data class PersonSpecification(
         SearchOperation.NEGATION ->
             builder.notEqual(root.get<Any>(criterion.key), criterion.value)
         SearchOperation.GREATER_THAN ->
-            builder.greaterThan(root.get(criterion.key), criterion.value.toString())
+            builder.greaterThan(root.get(criterion.key), criterion.value)
         SearchOperation.LESS_THAN ->
-            builder.lessThan(root.get(criterion.key), criterion.value.toString())
+            builder.lessThan(root.get(criterion.key), criterion.value)
         SearchOperation.GREATER_THAN_OR_EQUAL ->
-            builder.greaterThanOrEqualTo(root.get(criterion.key), criterion.value.toString())
+            builder.greaterThanOrEqualTo(root.get(criterion.key), criterion.value)
         SearchOperation.LESS_THAN_OR_EQUAL ->
-            builder.lessThanOrEqualTo(root.get(criterion.key), criterion.value.toString())
+            builder.lessThanOrEqualTo(root.get(criterion.key), criterion.value)
         SearchOperation.LIKE ->
-            builder.like(root.get(criterion.key), criterion.value.toString())
-        SearchOperation.STARTS_WITH ->
-            builder.like(root.get(criterion.key), criterion.value.toString() + "%")
-        SearchOperation.ENDS_WITH ->
-            builder.like(root.get(criterion.key), "%" + criterion.value.toString())
-        SearchOperation.CONTAINS ->
-            builder.like(root.get(criterion.key), "%" + criterion.value.toString() + "%")
+            builder.like(root.get(criterion.key), criterion.value)
     }
 }

@@ -11,33 +11,14 @@
       placement="bottom"
       autoClose="true"
     />
-    <ng-template #nameTipsPopover>Use <span class="fw-bold text-primary">?</span> to match any character</ng-template>
+    <ng-template #nameTipsPopover>
+      <p class="mb-0">
+        Use <span class="fw-bold text-primary">*</span> to match 0 or more characters (try it at the start or end!)
+      </p>
+      <p class="mb-0">Use <span class="fw-bold text-primary">?</span> to match a single character</p>
+    </ng-template>
     <div *ngIf="nameField.errors?.['pattern']" class="invalid-feedback">The name contains invalid characters.</div>
     <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
-  </div>
-
-  <label class="form-label"></label>
-  <div class="ms-1">
-    <div class="form-check form-check-inline">
-      <input
-        class="form-check-input"
-        type="radio"
-        formControlName="nameSearchMode"
-        name="nameSearchMode"
-        value="anywhere"
-      />
-      <label class="form-check-label">Anywhere inside name</label>
-    </div>
-    <div class="form-check form-check-inline">
-      <input
-        class="form-check-input"
-        type="radio"
-        formControlName="nameSearchMode"
-        name="nameSearchMode"
-        value="start"
-      />
-      <label class="form-check-label">Only from start</label>
-    </div>
   </div>
 
   <label class="form-label">Birth year</label>
