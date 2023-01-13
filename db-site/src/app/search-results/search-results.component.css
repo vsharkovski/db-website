@@ -1,5 +1,5 @@
 .results-table {
-  max-height: calc(100vh - 11.75rem);
+  max-height: calc(100vh - 10.5rem);
   overflow-y: auto;
   margin-bottom: 1rem;
 }
