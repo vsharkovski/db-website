@@ -55,6 +55,7 @@
 .wiki-container img {
   max-height: 1.5rem;
   width: auto;
+  margin-inline-end: 0.25rem;
 }
 
 .divider-top {
