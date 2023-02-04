@@ -17,7 +17,7 @@ fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
         predicate(this)
     }
 
-fun File.forEachCSVRecordBuffered(predicate: (CSVRecord) -> Unit) {
+fun File.forEachCSVRecordBuffered(logFunction: (Int) -> Unit, predicate: (CSVRecord) -> Unit) {
     val bufferedReader = this.bufferedReader()
     val csvParser = CSVParser(
         bufferedReader,
@@ -29,8 +29,13 @@ fun File.forEachCSVRecordBuffered(predicate: (CSVRecord) -> Unit) {
             .setHeader()
             .build()
     )
+
+    var index = 0
     for (record in csvParser) {
         predicate(record)
+
+        index++
+        logFunction(index)
     }
 }
 
@@ -44,15 +49,21 @@ class CSVService(
 ) {
     val logger: Logger = LoggerFactory.getLogger(CSVService::class.java)
 
+    private val logStatusUpdateInterval = 100000
+
     fun addFile(file: File) {
-        logger.info("Starting to save file [{}]", file.path)
-        file.forEachCSVRecordBuffered { addRecord(it) }
-        logger.info("Finished saving file [{}]", file.path)
+        logger.info("Add file: starting [{}]", file.path)
+        file.forEachCSVRecordBuffered(createLogStatusUpdateFunction("Add file")) {
+            addRecord(it)
+        }
+        logger.info("Add file: ended [{}]", file.path)
     }
 
     fun addNotabilityIndices(file: File) {
         logger.info("Add notabilityIndex from file: starting [{}]", file.path)
-        file.forEachCSVRecordBuffered { setRecordNotabilityIndex(it) }
+        file.forEachCSVRecordBuffered(createLogStatusUpdateFunction("Add notabilityIndex")) {
+            setRecordNotabilityIndex(it)
+        }
         logger.info("Add notabilityIndex from file: finished [{}]", file.path)
     }
 
@@ -82,7 +93,6 @@ class CSVService(
             deathLatitude = record.get("dpla1").toFloatOrNull(),
             notabilityIndex = getNotabilityIndex(record)
         )
-//        logger.info("Saving person [{}]", person)
         personRepository.save(person)
     }
 
@@ -98,4 +108,10 @@ class CSVService(
     private fun getNotabilityIndex(record: CSVRecord): Float? =
         record.get("sum_visib_ln_5criteria").toFloatOrNull()
 
+    private fun createLogStatusUpdateFunction(taskName: String): (Int) -> Unit {
+        return { index ->
+            if (index % logStatusUpdateInterval == 0)
+                logger.info("$taskName: $index processed")
+        }
+    }
 }
