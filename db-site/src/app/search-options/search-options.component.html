@@ -89,19 +89,21 @@
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
   </select>
 
-  <label class="form-label full-row">Occupation</label>
-  <div class="two-column-grid full-row ps-3">
-    <label for="occupationLevel1Id" class="form-label">Level 1</label>
-    <select class="form-select" formControlName="occupationLevel1Id">
-      <option [ngValue]="null">Any</option>
-      <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
-    </select>
-    <label class="form-label">Level 3</label>
-    <dbw-variable-search
-      [variables]="occupationsLevel3"
-      [pushedSelected]="recentmostPushedOccupationLevel3"
-      (resultSelected)="onOccupationLevel3Selected($event)"
-    ></dbw-variable-search>
+  <div class="full-row">
+    <label class="form-label">Occupation</label>
+    <div class="two-column-grid ps-3">
+      <label for="occupationLevel1Id" class="form-label">Level 1</label>
+      <select class="form-select" formControlName="occupationLevel1Id">
+        <option [ngValue]="null">Any</option>
+        <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
+      </select>
+      <label class="form-label">Level 3</label>
+      <dbw-variable-search
+        [variables]="occupationsLevel3"
+        [pushedSelected]="recentmostPushedOccupationLevel3"
+        (resultSelected)="onOccupationLevel3Selected($event)"
+      ></dbw-variable-search>
+    </div>
   </div>
 
   <div class="full-row d-flex">
