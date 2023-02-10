@@ -7,8 +7,7 @@ export interface Person {
   nameProcessed: string | null;
   genderId: number | null;
   level1MainOccId: number | null;
-  level2MainOccId: number | null;
-  level2SecondOccId: number | null;
+  level3MainOccId: number | null;
   citizenship1BId: number | null;
   citizenship2BId: number | null;
   birthLongitude: number | null;

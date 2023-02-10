@@ -36,4 +36,20 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
         @Param(value = "id") id: Long,
         @Param(value = "nameProcessed") nameProcessed: String
     )
+
+    @Transactional
+    @Modifying
+    @Query("update Person p set p.level1MainOccId = :level1MainOccId where p.wikidataCode = :wikidataCode")
+    fun setOccupationLevel1Id(
+        @Param(value = "wikidataCode") wikidataCode: Int,
+        @Param(value = "level1MainOccId") level1MainOccId: Int,
+    )
+
+    @Transactional
+    @Modifying
+    @Query("update Person p set p.level3MainOccId = :level3MainOccId where p.wikidataCode = :wikidataCode")
+    fun setOccupationLevel3Id(
+        @Param(value = "wikidataCode") wikidataCode: Int,
+        @Param(value = "level3MainOccId") level3MainOccId: Int,
+    )
 }

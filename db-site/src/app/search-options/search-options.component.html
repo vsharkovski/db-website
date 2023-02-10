@@ -1,4 +1,4 @@
-<form [formGroup]="form" (ngSubmit)="this.submitted.next()">
+<form [formGroup]="form" (ngSubmit)="this.submitted.next()" class="two-column-grid">
   <label for="term" class="form-label">Name</label>
   <div>
     <input
@@ -77,17 +77,32 @@
     </div>
   </div>
 
-  <label for="citizenship" class="form-label">Citizenship</label>
-  <select class="form-select" formControlName="citizenship">
+  <label for="citizenshipId" class="form-label">Citizenship</label>
+  <select class="form-select" formControlName="citizenshipId">
     <option [ngValue]="null">Any</option>
     <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
   </select>
 
-  <label for="gender" class="form-labe">Gender</label>
-  <select class="form-select" formControlName="gender">
+  <label for="genderId" class="form-label">Gender</label>
+  <select class="form-select" formControlName="genderId">
     <option [ngValue]="null">Any</option>
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
   </select>
+
+  <label class="form-label full-row">Occupation</label>
+  <div class="two-column-grid full-row ps-3">
+    <label for="occupationLevel1Id" class="form-label">Level 1</label>
+    <select class="form-select" formControlName="occupationLevel1Id">
+      <option [ngValue]="null">Any</option>
+      <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
+    </select>
+    <label class="form-label">Level 3</label>
+    <dbw-variable-search
+      [variables]="occupationsLevel3"
+      [pushedSelected]="recentmostPushedOccupationLevel3"
+      (resultSelected)="onOccupationLevel3Selected($event)"
+    ></dbw-variable-search>
+  </div>
 
   <div class="full-row d-flex">
     <button type="submit" class="btn btn-secondary ms-auto">Search</button>

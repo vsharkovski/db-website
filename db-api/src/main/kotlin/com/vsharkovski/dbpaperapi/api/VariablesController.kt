@@ -23,7 +23,7 @@ class VariablesController(
         // NOTE: If doing things in the StartupEventListener, this function will fire off before those.
         allVariablesResponse = VariablesAllResponse(
             genders = genderService.findAll().map { PublicVariable(id = it.id, name = it.name) },
-            occupations = occupationService.findAll().map { PublicVariable(id = it.id, name = it.name) },
+            occupations = occupationService.findAll().map { PublicVariable(id = it.id, name = it.name, type = it.type) },
             citizenships = citizenshipService.findAll().map { PublicVariable(id = it.id, name = it.nameReadable ?: it.name) }
         )
     }

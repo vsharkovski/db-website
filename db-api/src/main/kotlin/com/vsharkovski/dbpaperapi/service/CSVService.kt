@@ -1,6 +1,7 @@
 package com.vsharkovski.dbpaperapi.service
 
 import com.vsharkovski.dbpaperapi.model.Person
+import com.vsharkovski.dbpaperapi.repository.OccupationRepository
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
@@ -42,6 +43,7 @@ fun File.forEachCSVRecordBuffered(logFunction: (Int) -> Unit, predicate: (CSVRec
 @Service
 class CSVService(
     val personRepository: PersonRepository,
+    val occupationRepository: OccupationRepository,
     val genderService: GenderService,
     val occupationService: OccupationService,
     val citizenshipService: CitizenshipService,
@@ -67,6 +69,16 @@ class CSVService(
         logger.info("Add notabilityIndex from file: finished [{}]", file.path)
     }
 
+    fun addOccupations(file: File) {
+        logger.info("Add occupations from file: starting [{}]", file.path)
+        occupationRepository.setAllTypes(0)
+        file.forEachCSVRecordBuffered(createLogStatusUpdateFunction("Add occupations")) {
+            setRecordOccupations(it)
+        }
+        occupationService.deleteAllByType(0)
+        logger.info("Add occupations from file: finished [{}]", file.path)
+    }
+
     private fun addRecord(record: CSVRecord) {
         val name = record.get("name").ifEmpty { null }
         val person = Person(
@@ -78,11 +90,9 @@ class CSVService(
             genderId = record.get("gender")
                 .ifNotEmptyOrNull { genderService.findOrAddByName(it).id },
             level1MainOccId = record.get("level1_main_occ")
-                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
-            level2MainOccId = record.get("level2_main_occ")
-                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
-            level2SecondOccId = record.get("level2_second_occ")
-                .ifNotEmptyOrNull { occupationService.findOrAddByName(it).id },
+                .ifNotEmptyOrNull { occupationService.findOrAddByName(it, 1).id },
+            level3MainOccId = record.get("level3_main_occ")
+                .ifNotEmptyOrNull { occupationService.findOrAddByName(it, 3).id },
             citizenship1BId = record.get("citizenship_1_b")
                 .ifNotEmptyOrNull { citizenshipService.findOrAddByName(it).id },
             citizenship2BId = record.get("citizenship_2_b")
@@ -100,6 +110,20 @@ class CSVService(
         val wikidataCode = getRecordWikidataCode(record) ?: return
         val notability = getNotabilityIndex(record) ?: return
         personRepository.setNotabilityIndex(wikidataCode, notability)
+    }
+
+    private fun setRecordOccupations(record: CSVRecord) {
+        val wikidataCode = getRecordWikidataCode(record) ?: return
+
+        record.get("level1_main_occ").ifNotEmptyOrNull { occupationLevel1Name ->
+            val id = occupationService.findOrAddByName(occupationLevel1Name, 1).id
+            personRepository.setOccupationLevel1Id(wikidataCode, id)
+        }
+
+        record.get("level3_main_occ").ifNotEmptyOrNull { occupationLevel3Name ->
+            val id = occupationService.findOrAddByName(occupationLevel3Name, 3).id
+            personRepository.setOccupationLevel3Id(wikidataCode, id)
+        }
     }
 
     private fun getRecordWikidataCode(record: CSVRecord): Int? =

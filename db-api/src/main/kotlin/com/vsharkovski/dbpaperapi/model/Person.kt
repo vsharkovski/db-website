@@ -22,6 +22,7 @@ data class Person(
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "gender_id")
 //    val gender: Gender?,
+
     val genderId: Int?,
 
 //    @ManyToOne(fetch = FetchType.LAZY)
@@ -31,19 +32,8 @@ data class Person(
     @Column(name = "level_1_main_occ_id")
     val level1MainOccId: Int?,
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "level_2_main_occ_id")
-//    val level2MainOcc: Occupation?,
-
-    @Column(name = "level_2_main_occ_id")
-    val level2MainOccId: Int?,
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "level_2_second_occ_id")
-//    val level2SecondOcc: Occupation?,
-
-    @Column(name = "level_2_second_occ_id")
-    val level2SecondOccId: Int?,
+    @Column(name = "level_3_main_occ_id")
+    val level3MainOccId: Int?,
 
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "citizenship_1_b_id")

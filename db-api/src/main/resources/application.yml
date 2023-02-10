@@ -17,6 +17,7 @@ logging:
 database-management:
   import-all: false
   import-notability-index: false
+  import-occupations: false
   process-citizenship-names-readability: false
   process-citizenship-names-search: false
   process-person-names-search: false

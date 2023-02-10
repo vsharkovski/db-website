@@ -32,6 +32,7 @@ import { FooterComponent } from './footer/footer.component';
 import { Event, Router, Scroll } from '@angular/router';
 import { ViewportScroller } from '@angular/common';
 import { filter, pairwise } from 'rxjs';
+import { VariableSearchComponent } from './variable-search/variable-search.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +61,7 @@ import { filter, pairwise } from 'rxjs';
     SortDirectionPipe,
     SortVariablePipe,
     FooterComponent,
+    VariableSearchComponent,
   ],
   imports: [
     BrowserModule,

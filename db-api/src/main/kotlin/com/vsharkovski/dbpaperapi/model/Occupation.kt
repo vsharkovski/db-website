@@ -9,5 +9,7 @@ data class Occupation(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
 
+    val type: Int = 0,
+
     val name: String,
 )

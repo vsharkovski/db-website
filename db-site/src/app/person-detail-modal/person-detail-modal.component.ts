@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { ReplaySubject, skip } from 'rxjs';
 import { Person } from '../person.model';
 import { VariablesService } from '../variables.service';
 import { WikiApiPage } from '../wiki-api-page.model';
@@ -12,6 +13,12 @@ import { WikiService } from '../wiki.service';
 })
 export class PersonDetailModalComponent implements OnInit {
   @Input() person!: Person;
+
+  citizenshipsLabel: string = '';
+  citizenshipsValue: string = '';
+  occupationsValue: string = '';
+
+  variablesLoaded = new ReplaySubject<void>();
 
   wikidataUrl!: string;
   data: WikiApiPage | null = null;
@@ -30,15 +37,43 @@ export class PersonDetailModalComponent implements OnInit {
 
   ngOnInit(): void {
     // Get variables data.
-    this.variablesService
-      .getGenderMap()
-      .subscribe((genders) => (this.genders = genders));
-    this.variablesService
-      .getOccupationMap()
-      .subscribe((occupations) => (this.occupations = occupations));
-    this.variablesService
-      .getCitizenshipMap()
-      .subscribe((citizenships) => (this.citizenships = citizenships));
+    this.variablesService.getGenderMap().subscribe((genders) => {
+      this.genders = genders;
+      this.variablesLoaded.next();
+    });
+    this.variablesService.getOccupationMap().subscribe((occupations) => {
+      this.occupations = occupations;
+      this.variablesLoaded.next();
+    });
+    this.variablesService.getCitizenshipMap().subscribe((citizenships) => {
+      this.citizenships = citizenships;
+      this.variablesLoaded.next();
+    });
+
+    // When all 3 variable groups have been loaded, update strings.
+    this.variablesLoaded.pipe(skip(2)).subscribe(() => {
+      if (this.person.citizenship1BId !== null) {
+        if (this.person.citizenship2BId === null) {
+          this.citizenshipsLabel = 'Citizenship';
+          this.citizenshipsValue =
+            this.citizenships[this.person.citizenship1BId!];
+        } else {
+          this.citizenshipsLabel = 'Citizenships';
+          this.citizenshipsValue = `${
+            this.citizenships[this.person.citizenship1BId!]
+          }, ${this.citizenships[this.person.citizenship2BId]}`;
+        }
+      }
+
+      if (this.person.level1MainOccId !== null) {
+        this.occupationsValue = this.occupations[this.person.level1MainOccId!];
+        if (this.person.level3MainOccId !== null) {
+          this.occupationsValue = `${this.occupationsValue} (${
+            this.occupations[this.person.level3MainOccId]
+          })`;
+        }
+      }
+    });
 
     // Get wiki data.
     this.waitingForResponse = true;

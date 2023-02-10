@@ -61,9 +61,7 @@ export class SearchAppComponent implements OnInit {
     ]);
 
     querySet
-      .pipe(
-        filter((data) => (data[0] === undefined ? false : data[0].length > 0))
-      )
+      .pipe(filter((data) => data[0] !== undefined && data[0].length >= 0))
       .subscribe(([term, page, sortState]) => {
         this.router.navigate([], {
           relativeTo: this.route,

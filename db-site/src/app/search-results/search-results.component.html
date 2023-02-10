@@ -21,8 +21,9 @@
     >
     <span>Gender</span>
     <span>Occupation</span>
+    <span>(detailed) </span>
     <span>Citizenship</span>
-    <span>Citizenship (2nd)</span>
+    <span>(2nd)</span>
   </div>
   <div *ngIf="results.persons.length === 0" class="my-3">
     <h5 class="text-center text-muted">No results.</h5>
@@ -34,6 +35,7 @@
     <span>{{ person.death | dateYear }}</span>
     <span>{{ genders[person.genderId ?? -1] }}</span>
     <span>{{ occupations[person.level1MainOccId ?? -1] }}</span>
+    <span>{{ occupations[person.level3MainOccId ?? -1] }}</span>
     <span>{{ citizenships[person.citizenship1BId ?? -1] }}</span>
     <span>{{ citizenships[person.citizenship2BId ?? -1] }}</span>
   </div>

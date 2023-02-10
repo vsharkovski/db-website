@@ -32,8 +32,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   form: FormGroup;
 
   genders: Variable[] = [];
-  occupations: Variable[] = [];
+  occupationsLevel1: Variable[] = [];
+  occupationsLevel3: Variable[] = [];
   citizenships: Variable[] = [];
+
+  recentmostPushedOccupationLevel3?: Variable;
 
   variablesLoaded = new ReplaySubject<void>();
   pushedTerms = new ReplaySubject<string>();
@@ -56,8 +59,10 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       birthMax: fb.control<number | null>(null, [isIntegerOrNullValidator]),
       deathMin: fb.control<number | null>(null, [isIntegerOrNullValidator]),
       deathMax: fb.control<number | null>(null, [isIntegerOrNullValidator]),
-      citizenship: fb.control<number | null>(null),
-      gender: fb.control<number | null>(null),
+      citizenshipId: fb.control<number | null>(null),
+      occupationLevel1Id: fb.control<number | null>(null),
+      occupationLevel3Id: fb.control<string | null>(null),
+      genderId: fb.control<number | null>(null),
     });
 
     // Create the regular expression for terms.
@@ -81,7 +86,27 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       this.variablesLoaded.next();
     });
     this.variablesService.getOccupations().subscribe((occupations) => {
-      this.occupations = occupations;
+      this.occupationsLevel1 = occupations.filter((occ) => occ.type === 1);
+      this.occupationsLevel3 = occupations.filter((occ) => occ.type === 3);
+
+      // Sort occupations level 3 and clean up their names.
+      this.occupationsLevel3.sort((a, b) => a.name.localeCompare(b.name));
+      for (let occ of this.occupationsLevel3) {
+        let name = occ.name;
+
+        // While the name has a _, remove it (if at start) or replace it with space.
+        while (true) {
+          const pos = name.search('_');
+          if (pos == -1) break;
+          const replacement = pos == 0 ? '' : ' ';
+          name = `${name.substring(0, pos)}${replacement}${name.substring(
+            pos + 1
+          )}`;
+        }
+
+        occ.name = name;
+      }
+
       this.variablesLoaded.next();
     });
     this.variablesService.getCitizenships().subscribe((citizenships) => {
@@ -136,16 +161,27 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     if (values.deathMax !== null) {
       term += `death<=${this.clampLifeYear(values.deathMax)},`;
     }
-    if (values.citizenship) {
-      term += `citizenship1BId:${values.citizenship},`;
+    if (values.citizenshipId) {
+      term += `citizenship1BId:${values.citizenshipId},`;
     }
-    if (values.gender) {
-      term += `genderId:${values.gender},`;
+    if (values.occupationLevel1Id) {
+      term += `level1MainOccId:${values.occupationLevel1Id},`;
+    }
+    if (values.occupationLevel3Id) {
+      term += `level3MainOccId:${values.occupationLevel3Id},`;
+    }
+    if (values.genderId) {
+      term += `genderId:${values.genderId},`;
     }
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
     return term;
+  }
+
+  onOccupationLevel3Selected(occupation: Variable | null) {
+    // Update the form value to either the new id or null.
+    this.form.patchValue({ occupationLevel3Id: occupation?.id ?? null });
   }
 
   private pushTermToForm(term: string): void {
@@ -161,8 +197,10 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       birthMax: null,
       deathMin: null,
       deathMax: null,
-      citizenship: null,
-      gender: null,
+      citizenshipId: null,
+      occupationLevel1Id: null,
+      occupationLevel3Id: null,
+      genderId: null,
     };
 
     for (let c of criteria) {
@@ -189,12 +227,26 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'citizenship1BId' && c.operation == ':') {
         const id = Number(c.value);
         if (this.citizenships.find((item) => item.id === id)) {
-          values.citizenship = id;
+          values.citizenshipId = id;
+        }
+      } else if (c.key == 'level1MainOccId' && c.operation == ':') {
+        const id = Number(c.value);
+        if (this.occupationsLevel1.find((item) => item.id === id)) {
+          values.occupationLevel1Id = id;
+        }
+      } else if (c.key == 'level3MainOccId' && c.operation == ':') {
+        const id = Number(c.value);
+        const occupation = this.occupationsLevel3.find(
+          (item) => item.id === id
+        );
+        if (occupation) {
+          values.occupationLevel3Id = id;
+          this.recentmostPushedOccupationLevel3 = occupation;
         }
       } else if (c.key == 'genderId' && c.operation == ':') {
         const id = Number(c.value);
         if (this.genders.find((item) => item.id === id)) {
-          values.gender = id;
+          values.genderId = id;
         }
       }
     }
@@ -233,11 +285,15 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   get citizenshipField(): AbstractControl {
-    return this.form.get('citizenship')!;
+    return this.form.get('citizenshipId')!;
+  }
+
+  get occupationLevel1Field(): AbstractControl {
+    return this.form.get('occupationLevel1Id')!;
   }
 
   get genderField(): AbstractControl {
-    return this.form.get('gender')!;
+    return this.form.get('genderId')!;
   }
 }
 
@@ -247,6 +303,8 @@ interface FormValues {
   birthMax: number | null;
   deathMin: number | null;
   deathMax: number | null;
-  citizenship: number | null;
-  gender: number | null;
+  citizenshipId: number | null;
+  occupationLevel1Id: number | null;
+  occupationLevel3Id: number | null;
+  genderId: number | null;
 }

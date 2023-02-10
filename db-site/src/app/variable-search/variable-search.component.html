@@ -1,0 +1,16 @@
+<input
+  type="text"
+  [formControl]="termControl"
+  class="form-control"
+  (focusin)="onFocusIn()"
+  (focusout)="onFocusOut()"
+  placeholder="Enter occupation... (optional)"
+/>
+
+<div *ngIf="resultsVisible" class="results-wrapper">
+  <div class="results-list">
+    <div *ngFor="let result of results" (click)="onResultClick(result)" class="result">
+      {{ result.name }}
+    </div>
+  </div>
+</div>

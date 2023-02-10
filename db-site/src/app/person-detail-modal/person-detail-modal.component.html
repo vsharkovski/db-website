@@ -19,12 +19,9 @@
       <span *ngIf="person.genderId !== null">Gender</span>
       <span *ngIf="person.genderId !== null">{{ genders[person.genderId] }}</span>
       <span *ngIf="person.level1MainOccId !== null">Occupation</span>
-      <span *ngIf="person.level1MainOccId !== null">{{ occupations[person.level1MainOccId] }}</span>
-      <span *ngIf="person.citizenship1BId !== null">Citizenship{{ person.citizenship2BId ? "s" : "" }}</span>
-      <span *ngIf="person.citizenship1BId !== null"
-        >{{ citizenships[person.citizenship1BId]
-        }}{{ person.citizenship2BId ? ", " + citizenships[person.citizenship2BId] : "" }}</span
-      >
+      <span *ngIf="person.level1MainOccId !== null">{{ occupationsValue }}</span>
+      <span *ngIf="person.citizenship1BId !== null">{{ citizenshipsLabel }}</span>
+      <span *ngIf="person.citizenship1BId !== null">{{ citizenshipsValue }}</span>
       <span>Notability</span>
       <span>{{ person.notabilityIndex | number : "1.2-2" }}</span>
     </div>
