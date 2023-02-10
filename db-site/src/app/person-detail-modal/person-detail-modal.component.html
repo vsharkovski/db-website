@@ -4,26 +4,32 @@
 </div>
 <div class="modal-body">
   <div class="person-info" [class.image-present]="data?.thumbnail?.source">
-    <div class="image-container" *ngIf="data?.thumbnail?.source">
-      <a [href]="wikidataUrl">
-        <img [src]="data!.thumbnail!.source" class="img-fluid rounded shadow" />
-      </a>
-    </div>
-    <div class="details-panel" [class.image-present]="data?.thumbnail?.source">
-      <span *ngIf="person.birth !== null || person.death !== null">Birth</span>
-      <span *ngIf="person.birth !== null || person.death !== null">{{
+    <div class="details-panel">
+      <!-- <div class="detail-row"> -->
+      <span *ngIf="person.birth !== null || person.death !== null" class="label">Birth</span>
+      <span *ngIf="person.birth !== null || person.death !== null" class="value">{{
         person.birth | dateYear | unknownYear : true : false
       }}</span>
-      <span *ngIf="person.death !== null">Death</span>
-      <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
-      <span *ngIf="person.genderId !== null">Gender</span>
-      <span *ngIf="person.genderId !== null">{{ genders[person.genderId] }}</span>
-      <span *ngIf="person.level1MainOccId !== null">Occupation</span>
-      <span *ngIf="person.level1MainOccId !== null">{{ occupationsValue }}</span>
-      <span *ngIf="person.citizenship1BId !== null">{{ citizenshipsLabel }}</span>
-      <span *ngIf="person.citizenship1BId !== null">{{ citizenshipsValue }}</span>
-      <span>Notability</span>
-      <span>{{ person.notabilityIndex | number : "1.2-2" }}</span>
+      <!-- </div>
+      <div class="detail-row"> -->
+      <span *ngIf="person.death !== null" class="label">Death</span>
+      <span *ngIf="person.death !== null" class="value">{{ person.death | dateYear }}</span>
+      <!-- </div>
+      <div class="detail-row"> -->
+      <span *ngIf="person.genderId !== null" class="label">Gender</span>
+      <span *ngIf="person.genderId !== null" class="value">{{ genders[person.genderId] }}</span>
+      <!-- </div> -->
+      <span *ngIf="person.level1MainOccId !== null" class="label">Occupation</span>
+      <span *ngIf="person.level1MainOccId !== null" class="value">{{ occupationsValue }}</span>
+      <span *ngIf="person.citizenship1BId !== null" class="label">{{ citizenshipsLabel }}</span>
+      <span *ngIf="person.citizenship1BId !== null" class="value">{{ citizenshipsValue }}</span>
+      <!-- <div class="detail-row"> -->
+      <span class="label">Notability</span>
+      <span class="value">{{ person.notabilityIndex | number : "1.2-2" }}</span>
+      <!-- </div> -->
+    </div>
+    <div class="image-container" *ngIf="data?.thumbnail?.source">
+      <img [src]="data!.thumbnail!.source" class="img-fluid rounded shadow" />
     </div>
   </div>
   <div class="divider-top mt-3 pt-2" *ngIf="waitingForResponse || data?.extract">

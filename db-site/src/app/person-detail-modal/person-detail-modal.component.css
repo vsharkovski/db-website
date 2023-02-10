@@ -1,38 +1,38 @@
-.person-info {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
 .person-info.image-present {
+  display: grid;
   grid-template-columns: minmax(auto, 1fr) 1fr;
 }
 
-.details-panel {
-  /* Grid is for when no image is present. */
+/* When image is not present, it's a grid. */
+.person-info .details-panel {
   display: grid;
   grid-template-rows: repeat(6, minmax(min-content, max-content));
   grid-template-columns: 1fr 1fr;
   column-gap: 0.75rem;
+
   padding: 0rem 1rem;
 }
 
-.details-panel > span:nth-child(odd) {
+.person-info .label {
   font-weight: 600;
+  /* margin-inline-end: 1rem; */
   text-align: end;
 }
 
-.details-panel > span:nth-child(even) {
-  margin-bottom: 0.25rem;
-}
-
-.details-panel.image-present {
-  /* Flex is when an image is present. */
+/* When image is present, it's a flex column. */
+.person-info.image-present .details-panel {
   display: flex;
   flex-direction: column;
 }
 
-.details-panel.image-present > span:nth-child(odd) {
+.person-info.image-present .label {
   text-align: start;
+  margin-top: 0.25rem;
+}
+
+.person-info.image-present .label:not(:first-child) {
+  border-top: var(--bs-modal-header-border-width) solid
+    var(--bs-modal-header-border-color);
 }
 
 .image-container {
