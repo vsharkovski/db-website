@@ -8,6 +8,7 @@
 }
 
 .details-panel {
+  /* Grid is for when no image is present. */
   display: grid;
   grid-template-rows: repeat(6, minmax(min-content, max-content));
   grid-template-columns: 1fr 1fr;
@@ -21,21 +22,23 @@
 }
 
 .details-panel > span:nth-child(even) {
-  text-align: start;
+  margin-bottom: 0.25rem;
+}
+
+.details-panel.image-present {
+  /* Flex is when an image is present. */
+  display: flex;
+  flex-direction: column;
 }
 
 .details-panel.image-present > span:nth-child(odd) {
   text-align: start;
 }
 
-.details-panel.image-present > span:nth-child(even) {
-  text-align: end;
-}
-
 .image-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .image-container img {
