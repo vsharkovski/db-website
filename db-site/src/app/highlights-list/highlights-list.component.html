@@ -1,59 +1,56 @@
-<div class="d-flex flex-column align-items-center">
-  <div class="text-center">
-    <h5>
-      <a [routerLink]="['/search']" class="text-reset">Explore the database online!</a>
-    </h5>
-    <p>
-      You can finally <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
-      filtering by name, birth and death year, gender, occupation, or citizenship.
-    </p>
-  </div>
-  <div class="position-relative">
-    <img src="assets/highlights/search-app-2.jpg" class="img-fluid rounded shadow" />
-    <a [routerLink]="['/search']" class="stretched-link"></a>
-  </div>
-</div>
-<div class="mt-5 d-flex flex-column align-items-center">
-  <div class="text-center">
-    <h5>Earth Visualization</h5>
-    <p>
-      Topi Tjukanov used our dataset to create an <a [href]="topiLink">interactive visualization</a> of the most notable
-      people around the world.
-    </p>
-  </div>
-  <div class="position-relative">
-    <img src="assets/highlights/topi.jpg" class="img-fluid rounded shadow topi-img" />
-    <a [href]="topiLink" class="stretched-link"></a>
-  </div>
-</div>
-<div class="mt-5 d-flex flex-column align-items-center">
-  <h5 class="text-center">Birthplaces of notable people in Europe from 1000 AD onwards</h5>
-  <div class="my-2">
-    <video autoplay muted loop class="rounded shadow">
-      <source src="assets/highlights/europe-vis-1000ad-onwards.mp4" />
-      Download the <a href="assets/highlights/europe-vis-1000ad-onwards.mp4">video.</a>
-    </video>
-  </div>
-  <p class="text-muted mb-0">
-    credit to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird on Twitter</a>
-  </p>
-</div>
-<div class="mt-5">
-  <h5 class="text-center mb-3">Top 0.1% of all scientific papers</h5>
-  <div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-4">
+<div class="row">
+  <div class="d-0 d-lg-block col-lg-1"></div>
+  <div class="col-lg-10">
+    <div class="row">
+      <div class="col-md">
+        <h5>
+          <a [routerLink]="['/search']" class="text-reset">Explore the database online!</a>
+        </h5>
+        <p>
+          You can finally <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
+          filtering by name, birth and death year, gender, occupation, or citizenship.
+        </p>
+      </div>
+      <div class="col-md position-relative">
+        <img src="assets/highlights/search-app-2.jpg" class="img-fluid rounded shadow search-img" />
+        <a [routerLink]="['/search']" class="stretched-link"></a>
+      </div>
+    </div>
+    <div class="mt-5 row">
+      <div class="col-md">
+        <h5>Earth Visualization</h5>
+        <p>
+          Topi Tjukanov used our dataset to create an <a [href]="topiLink">interactive visualization</a> of the most
+          notable people around the world.
+        </p>
+      </div>
+      <div class="col-md position-relative">
+        <img src="assets/highlights/topi.jpg" class="img-fluid rounded shadow topi-img" />
+        <a [href]="topiLink" class="stretched-link"></a>
+      </div>
+    </div>
+    <div class="mt-5 row">
+      <div class="col-md">
+        <h5>Timeline of Europe, 1000 AD onwards</h5>
+        <p>This animation shows a timeline of the birthplaces of notable people in Europe from 1000 AD onwards.</p>
+        <p class="text-muted">
+          credit to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird on Twitter</a>
+        </p>
+      </div>
+      <div class="col-md">
+        <video autoplay controls muted loop class="rounded shadow">
+          <source src="assets/highlights/europe-vis-1000ad-onwards.mp4" />
+          Download the <a href="assets/highlights/europe-vis-1000ad-onwards.mp4">video.</a>
+        </video>
+      </div>
+    </div>
+    <div class="mt-5 row">
+      <h5 class="mb-3">Top 0.1% of all scientific papers</h5>
       <p>
         <a [href]="altmetricLink">According to Altmetric</a>, as of October 2022, we are now in the top 0.1% of all
         scientific papers of a similar age, and in the top 5% of all research papers ever.
       </p>
     </div>
-    <div class="col-md-4 d-flex justify-content-center">
-      <div class="position-relative">
-        <img src="assets/highlights/altmetric-oct-2022.png" class="img-fluid rounded shadow justify-self-center" />
-        <a [href]="altmetricLink" class="stretched-link"></a>
-      </div>
-    </div>
-    <div class="col-md-2"></div>
   </div>
+  <div class="d-0 d-lg-block col-lg-1"></div>
 </div>
