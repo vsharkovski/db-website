@@ -43,6 +43,7 @@
 
 .image-container img {
   max-height: 30vh;
+  object-fit: cover;
 }
 
 .wiki-container {
