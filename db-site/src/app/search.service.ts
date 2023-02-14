@@ -36,7 +36,8 @@ export class SearchService {
             hasNextPage: false,
             hasPreviousPage: false,
             pageNumber: 0,
-            maxSliceSize: 0,
+            totalPages: 0,
+            resultsPerPage: 0,
             sort: {
               variable: 'notabilityIndex',
               direction: 'descending',

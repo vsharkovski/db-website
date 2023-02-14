@@ -7,6 +7,7 @@ data class SearchResponse(
     val hasPreviousPage: Boolean,
     val hasNextPage: Boolean,
     val pageNumber: Int,
-    val maxSliceSize: Int,
+    val totalPages: Int,
+    val resultsPerPage: Int,
     val sort: PublicSortState
 )

@@ -14,11 +14,14 @@
     <div class="results-header mb-2">
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="results && results.persons && results.persons.length > 0 && !waitingForResults"
-        >Showing results {{ results.pageNumber * results.maxSliceSize + 1 }} -
-        {{ results.pageNumber * results.maxSliceSize + results.persons.length }} (page {{ results.pageNumber + 1 }}),
-        sorted by {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
+        >Showing results {{ results.pageNumber * results.resultsPerPage + 1 }} -
+        {{ results.pageNumber * results.resultsPerPage + results.persons.length }}, sorted by
+        {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
       </span>
-      <span *ngIf="waitingForResults" class="loading-label text-primary">Please wait...</span>
+      <span *ngIf="waitingForResults" class="loading-label text-primary me-auto">Please wait...</span>
+      <span *ngIf="results && results.persons && results.persons.length > 0 && !waitingForResults" class="ms-auto"
+        >Page: {{ results.pageNumber + 1 }} / {{ results.totalPages }}</span
+      >
       <dbw-search-results-page-buttons
         *ngIf="
           results && results.persons && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)
@@ -27,7 +30,6 @@
         [disabled]="waitingForResults"
         (previousPageButtonClicked)="onPageButtonClick(-1)"
         (nextPageButtonClicked)="onPageButtonClick(+1)"
-        class="ms-auto"
       ></dbw-search-results-page-buttons>
     </div>
     <dbw-search-results

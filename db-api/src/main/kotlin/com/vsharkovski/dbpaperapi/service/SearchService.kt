@@ -72,13 +72,14 @@ class SearchService(
         )
 
         // Query for results.
-        val resultsSlice = personRepository.findAll(specification, paging)
+        val resultsPage = personRepository.findAll(specification, paging)
         return SearchResult(
-            results = resultsSlice.content,
-            hasPreviousPage = resultsSlice.hasPrevious(),
-            hasNextPage = resultsSlice.hasNext(),
+            results = resultsPage.content,
+            hasPreviousPage = resultsPage.hasPrevious(),
+            hasNextPage = resultsPage.hasNext(),
             pageNumber = pageNumber,
-            maxSliceSize = resultsPerPage,
+            totalPages = resultsPage.totalPages,
+            resultsPerPage = resultsPerPage,
             sortState = sortState
         )
     }
