@@ -1,0 +1,32 @@
+<div class="d-flex align-items-center px-3 bg-light rounded">
+  <span class="me-2 fw-semibold">Page:</span>
+  <span class="me-2">1</span>
+  <div class="btn-group">
+    <button class="btn btn-sm btn-light" [disabled]="disabled || currentPage === 0" (click)="changePage(0)"><<</button>
+    <button
+      class="btn btn-sm btn-light"
+      [disabled]="disabled || currentPage === 0"
+      (click)="changePage(currentPage - 1)"
+    >
+      <
+    </button>
+  </div>
+  <input [formControl]="pageControl" type="number" class="form-control mx-1" />
+  <div class="btn-group">
+    <button
+      class="btn btn-sm btn-light"
+      [disabled]="disabled || currentPage === totalPages - 1"
+      (click)="changePage(currentPage + 1)"
+    >
+      >
+    </button>
+    <button
+      class="btn btn-sm btn-light"
+      [disabled]="disabled || currentPage === totalPages - 1"
+      (click)="changePage(totalPages - 1)"
+    >
+      >>
+    </button>
+  </div>
+  <span class="ms-2">{{ totalPages }}</span>
+</div>

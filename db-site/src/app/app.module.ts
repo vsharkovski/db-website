@@ -33,6 +33,7 @@ import { Event, Router, Scroll } from '@angular/router';
 import { ViewportScroller } from '@angular/common';
 import { filter, pairwise } from 'rxjs';
 import { VariableSearchComponent } from './variable-search/variable-search.component';
+import { PagePickerComponent } from './page-picker/page-picker.component';
 
 @NgModule({
   declarations: [
@@ -62,6 +63,7 @@ import { VariableSearchComponent } from './variable-search/variable-search.compo
     SortVariablePipe,
     FooterComponent,
     VariableSearchComponent,
+    PagePickerComponent,
   ],
   imports: [
     BrowserModule,

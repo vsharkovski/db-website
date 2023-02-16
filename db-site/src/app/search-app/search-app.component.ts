@@ -170,6 +170,11 @@ export class SearchAppComponent implements OnInit {
     }
   }
 
+  onPageChanged(page: number): void {
+    console.log('search app page changed event', page);
+    this.pageSet.next(page);
+  }
+
   onSortStateSet(sortState: SortState): void {
     // Whenever the sort state is changed, emit from the appropriate observable.
     // The page is also reset to 0.
