@@ -11,9 +11,8 @@
           filtering by name, birth and death year, gender, occupation, or citizenship.
         </p>
       </div>
-      <div class="col-md position-relative">
-        <img src="assets/highlights/search-app-2.jpg" class="img-fluid rounded shadow search-img" />
-        <a [routerLink]="['/search']" class="stretched-link"></a>
+      <div class="col-md d-flex justify-content-center">
+        <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
       </div>
     </div>
     <div class="mt-5 row">

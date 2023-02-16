@@ -1,4 +1,4 @@
-<form [formGroup]="form" (ngSubmit)="this.submitted.next()" class="two-column-grid">
+<form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="two-column-grid">
   <label for="term" class="form-label">Name</label>
   <div>
     <input

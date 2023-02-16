@@ -43,7 +43,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
   @Input('pushedTerm') recentmostPushedTerm?: string;
   @Output() termChanged = new EventEmitter<string>();
-  @Output() submitted = new EventEmitter<void>();
+  @Output() submitted = new EventEmitter<string>();
 
   constructor(
     fb: NonNullableFormBuilder,
@@ -182,6 +182,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   onOccupationLevel3Selected(occupation: Variable | null) {
     // Update the form value to either the new id or null.
     this.form.patchValue({ occupationLevel3Id: occupation?.id ?? null });
+  }
+
+  onFormSubmit(): void {
+    const term = this.compileTermFromFormValues(this.form.value);
+    this.submitted.next(term);
   }
 
   private pushTermToForm(term: string): void {
