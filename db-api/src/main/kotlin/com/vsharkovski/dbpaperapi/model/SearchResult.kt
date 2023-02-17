@@ -8,6 +8,7 @@ data class SearchResult<T>(
     val hasNextPage: Boolean = false,
     val pageNumber: Int = 0,
     val totalPages: Int = 0,
+    val totalResults: Int = 0,
     val resultsPerPage: Int = 0,
     val sortState: SortState = SortState("notabilityIndex", Sort.Direction.DESC)
 )

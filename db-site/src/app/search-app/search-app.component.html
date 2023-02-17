@@ -15,22 +15,11 @@
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="results && results.persons && results.persons.length > 0 && !waitingForResults"
         >Showing results {{ results.pageNumber * results.resultsPerPage + 1 }} -
-        {{ results.pageNumber * results.resultsPerPage + results.persons.length }}, sorted by
-        {{ results.sort.variable | sortVariable }} {{ results.sort.direction }}
+        {{ results.pageNumber * results.resultsPerPage + results.persons.length }} (out of
+        {{ results.totalResults }} total), sorted by {{ results.sort.variable | sortVariable }}
+        {{ results.sort.direction }}
       </span>
       <span *ngIf="waitingForResults" class="loading-label text-primary me-auto">Please wait...</span>
-      <!-- <span *ngIf="results && results.persons && results.persons.length > 0 && !waitingForResults" class="ms-auto"
-        >Page: {{ results.pageNumber + 1 }} / {{ results.totalPages }}</span
-      > -->
-      <!-- <dbw-search-results-page-buttons
-        *ngIf="
-          results && results.persons && results.persons.length > 0 && (results.hasPreviousPage || results.hasNextPage)
-        "
-        [results]="results"
-        [disabled]="waitingForResults"
-        (previousPageButtonClicked)="onPageButtonClick(-1)"
-        (nextPageButtonClicked)="onPageButtonClick(+1)"
-      ></dbw-search-results-page-buttons> -->
       <dbw-page-picker
         *ngIf="(results?.persons?.length ?? 0) > 0"
         [currentPage]="results?.pageNumber ?? 0"

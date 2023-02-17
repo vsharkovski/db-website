@@ -37,6 +37,7 @@ export class SearchService {
             hasPreviousPage: false,
             pageNumber: 0,
             totalPages: 0,
+            totalResults: 0,
             resultsPerPage: 0,
             sort: {
               variable: 'notabilityIndex',

@@ -42,6 +42,7 @@ class SearchController(
                 hasNextPage = result.hasNextPage,
                 pageNumber = page,
                 totalPages = result.totalPages,
+                totalResults = result.totalResults,
                 resultsPerPage = result.resultsPerPage,
                 sort = PublicSortState(
                     variable = result.sortState.variable,

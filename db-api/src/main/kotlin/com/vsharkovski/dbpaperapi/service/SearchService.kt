@@ -79,6 +79,7 @@ class SearchService(
             hasNextPage = resultsPage.hasNext(),
             pageNumber = pageNumber,
             totalPages = resultsPage.totalPages,
+            totalResults = resultsPage.totalElements.toInt(),
             resultsPerPage = resultsPerPage,
             sortState = sortState
         )

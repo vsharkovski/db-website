@@ -157,19 +157,6 @@ export class SearchAppComponent implements OnInit {
     }
   }
 
-  // onPageButtonClick(pageChange: number): void {
-  //   // Whenever the page is changed and it is possible to move to the new page,
-  //   // emit from the appropriate observable.
-  //   const latestPage = Number(this.route.snapshot.queryParams['page'] ?? '0');
-  //   if (
-  //     ((pageChange === -1 && this.results?.hasPreviousPage) ||
-  //       (pageChange === 1 && this.results?.hasNextPage)) &&
-  //     latestPage + pageChange >= 0
-  //   ) {
-  //     this.pageSet.next(latestPage + pageChange);
-  //   }
-  // }
-
   onPageChanged(page: number): void {
     this.pageSet.next(page);
   }

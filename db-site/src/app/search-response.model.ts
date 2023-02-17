@@ -7,6 +7,7 @@ export interface SearchResponse extends Response {
   hasNextPage: boolean;
   pageNumber: number;
   totalPages: number;
+  totalResults: number;
   resultsPerPage: number;
   persons: Person[];
   sort: SortState;
