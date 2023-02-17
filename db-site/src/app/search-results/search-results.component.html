@@ -1,35 +1,44 @@
 <div *ngIf="results" class="results-table">
   <div class="search-result results-header">
-    <span class="sortable-variable" (click)="onSortIndicatorClick('notabilityIndex')"
+    <span
+      class="sortable-variable"
+      (click)="onSortIndicatorClick('notabilityIndex')"
+      title="Notability index. Higher means more notable. Click to sort."
       ><span [class.highlighted-variable]="results.sort.variable === 'notabilityIndex'">Notability</span
       ><span class="sort-indicator">{{
         (results.sort.variable === "notabilityIndex" ? results.sort.direction : null) | sortDirection
       }}</span></span
     >
-    <span>Name</span>
-    <span class="sortable-variable" (click)="onSortIndicatorClick('birth')"
+    <span title="The person's name.">Name</span>
+    <span
+      class="sortable-variable"
+      (click)="onSortIndicatorClick('birth')"
+      title="The person's year of birth. Click to sort."
       ><span [class.highlighted-variable]="results.sort.variable === 'birth'">Birth</span
       ><span class="sort-indicator" (click)="onSortIndicatorClick('birth')">{{
         (results.sort.variable === "birth" ? results.sort.direction : null) | sortDirection
       }}</span>
     </span>
-    <span class="sortable-variable" (click)="onSortIndicatorClick('death')"
+    <span
+      class="sortable-variable"
+      (click)="onSortIndicatorClick('death')"
+      title="The person's year of death. Click to sort."
       ><span [class.highlighted-variable]="results.sort.variable === 'death'">Death</span
       ><span class="sort-indicator" (click)="onSortIndicatorClick('death')">{{
         (results.sort.variable === "death" ? results.sort.direction : null) | sortDirection
       }}</span></span
     >
-    <span>Gender</span>
-    <span>Occupation</span>
-    <span>(detailed) </span>
-    <span>Citizenship</span>
-    <span>(2nd)</span>
+    <span title="The person's gender.">Gender</span>
+    <span title="The person's general occupation category (occupation level 1).">Occupation</span>
+    <span title="The person's detailed occupation (occupation level 3).">(detailed) </span>
+    <span title="The person's citizenship.">Citizenship</span>
+    <span title="The person's second citizenship, if present.">(2nd)</span>
   </div>
   <div *ngIf="results.persons.length === 0" class="my-3 px-3">
     <h5 class="text-muted">No results.</h5>
     <p class="">
-      If searching by name, try putting <code>*</code> at the start and end. For example, instead of <code>john</code>, search for
-      <code>*john*</code>.
+      If searching by name, try putting <code>*</code> at the start and end. For example, instead of <code>john</code>,
+      search for <code>*john*</code>.
     </p>
   </div>
   <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">

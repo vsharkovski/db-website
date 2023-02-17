@@ -1,13 +1,13 @@
 <div class="row" [class.d-flex]="!hasAskedForResults">
-  <div class="col-lg-auto mb-3 px-3 text-center options-container" [class.mx-auto]="!hasAskedForResults">
+  <div class="col-lg-auto mb-3 px-3 options-container" [class.mx-auto]="!hasAskedForResults">
     <h2 class="mb-3">Find people in history</h2>
     <dbw-search-options
       [pushedTerm]="termPushedToOptions"
       (termChanged)="onTermSet($event)"
       (submitted)="searchOptionsSubmitted.next()"
     ></dbw-search-options>
-    <p class="mt-3 mb-0">Tip: Click on a search result to see details.</p>
-    <p class="mt-1 mb-0">
+    <p class="mt-3 mb-0 text-center">Tip: Click on a search result to see details.</p>
+    <p class="mt-1 mb-0 text-center">
       <a [routerLink]="['/about']" fragment="download">Download the whole dataset here.</a>
     </p>
   </div>
