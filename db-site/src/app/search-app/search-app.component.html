@@ -1,12 +1,13 @@
 <div class="row" [class.d-flex]="!hasAskedForResults">
-  <div class="col-lg-auto mb-3 px-3 options-container" [class.mx-auto]="!hasAskedForResults">
-    <h2 class="text-center mb-3">Find people in history</h2>
+  <div class="col-lg-auto mb-3 px-3 text-center options-container" [class.mx-auto]="!hasAskedForResults">
+    <h2 class="mb-3">Find people in history</h2>
     <dbw-search-options
       [pushedTerm]="termPushedToOptions"
       (termChanged)="onTermSet($event)"
       (submitted)="searchOptionsSubmitted.next()"
     ></dbw-search-options>
-    <p class="mt-3 text-center">
+    <p class="mt-3 mb-0">Tip: Click on a search result to see details.</p>
+    <p class="mt-1 mb-0">
       <a [routerLink]="['/about']" fragment="download">Download the whole dataset here.</a>
     </p>
   </div>
@@ -20,15 +21,17 @@
         {{ results.sort.direction }}
       </span>
       <span *ngIf="waitingForResults" class="loading-label text-primary me-auto">Please wait...</span>
-      <dbw-page-picker
-        *ngIf="(results?.persons?.length ?? 0) > 0"
-        [currentPage]="results?.pageNumber ?? 0"
-        [totalPages]="results?.totalPages ?? 0"
-        [allowArbitraryChanging]="true"
-        [disabled]="waitingForResults"
-        (pageChanged)="onPageChanged($event)"
-        class="ms-auto"
-      ></dbw-page-picker>
+      <div *ngIf="(results?.persons?.length ?? 0) > 0" class="d-flex px-md-3 mx-auto mx-sm-0 ms-sm-auto">
+        <span class="me-2 fw-semibold">Page:</span>
+        <dbw-page-picker
+          [currentPage]="results?.pageNumber ?? 0"
+          [totalPages]="results?.totalPages ?? 0"
+          [allowArbitraryChanging]="true"
+          [disabled]="waitingForResults"
+          (pageChanged)="onPageChanged($event)"
+          class=""
+        ></dbw-page-picker>
+      </div>
     </div>
     <dbw-search-results
       [results]="results"
