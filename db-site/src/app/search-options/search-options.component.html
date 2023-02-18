@@ -1,5 +1,5 @@
 <form [formGroup]="form" (ngSubmit)="onFormSubmit()" class="two-column-grid">
-  <label for="term" class="form-label">Name</label>
+  <label for="term" class="form-label" title="The person's name.">Name</label>
   <div>
     <input
       type="text"
@@ -21,7 +21,7 @@
     <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
   </div>
 
-  <label class="form-label">Birth year</label>
+  <label class="form-label" title="The person's year of birth.">Birth year</label>
   <div>
     <div class="number-range">
       <input
@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <label class="form-label">Death year</label>
+  <label class="form-label" title="The person's year of death.">Death year</label>
   <div>
     <div class="number-range">
       <input
@@ -77,13 +77,13 @@
     </div>
   </div>
 
-  <label for="citizenshipId" class="form-label">Citizenship</label>
+  <label for="citizenshipId" class="form-label" title="The person's citizenship.">Citizenship</label>
   <select class="form-select" formControlName="citizenshipId">
     <option [ngValue]="null">Any</option>
     <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
   </select>
 
-  <label for="genderId" class="form-label">Gender</label>
+  <label for="genderId" class="form-label" title="The person's gender.">Gender</label>
   <select class="form-select" formControlName="genderId">
     <option [ngValue]="null">Any</option>
     <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
@@ -92,12 +92,17 @@
   <div class="full-row">
     <label class="form-label">Occupation</label>
     <div class="two-column-grid ps-3">
-      <label for="occupationLevel1Id" class="form-label">Level 1</label>
+      <label
+        for="occupationLevel1Id"
+        class="form-label"
+        title="The person's general occupation category (occupation level 1)."
+        >Level 1</label
+      >
       <select class="form-select" formControlName="occupationLevel1Id">
         <option [ngValue]="null">Any</option>
         <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
       </select>
-      <label class="form-label">Level 3</label>
+      <label class="form-label" title="The person's detailed occupation (occupation level 3).">Level 3</label>
       <dbw-variable-search
         [variables]="occupationsLevel3"
         [pushedSelected]="recentmostPushedOccupationLevel3"
@@ -106,7 +111,7 @@
     </div>
   </div>
 
-  <label class="form-label">Notability</label>
+  <label class="form-label" title="Notability index. Higher means more notable.">Notability</label>
   <div>
     <div class="number-range">
       <input type="number" class="form-control" formControlName="notabilityMin" [placeholder]="0" />
