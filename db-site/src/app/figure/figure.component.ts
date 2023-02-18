@@ -15,6 +15,8 @@ export class FigureComponent {
   @Input() title!: string;
   @Input() subtitle?: string;
   @Input() size?: FigureSize = FigureSize.Normal;
+  @Input() clickRoute?: string;
+  @Input() clickOpenNewTab: boolean = false;
 
   constructor(private locationStrategy: LocationStrategy) {
     const href = this.locationStrategy.getBaseHref();
