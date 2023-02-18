@@ -106,6 +106,15 @@
     </div>
   </div>
 
+  <label class="form-label">Notability</label>
+  <div>
+    <div class="number-range">
+      <input type="number" class="form-control" formControlName="notabilityMin" [placeholder]="0" />
+      <span>to</span>
+      <input type="number" class="form-control" formControlName="notabilityMax" [placeholder]="100" />
+    </div>
+  </div>
+
   <div class="full-row d-flex">
     <button type="submit" class="btn btn-secondary ms-auto">Search</button>
   </div>

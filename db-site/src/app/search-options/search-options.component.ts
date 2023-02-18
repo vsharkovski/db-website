@@ -63,6 +63,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       occupationLevel1Id: fb.control<number | null>(null),
       occupationLevel3Id: fb.control<string | null>(null),
       genderId: fb.control<number | null>(null),
+      notabilityMin: fb.control<number | null>(null),
+      notabilityMax: fb.control<number | null>(null),
     });
 
     // Create the regular expression for terms.
@@ -173,6 +175,12 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     if (values.genderId) {
       term += `genderId:${values.genderId},`;
     }
+    if (values.notabilityMin !== null) {
+      term += `notabilityIndex>=${this.clampNotability(values.notabilityMin)},`;
+    }
+    if (values.notabilityMax !== null) {
+      term += `notabilityIndex<=${this.clampNotability(values.notabilityMax)},`;
+    }
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);
     }
@@ -206,6 +214,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       occupationLevel1Id: null,
       occupationLevel3Id: null,
       genderId: null,
+      notabilityMin: null,
+      notabilityMax: null,
     };
 
     for (let c of criteria) {
@@ -214,6 +224,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'birth') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
+          num = this.clampLifeYear(num);
           if (c.operation == '>=') {
             values.birthMin = num;
           } else if (c.operation == '<=') {
@@ -223,6 +234,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'death') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
+          num = this.clampLifeYear(num);
           if (c.operation == '>=') {
             values.deathMin = num;
           } else if (c.operation == '<=') {
@@ -253,6 +265,16 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         if (this.genders.find((item) => item.id === id)) {
           values.genderId = id;
         }
+      } else if (c.key == 'notabilityIndex') {
+        let num = Number(c.value);
+        if (Number.isInteger(num)) {
+          num = this.clampNotability(num);
+          if (c.operation == '>=') {
+            values.notabilityMin = num;
+          } else if (c.operation == '<=') {
+            values.notabilityMax = num;
+          }
+        }
       }
     }
 
@@ -262,7 +284,11 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   private clampLifeYear(year: number): number {
-    return Math.min(Math.max(this.LIFE_YEAR_MIN, year), this.LIFE_YEAR_MAX);
+    return Math.min(Math.max(year, this.LIFE_YEAR_MIN), this.LIFE_YEAR_MAX);
+  }
+
+  private clampNotability(notability: number): number {
+    return Math.min(Math.max(notability, 0), 100);
   }
 
   get pageField(): AbstractControl {
@@ -300,6 +326,14 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   get genderField(): AbstractControl {
     return this.form.get('genderId')!;
   }
+
+  get notabilityMinField(): AbstractControl {
+    return this.form.get('notabilityMin')!;
+  }
+
+  get notabilityMaxField(): AbstractControl {
+    return this.form.get('notabilityMax')!;
+  }
 }
 
 interface FormValues {
@@ -312,4 +346,6 @@ interface FormValues {
   occupationLevel1Id: number | null;
   occupationLevel3Id: number | null;
   genderId: number | null;
+  notabilityMin: number | null;
+  notabilityMax: number | null;
 }
