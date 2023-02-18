@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class OccupationService(val occupationRepository: OccupationRepository) {
-    fun findOrAddByName(name: String, type: Int): Occupation =
+    fun findOrAddByName(name: String, type: Short): Occupation =
         occupationRepository.findByName(name)?.let {
             if (it.type != type) {
                 // Update the type.
@@ -19,8 +19,4 @@ class OccupationService(val occupationRepository: OccupationRepository) {
 
     fun findAll(): List<Occupation> = occupationRepository.findAll()
 
-    fun deleteAllByType(type: Int) =
-        occupationRepository.findAllByType(type).forEach {
-            occupationRepository.deleteById(it.id)
-        }
 }

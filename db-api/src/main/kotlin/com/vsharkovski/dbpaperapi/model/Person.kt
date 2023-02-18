@@ -19,35 +19,19 @@ data class Person(
 
     val nameProcessed: String?,
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "gender_id")
-//    val gender: Gender?,
-
-    val genderId: Int?,
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "level_1_main_occ_id")
-//    val level1MainOcc: Occupation?,
+    val genderId: Short?,
 
     @Column(name = "level_1_main_occ_id")
-    val level1MainOccId: Int?,
+    val level1MainOccId: Short?,
 
     @Column(name = "level_3_main_occ_id")
-    val level3MainOccId: Int?,
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "citizenship_1_b_id")
-//    val citizenship1B: Citizenship?,
+    val level3MainOccId: Short?,
 
     @Column(name = "citizenship_1_b_id")
-    val citizenship1BId: Int?,
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "citizenship_2_b_id")
-//    val citizenship2B: Citizenship?,
+    val citizenship1BId: Short?,
 
     @Column(name = "citizenship_2_b_id")
-    val citizenship2BId: Int?,
+    val citizenship2BId: Short?,
 
     @Column(name = "birth_longitude")
     val birthLongitude: Float?,

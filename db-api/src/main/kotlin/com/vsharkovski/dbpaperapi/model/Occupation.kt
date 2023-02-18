@@ -7,9 +7,9 @@ import javax.persistence.*
 data class Occupation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    val id: Short = 0,
 
-    val type: Int = 0,
+    val type: Short = 0,
 
     val name: String,
 )

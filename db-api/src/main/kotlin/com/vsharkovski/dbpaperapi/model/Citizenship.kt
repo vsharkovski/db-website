@@ -7,7 +7,7 @@ import javax.persistence.*
 data class Citizenship(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int = 0,
+    val id: Short = 0,
 
     val name: String,
 
