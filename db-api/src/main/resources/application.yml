@@ -15,11 +15,14 @@ logging:
   file:
     path: logs
 database-management:
-  import-all: false
-  import-notability-index: false
-  import-occupations: false
-  process-citizenship-names-readability: false
-  process-citizenship-names-search: false
-  process-person-names-search: false
+  import:
+    relational-all: false
+    raw-all: false
+  process:
+    citizenship-names:
+      readability: false
+      search: false
+    person-names:
+      search: false
 search:
   results-per-page: 1000

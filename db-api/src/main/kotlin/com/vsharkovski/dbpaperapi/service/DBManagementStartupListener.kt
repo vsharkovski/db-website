@@ -8,45 +8,36 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 
 @Component
-class StartupEventListener(
+class DBManagementStartupListener(
     val csvService: CSVService,
     val citizenshipService: CitizenshipService,
-    val occupationService: OccupationService,
     val personService: PersonService
 ) {
-    private val logger = LoggerFactory.getLogger(StartupEventListener::class.java)
+    private val logger = LoggerFactory.getLogger(DBManagementStartupListener::class.java)
 
-    @Value("\${database-management.import-all}")
-    val shouldImportDatabase: Boolean = false
+    @Value("\${database-management.import.relational-all}")
+    val shouldImportRelationalDatabase: Boolean = false
 
-    @Value("\${database-management.import-notability-index}")
-    val shouldImportNotabilityIndex: Boolean = false
+    @Value("\${database-management.import.raw-all}")
+    val shouldImportRawDatabase: Boolean = false
 
-    @Value("\${database-management.import-occupations}")
-    val shouldImportOccupations: Boolean = false
-
-    @Value("\${database-management.process-citizenship-names-readability}")
+    @Value("\${database-management.process.citizenship-names.readability}")
     val shouldProcessCitizenshipNamesReadability: Boolean = false
 
-    @Value("\${database-management.process-citizenship-names-search}")
+    @Value("\${database-management.process.citizenship-names.search}")
     val shouldProcessCitizenshipNamesSearch: Boolean = false
 
-    @Value("\${database-management.process-person-names-search}")
+    @Value("\${database-management.process.person-names.search}")
     val shouldProcessPersonNamesSearch: Boolean = false
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
-        if (shouldImportDatabase) {
+        if (shouldImportRelationalDatabase) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
             csvService.addFile(resource.file)
         }
-        if (shouldImportNotabilityIndex) {
-            val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.addNotabilityIndices(resource.file)
-        }
-        if (shouldImportOccupations) {
-            val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.addOccupations(resource.file)
+        if (shouldImportRawDatabase) {
+
         }
         if (shouldProcessCitizenshipNamesSearch) {
             citizenshipService.processAllCitizenshipNamesForSearch()
