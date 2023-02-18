@@ -1,7 +1,9 @@
 package com.vsharkovski.dbpaperapi.service
 
 import com.vsharkovski.dbpaperapi.model.Person
+import com.vsharkovski.dbpaperapi.model.RawCSVData
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
+import com.vsharkovski.dbpaperapi.repository.RawCSVDataRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
@@ -13,6 +15,7 @@ import java.io.File
 @Service
 class CSVService(
     val personRepository: PersonRepository,
+    val rawCSVDataRepository: RawCSVDataRepository,
     val genderService: GenderService,
     val occupationService: OccupationService,
     val citizenshipService: CitizenshipService,
@@ -22,13 +25,36 @@ class CSVService(
 
     private val logStatusUpdateInterval = 100000
 
-    fun addFile(file: File) {
-        logger.info("Add file: starting [{}]", file.path)
-        file.forEachCSVRecordBuffered(this::addRecord, createLogStatusUpdateFunction("Add file"))
-        logger.info("Add file: ended [{}]", file.path)
+    fun addFileRelational(file: File) {
+        // Add all records of the file into the relational tables.
+        logger.info("Add file relational: starting [{}]", file.path)
+        file.forEachCSVRecordBuffered(
+            this::addRecordToRelationalDB,
+            createLogStatusUpdateFunction("Add file relational")
+        )
+        logger.info("Add file relational: ended [{}]", file.path)
     }
 
-    private fun addRecord(record: CSVRecord) {
+    fun addFileRaw(file: File) {
+        // Add all lines of the file into the raw table.
+        logger.info("Add file raw: starting [{}]", file.path)
+
+        val logFunction = createLogStatusUpdateFunction("Add file raw")
+        var index = 0
+        file.forEachLine { line ->
+            if (index > 0) {
+                // Skip the first line as it is the header of the csv.
+                addLineToRawDB(line)
+            }
+
+            index++
+            logFunction(index)
+        }
+
+        logger.info("Add file relational: ended [{}]", file.path)
+    }
+
+    private fun addRecordToRelationalDB(record: CSVRecord) {
         val name = record.get("name").ifEmpty { null }
         val person = Person(
             wikidataCode = record.get("wikidata_code").substring(1).toIntOrNull(),
@@ -53,6 +79,18 @@ class CSVService(
             notabilityIndex = record.get("sum_visib_ln_5criteria").toFloatOrNull()
         )
         personRepository.save(person)
+    }
+
+    private fun addLineToRawDB(line: String) {
+        // Extract wikidata code from the line. It should be the first column.
+        val firstCommaPosition = line.indexOf(',')
+        val wikidataCode = line.substring(1, firstCommaPosition).toIntOrNull() ?: return
+
+        // Get relational ID from the wikidata ID.
+        val id = personRepository.findIdByWikidataCode(wikidataCode) ?: return
+
+        // Save the record using the new ID.
+        rawCSVDataRepository.save(RawCSVData(personId = id, data = line))
     }
 
     private fun createLogStatusUpdateFunction(taskName: String): (Int) -> Unit {

@@ -34,10 +34,12 @@ class DBManagementStartupListener(
     fun importDataset(event: ContextRefreshedEvent) {
         if (shouldImportRelationalDatabase) {
             val resource = ClassPathResource("/static/cross-verified-database.csv")
-            csvService.addFile(resource.file)
+            csvService.addFileRelational(resource.file)
         }
         if (shouldImportRawDatabase) {
-
+            // Will only work if the relational database has already been imported.
+            val resource = ClassPathResource("/static/cross-verified-database.csv")
+            csvService.addFileRaw(resource.file)
         }
         if (shouldProcessCitizenshipNamesSearch) {
             citizenshipService.processAllCitizenshipNamesForSearch()

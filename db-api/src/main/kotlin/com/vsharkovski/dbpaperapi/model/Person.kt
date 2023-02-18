@@ -46,5 +46,5 @@ data class Person(
     val deathLatitude: Float?,
 
     @Column(name = "notability_index")
-    val notabilityIndex: Float?
+    val notabilityIndex: Float?,
 )

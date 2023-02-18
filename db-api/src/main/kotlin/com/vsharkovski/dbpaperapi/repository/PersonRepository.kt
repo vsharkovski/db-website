@@ -20,15 +20,8 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
 
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
 
-    fun findByWikidataCode(wikidataCode: Int): Person?
-
-    @Transactional
-    @Modifying
-    @Query("update Person p set p.notabilityIndex = :notabilityIndex where p.wikidataCode = :wikidataCode")
-    fun setNotabilityIndex(
-        @Param(value = "wikidataCode") wikidataCode: Int,
-        @Param(value = "notabilityIndex") notabilityIndex: Float
-    )
+    @Query("select p.id from Person p where p.wikidataCode = :wikidataCode")
+    fun findIdByWikidataCode(wikidataCode: Int): Long?
 
     @Transactional
     @Modifying
@@ -36,21 +29,5 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
     fun setNameProcessed(
         @Param(value = "id") id: Long,
         @Param(value = "nameProcessed") nameProcessed: String
-    )
-
-    @Transactional
-    @Modifying
-    @Query("update Person p set p.level1MainOccId = :level1MainOccId where p.wikidataCode = :wikidataCode")
-    fun setOccupationLevel1Id(
-        @Param(value = "wikidataCode") wikidataCode: Int,
-        @Param(value = "level1MainOccId") level1MainOccId: Int,
-    )
-
-    @Transactional
-    @Modifying
-    @Query("update Person p set p.level3MainOccId = :level3MainOccId where p.wikidataCode = :wikidataCode")
-    fun setOccupationLevel3Id(
-        @Param(value = "wikidataCode") wikidataCode: Int,
-        @Param(value = "level3MainOccId") level3MainOccId: Int,
     )
 }
