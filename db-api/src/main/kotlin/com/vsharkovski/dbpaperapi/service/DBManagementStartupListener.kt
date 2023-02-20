@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
-import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.FileSystemResource
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,13 +37,21 @@ class DBManagementStartupListener(
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
         if (shouldImportRelationalDatabase && csvFilePath != null) {
-            val resource = ClassPathResource(csvFilePath!!)
-            csvService.addFileRelational(resource.file)
+            val resource = FileSystemResource(csvFilePath!!)
+            if (resource.exists()) {
+                csvService.addFileRelational(resource.file)
+            } else {
+                logger.error("Failed attempt to import relational database: file not found [{}]", csvFilePath)
+            }
         }
         if (shouldImportRawDatabase && csvFilePath != null) {
             // Will only work if the relational database has already been imported.
-            val resource = ClassPathResource(csvFilePath!!)
-            csvService.addFileRaw(resource.file)
+            val resource = FileSystemResource(csvFilePath!!)
+            if (resource.exists()) {
+                csvService.addFileRaw(resource.file)
+            } else {
+                logger.error("Failed attempt to import raw database: file not found [{}]", csvFilePath)
+            }
         }
         if (shouldProcessCitizenshipNamesSearch) {
             citizenshipService.processAllCitizenshipNamesForSearch()

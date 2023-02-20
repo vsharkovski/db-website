@@ -8,5 +8,3 @@ logging:
     path: logs
   level:
     ROOT: INFO
-db-management:
-  csv-file-path: /static/cross-verified-database.csv

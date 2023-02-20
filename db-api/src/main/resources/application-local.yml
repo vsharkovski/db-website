@@ -1,0 +1,11 @@
+db-management:
+  csv-file-path: C:/Vlatko/Repos/db-website/db-api/src/main/resources/static/cross-verified-database.csv
+  import:
+    relational-all: false
+    raw-all: false
+  process:
+    citizenship-names:
+      readability: false
+      search: false
+    person-names:
+      search: false
