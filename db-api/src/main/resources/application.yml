@@ -1,9 +1,5 @@
 # Should set logging level to ERROR on production, and INFO on dev / test
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/dbpaperdb
-    username: vlatko
-    password: vlatko
   jpa:
     hibernate:
       ddl-auto: validate
@@ -14,7 +10,10 @@ spring:
 logging:
   file:
     path: logs
+  level:
+    ROOT: INFO
 database-management:
+  file-path: /static/cross-verified-database.csv
   import:
     relational-all: false
     raw-all: false

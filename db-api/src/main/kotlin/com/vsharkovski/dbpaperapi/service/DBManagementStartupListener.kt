@@ -1,6 +1,5 @@
 package com.vsharkovski.dbpaperapi.service
 
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
@@ -13,8 +12,6 @@ class DBManagementStartupListener(
     val citizenshipService: CitizenshipService,
     val personService: PersonService
 ) {
-    private val logger = LoggerFactory.getLogger(DBManagementStartupListener::class.java)
-
     @Value("\${database-management.import.relational-all}")
     val shouldImportRelationalDatabase: Boolean = false
 
@@ -30,15 +27,18 @@ class DBManagementStartupListener(
     @Value("\${database-management.process.person-names.search}")
     val shouldProcessPersonNamesSearch: Boolean = false
 
+    @Value("\${database-management.file-path}")
+    val csvFilePath: String? = null
+
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
-        if (shouldImportRelationalDatabase) {
-            val resource = ClassPathResource("/static/cross-verified-database.csv")
+        if (shouldImportRelationalDatabase && csvFilePath != null) {
+            val resource = ClassPathResource(csvFilePath!!)
             csvService.addFileRelational(resource.file)
         }
-        if (shouldImportRawDatabase) {
+        if (shouldImportRawDatabase && csvFilePath != null) {
             // Will only work if the relational database has already been imported.
-            val resource = ClassPathResource("/static/cross-verified-database.csv")
+            val resource = ClassPathResource(csvFilePath!!)
             csvService.addFileRaw(resource.file)
         }
         if (shouldProcessCitizenshipNamesSearch) {
