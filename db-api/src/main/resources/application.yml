@@ -12,8 +12,8 @@ logging:
     path: logs
   level:
     ROOT: INFO
-database-management:
-  file-path: /static/cross-verified-database.csv
+db-management:
+  csv-file-path: no-file
   import:
     relational-all: false
     raw-all: false

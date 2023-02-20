@@ -1,5 +1,7 @@
 package com.vsharkovski.dbpaperapi.service
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
@@ -12,22 +14,24 @@ class DBManagementStartupListener(
     val citizenshipService: CitizenshipService,
     val personService: PersonService
 ) {
-    @Value("\${database-management.import.relational-all}")
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    @Value("\${db-management.import.relational-all}")
     val shouldImportRelationalDatabase: Boolean = false
 
-    @Value("\${database-management.import.raw-all}")
+    @Value("\${db-management.import.raw-all}")
     val shouldImportRawDatabase: Boolean = false
 
-    @Value("\${database-management.process.citizenship-names.readability}")
+    @Value("\${db-management.process.citizenship-names.readability}")
     val shouldProcessCitizenshipNamesReadability: Boolean = false
 
-    @Value("\${database-management.process.citizenship-names.search}")
+    @Value("\${db-management.process.citizenship-names.search}")
     val shouldProcessCitizenshipNamesSearch: Boolean = false
 
-    @Value("\${database-management.process.person-names.search}")
+    @Value("\${db-management.process.person-names.search}")
     val shouldProcessPersonNamesSearch: Boolean = false
 
-    @Value("\${database-management.file-path}")
+    @Value("\${db-management.csv-file-path}")
     val csvFilePath: String? = null
 
     @EventListener
