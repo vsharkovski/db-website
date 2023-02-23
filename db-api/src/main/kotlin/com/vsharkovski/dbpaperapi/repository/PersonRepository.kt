@@ -20,6 +20,8 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
 
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
 
+    fun findByNameLikeIgnoreCase(name: String): List<PersonIdAndNames>
+
     @Query("select p.id from Person p where p.wikidataCode = :wikidataCode")
     fun findIdByWikidataCode(wikidataCode: Int): Long?
 

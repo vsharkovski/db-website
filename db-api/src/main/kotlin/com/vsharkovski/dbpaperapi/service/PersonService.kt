@@ -36,7 +36,7 @@ class PersonService(
     }
 
     fun processSinglePersonNameForSearch(person: PersonIdAndNames) =
-        person.name?.let{
+        person.name?.let {
             personRepository.setNameProcessed(person.id, nameService.processForSearch(it))
         }
 

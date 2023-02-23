@@ -1,5 +1,5 @@
 db-management:
-  csv-file-path: C:/Vlatko/Repos/db-website/db-api/src/main/resources/static/cross-verified-database.csv
+  csv-file-path: C:/Users/vsark/Documents/db-site/cross-verified-database.csv
   import:
     relational-all: false
     raw-all: false
@@ -8,4 +8,4 @@ db-management:
       readability: false
       search: false
     person-names:
-      search: false
+      search: true
