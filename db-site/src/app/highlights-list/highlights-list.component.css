@@ -30,3 +30,9 @@ video {
   z-index: 2;
   position: relative;
 }
+
+.search-section {
+  background-image: url("/assets/figures/fig3.png");
+  background-size: cover;
+  background-position: center 0%;
+}

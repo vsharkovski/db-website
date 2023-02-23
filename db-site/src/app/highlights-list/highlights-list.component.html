@@ -1,9 +1,25 @@
 <div class="row">
   <div class="d-0 d-lg-block col-lg-1"></div>
   <div class="col-lg-10">
-    <div class="topi-section rounded shadow position-relative">
+    <div class="row g-0 search-section">
+      <div class="col-md">
+        <div class="bg-white py-2">
+          <h5>
+            <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
+          </h5>
+          <p>
+            You can now <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
+            filtering by name, birth and death year, gender, occupation, or citizenship.
+          </p>
+        </div>
+      </div>
+      <div class="col-md d-flex justify-content-center bg-white">
+        <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
+      </div>
+    </div>
+    <div class="mt-5 topi-section rounded shadow position-relative">
       <a [href]="topiProjectLink" class="stretched-link"></a>
-      <div class="bg-light rounded p-3 topi-section-text">
+      <div class="bg-white rounded p-3 topi-section-text">
         <!-- <h5><a [href]="topiProjectLink" class="text-reset">Earth Visualization</a></h5> -->
         <h5>Earth Visualization</h5>
         <p class="mb-0">
@@ -15,20 +31,7 @@
         </p>
       </div>
     </div>
-    <div class="mt-5 row">
-      <div class="col-md">
-        <h5>
-          <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
-        </h5>
-        <p>
-          You can now <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
-          filtering by name, birth and death year, gender, occupation, or citizenship.
-        </p>
-      </div>
-      <div class="col-md d-flex justify-content-center">
-        <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
-      </div>
-    </div>
+
     <div class="mt-5 row">
       <div class="col-md">
         <h5>Timeline of Europe, 1000 AD onwards</h5>
