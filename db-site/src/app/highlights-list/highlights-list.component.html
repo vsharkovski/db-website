@@ -1,13 +1,27 @@
 <div class="row">
   <div class="d-0 d-lg-block col-lg-1"></div>
   <div class="col-lg-10">
-    <div class="row">
+    <div class="topi-section rounded shadow position-relative">
+      <a [href]="topiProjectLink" class="stretched-link"></a>
+      <div class="bg-light rounded p-3 topi-section-text">
+        <!-- <h5><a [href]="topiProjectLink" class="text-reset">Earth Visualization</a></h5> -->
+        <h5>Earth Visualization</h5>
+        <p class="mb-0">
+          Click to can see an <a [href]="topiProjectLink" class="fw-semibold">interactive visualization</a> of the most
+          notable people in the world.
+        </p>
+        <p class="mb-0 text-muted text-end">
+          credits to <a [href]="topiPersonalLink" class="text-reset">Topi Tjunkanov</a>
+        </p>
+      </div>
+    </div>
+    <div class="mt-5 row">
       <div class="col-md">
         <h5>
-          <a [routerLink]="['/search']" class="text-reset">Explore the database online!</a>
+          <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
         </h5>
         <p>
-          You can finally <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
+          You can now <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
           filtering by name, birth and death year, gender, occupation, or citizenship.
         </p>
       </div>
@@ -17,23 +31,10 @@
     </div>
     <div class="mt-5 row">
       <div class="col-md">
-        <h5>Earth Visualization</h5>
-        <p>
-          Topi Tjukanov used our dataset to create an <a [href]="topiLink">interactive visualization</a> of the most
-          notable people around the world.
-        </p>
-      </div>
-      <div class="col-md position-relative">
-        <img src="assets/highlights/topi.jpg" class="img-fluid rounded shadow topi-img" />
-        <a [href]="topiLink" class="stretched-link"></a>
-      </div>
-    </div>
-    <div class="mt-5 row">
-      <div class="col-md">
         <h5>Timeline of Europe, 1000 AD onwards</h5>
         <p>This animation shows a timeline of the birthplaces of notable people in Europe from 1000 AD onwards.</p>
         <p class="text-muted">
-          credit to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird on Twitter</a>
+          credits to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird</a>
         </p>
       </div>
       <div class="col-md">
@@ -44,10 +45,10 @@
       </div>
     </div>
     <div class="mt-5 row">
-      <h5 class="mb-3">Top 0.1% of all scientific papers</h5>
+      <h5 class="mb-3"><a [href]="altmetricLink" class="text-reset">Paper metrics</a></h5>
       <p>
-        <a [href]="altmetricLink">According to Altmetric</a>, as of October 2022, we are now in the top 0.1% of all
-        scientific papers of a similar age, and in the top 5% of all research papers ever.
+        So far, our database has been downloaded more than 155,000 times. There have also been at least
+        <a [href]="altmetricLink">144 news stories from 117 outlets</a>.
       </p>
     </div>
   </div>

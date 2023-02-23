@@ -7,7 +7,8 @@ import { Router } from '@angular/router';
   styleUrls: ['./highlights-list.component.css'],
 })
 export class HighlightsListComponent {
-  topiLink: string = 'https://tjukanovt.github.io/notable-people';
+  topiProjectLink: string = 'https://tjukanovt.github.io/notable-people';
+  topiPersonalLink: string = 'https://tjukanov.org/';
   altmetricLink: string =
     'https://nature.altmetric.com/details/129575296#score';
   inquisitiveBirdTwitterLink: string =

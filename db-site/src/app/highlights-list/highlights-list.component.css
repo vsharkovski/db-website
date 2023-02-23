@@ -17,3 +17,16 @@ video {
 .altmetric-img {
   width: 100%;
 }
+
+.topi-section {
+  background-image: url("/assets/highlights/topi.jpg");
+  background-size: cover;
+  background-position: center 0%;
+  height: 20rem;
+  padding: 1.5rem;
+}
+
+.topi-section-text {
+  z-index: 2;
+  position: relative;
+}
