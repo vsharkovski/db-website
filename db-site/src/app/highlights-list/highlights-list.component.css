@@ -32,7 +32,9 @@ video {
 }
 
 .search-section {
-  background-image: url("/assets/figures/fig3.png");
-  background-size: cover;
-  background-position: center 0%;
+  background-image: url("/assets/figures/fig3-2.png");
+  /* background-size: cover; */
+  background-size: contain;
+  background-repeat: no-repeat;
+  /* background-position: center 0%; */
 }
