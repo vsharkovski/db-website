@@ -8,4 +8,4 @@ db-management:
       readability: false
       search: false
     person-names:
-      search: true
+      search: false
