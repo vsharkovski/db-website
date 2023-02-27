@@ -31,10 +31,12 @@ video {
   position: relative;
 }
 
-.search-section {
-  background-image: url("/assets/figures/fig3-2.png");
-  /* background-size: cover; */
-  background-size: contain;
-  background-repeat: no-repeat;
-  /* background-position: center 0%; */
+@media (min-width: 768px) {
+  .search-section {
+    background-image: url("/assets/figures/fig3-2.png");
+    /* background-size: cover; */
+    background-size: contain;
+    background-repeat: no-repeat;
+    /* background-position: center 0%; */
+  }
 }
