@@ -7,16 +7,17 @@
       formControlName="name"
       placeholder="Enter name..."
       [class.is-invalid]="nameField.invalid"
-      [ngbPopover]="nameTipsPopover"
-      placement="bottom"
-      autoClose="true"
     />
-    <ng-template #nameTipsPopover>
+    <div class="full-row form-check mt-2">
+      <input type="checkbox" class="form-check-input" formControlName="advancedMode" value="" />
+      <label class="form-check-label">Advanced name search</label>
+    </div>
+    <div *ngIf="form.value.advancedMode" class="small">
       <p class="mb-0">
         Use <span class="fw-bold text-primary">*</span> to match 0 or more characters (try it at the start or end!)
       </p>
       <p class="mb-0">Use <span class="fw-bold text-primary">?</span> to match a single character</p>
-    </ng-template>
+    </div>
     <div *ngIf="nameField.errors?.['pattern']" class="invalid-feedback">The name contains invalid characters.</div>
     <div *ngIf="nameField.errors?.['maxlength']" class="invalid-feedback">The name is too long.</div>
   </div>

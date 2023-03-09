@@ -65,6 +65,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       genderId: fb.control<number | null>(null),
       notabilityMin: fb.control<number | null>(null),
       notabilityMax: fb.control<number | null>(null),
+      advancedMode: fb.control<boolean>(false),
     });
 
     // Create the regular expression for terms.
@@ -126,9 +127,16 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     // Whenever the form is changed, emit the new term.
     this.form.valueChanges.subscribe((values) => {
       if (this.form.valid) {
-        this.termChanged.emit(
-          this.compileTermFromFormValues(values as FormValues)
-        );
+        // Update advancedMode.
+        values = values as FormValues;
+        const newAdvancedMode = this.determineAdvancedMode(values);
+        if (newAdvancedMode != values.advancedMode) {
+          values.advancedMode = newAdvancedMode;
+          this.form.patchValue(values, { emitEvent: false });
+        }
+
+        // Compile term from form values and emit.
+        this.termChanged.emit(this.compileTermFromFormValues(values));
       }
     });
   }
@@ -142,14 +150,42 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     }
   }
 
-  compileTermFromFormValues(values: FormValues): string {
+  onOccupationLevel3Selected(occupation: Variable | null) {
+    // Update the form value to either the new id or null.
+    this.form.patchValue({ occupationLevel3Id: occupation?.id ?? null });
+  }
+
+  onFormSubmit(): void {
+    const term = this.compileTermFromFormValues(this.form.value);
+    this.submitted.next(term);
+  }
+
+  private determineAdvancedMode(values: FormValues): boolean {
+    const hasWildcard = values.name.includes('*') || values.name.includes('?');
+    if (values.advancedMode && !hasWildcard) {
+      // Advanced mode was turned on, either now or before.
+      // It should not be turned off even if there are no wildcards.
+      return true;
+    } else if (values.advancedMode && hasWildcard) {
+      return true;
+    } else if (!values.advancedMode && !hasWildcard) {
+      return false;
+    } else if (!values.advancedMode && hasWildcard) {
+      return true;
+    }
+    return false;
+  }
+
+  private compileTermFromFormValues(values: FormValues): string {
     let term = '';
     if (values.name) {
+      // When advanced mode is disabled, add wildcards at start and end.
+      const name = values.advancedMode ? values.name : `*${values.name}*`;
       let operator = ':';
-      if (values.name.includes('*') || values.name.includes('_')) {
+      if (name.includes('*') || name.includes('_')) {
         operator = '~';
       }
-      term += `name${operator}${values.name},`;
+      term += `name${operator}${name},`;
     }
     if (values.birthMin !== null) {
       term += `birth>=${this.clampLifeYear(values.birthMin)},`;
@@ -187,17 +223,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     return term;
   }
 
-  onOccupationLevel3Selected(occupation: Variable | null) {
-    // Update the form value to either the new id or null.
-    this.form.patchValue({ occupationLevel3Id: occupation?.id ?? null });
-  }
-
-  onFormSubmit(): void {
-    const term = this.compileTermFromFormValues(this.form.value);
-    this.submitted.next(term);
-  }
-
   private pushTermToForm(term: string): void {
+    // Match regex groups in term and create a list of all matches.
     const criteria = [...`${term},`.matchAll(this.termRegex)].map((match) => ({
       key: match[1],
       operation: match[2],
@@ -216,11 +243,33 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       genderId: null,
       notabilityMin: null,
       notabilityMax: null,
+      advancedMode: false,
     };
 
     for (let c of criteria) {
       if (c.key == 'name' && (c.operation == ':' || c.operation == '~')) {
-        values.name = c.value;
+        const name = c.value;
+        if (name.startsWith('*') && name.endsWith('*')) {
+          // Starts and ends with *.
+          const nameTrimmed = name.substring(1, name.length - 1);
+          if (nameTrimmed.includes('*') || nameTrimmed.includes('?')) {
+            // Also has wildcards inside.
+            values.name = name;
+            values.advancedMode = true;
+          } else {
+            // No wildcards inside. Interpret as not advanced mode.
+            values.name = nameTrimmed;
+            values.advancedMode = false;
+          }
+        } else if (name.includes('*') || name.includes('?')) {
+          // Does not start and end with *, but has wildcard somewhere.
+          values.name = name;
+          values.advancedMode = true;
+        } else {
+          // No wildcard anywhere.
+          values.name = name;
+          values.advancedMode = false;
+        }
       } else if (c.key == 'birth') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
@@ -348,4 +397,5 @@ interface FormValues {
   genderId: number | null;
   notabilityMin: number | null;
   notabilityMax: number | null;
+  advancedMode: boolean;
 }
