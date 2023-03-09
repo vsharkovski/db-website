@@ -8,6 +8,7 @@ import { ReferenceData } from '../reference-data.model';
   styleUrls: ['./about.component.css'],
 })
 export class AboutComponent {
-  @Input() showAboutHeading: boolean = true;
+  @Input() showFullAbout: boolean = true;
+  @Input() showAllReferences: boolean = true;
   references: ReferenceData[] = ReferencesDataJson;
 }

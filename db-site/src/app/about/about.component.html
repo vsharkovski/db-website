@@ -13,13 +13,6 @@
 
 <h5>About the project</h5>
 <p>
-  Since the time Plutarch's Parallel Lives was written in the beginning of the second century AD and his 23 biographies
-  have survived two thousand years (or even more ancient, the Epic of Gilgamesh dates back to 2000 BC), the task of
-  registering famous individuals and their influence has been a recurrent field of study. Over the last few years, this
-  task has been undertaken to a much larger scale, with a growing number of databases documenting history, allowing
-  statistical analysis of socio-historical facts, at a scale that had never been reached so far.
-</p>
-<p>
   <a href="https://www.nature.com/articles/s41597-022-01369-4">Our most recent paper</a> develops a cross-verified
   database of 2.2 million notable individuals using several Wikipedia editions and Wikidata.
 </p>
@@ -37,40 +30,45 @@
   >, the second version of Pantheon (2.0) in <a routerLink="." fragment="jara">Jara-Figueroa and Hidalgo (2019)</a> and
   a recent independent work by <a routerLink="." fragment="nekoei">Nekoei and Sinn (2020)</a>).
 </p>
-<p>
-  Our approach complements existing approaches in several ways. First, we collect a massive amount of data that leads to
-  several cross-verifications. It is based on multiple sources (various editions of Wikipedia and Wikidata) and
-  deduplication techniques. The combination of Wikipedia and Wikidata brings 2.72% new birth dates, 8.16% new
-  occupations and 17.16% new citizenships. We find that there are very few errors in the part of the database that
-  contains the most documented individuals. We also find non trivial error rates (around 1%) in the bottom part of the
-  notability distribution, due to sparse information and classification errors or ambiguity. This either requires manual
-  corrections for future use or a statistical treatment of these errors in statistical approaches. The combination of
-  Wikipedia and Wikidata corrects about 0.5% of errors. One therefore needs to trade-off the size of the database and
-  the precision of the data.
-</p>
-<p>
-  Second, we adopt a social science approach: data collection is driven by specific social questions on gender, economic
-  and cultural development and quantitative exploration of cultural trends that we document in this paper. This approach
-  is used in particular to document the Anglo-Saxon bias naturally present in existing projects based on the English
-  edition of Wikipedia.
-</p>
-This strategy results in a cross-verified database of 2.2 million unique individuals (we do not recommend to go beyond
-given the errors in the extended database of 4.7 million people. We also add a large fraction of newly-added individuals
-from non-English editions of Wikipedia who actually played a significant role in important periods of human history.
-There are more than 700,000 such individuals, almost a third of the database we verified.
-<p>
-  Such projects represent promising developments for the Social Sciences. A good example is illustrated by
-  <a routerLink="." fragment="serafinelli">Serafinelli and Tabellini (2017)</a> (see related Vox column) who analyzed
-  the historical development of cities and relate it to the emergence of a creative class using
-  <a routerLink="." fragment="schich">Schich et al. (2014)</a> or
-  <a routerLink="." fragment="croix">de la Croix and Licandro (2015)</a> our previous work in its 1.0. version in
-  <a routerLink="." fragment="gergaud">Gergaud et al. (2016)</a>.
-</p>
-<p>We welcome comments on our approach, and point towards this website to obtain the data, or extended requests.</p>
+<div *ngIf="showFullAbout">
+  <p>
+    Our approach complements existing approaches in several ways. First, we collect a massive amount of data that leads
+    to several cross-verifications. It is based on multiple sources (various editions of Wikipedia and Wikidata) and
+    deduplication techniques. The combination of Wikipedia and Wikidata brings 2.72% new birth dates, 8.16% new
+    occupations and 17.16% new citizenships. We find that there are very few errors in the part of the database that
+    contains the most documented individuals. We also find non trivial error rates (around 1%) in the bottom part of the
+    notability distribution, due to sparse information and classification errors or ambiguity. This either requires
+    manual corrections for future use or a statistical treatment of these errors in statistical approaches. The
+    combination of Wikipedia and Wikidata corrects about 0.5% of errors. One therefore needs to trade-off the size of
+    the database and the precision of the data.
+  </p>
+  <p>
+    Second, we adopt a social science approach: data collection is driven by specific social questions on gender,
+    economic and cultural development and quantitative exploration of cultural trends that we document in this paper.
+    This approach is used in particular to document the Anglo-Saxon bias naturally present in existing projects based on
+    the English edition of Wikipedia.
+  </p>
+  <p>
+    This strategy results in a cross-verified database of 2.2 million unique individuals (we do not recommend to go
+    beyond given the errors in the extended database of 4.7 million people). We also add a large fraction of newly-added
+    individuals from non-English editions of Wikipedia who actually played a significant role in important periods of
+    human history. There are more than 700,000 such individuals, almost a third of the database we verified.
+  </p>
+  <p>
+    Such projects represent promising developments for the Social Sciences. A good example is illustrated by
+    <a routerLink="." fragment="serafinelli">Serafinelli and Tabellini (2017)</a> (see related Vox column) who analyzed
+    the historical development of cities and relate it to the emergence of a creative class using
+    <a routerLink="." fragment="schich">Schich et al. (2014)</a> or
+    <a routerLink="." fragment="croix">de la Croix and Licandro (2015)</a> our previous work in its 1.0. version in
+    <a routerLink="." fragment="gergaud">Gergaud et al. (2016)</a>.
+  </p>
+  <p>We welcome comments on our approach, and point towards this website to obtain the data, or extended requests.</p>
+</div>
+<p *ngIf="!showFullAbout"><a [routerLink]="['about']">Continue reading...</a></p>
 
 <h5>Papers</h5>
 <dbw-paper-reference
-  *ngFor="let reference of references"
+  *ngFor="let reference of references.slice(0, showAllReferences ? references.length : 1)"
   [description]="reference.description"
   [paperTitle]="reference.paperTitle"
   [paperUrl]="reference.paperUrl"
@@ -78,6 +76,7 @@ There are more than 700,000 such individuals, almost a third of the database we 
   [bibtexCitation]="reference.bibtexCitation"
   [shouldBoldPaperTitle]="reference.shouldBoldPaperTitle"
 ></dbw-paper-reference>
+<p *ngIf="!showAllReferences"><a [routerLink]="['about']">See older versions...</a></p>
 
 <h5>Authors</h5>
 <ul>
@@ -98,8 +97,12 @@ There are more than 700,000 such individuals, almost a third of the database we 
 
 <h6>Additional credits</h6>
 <ul>
+  <li>
+    <a href="https://www.linkedin.com/in/vladimir-sharkovski-37a30818a/">Vladimir Sharkovski</a> - NYU Abu Dhabi -
+    Website development, deployment, management
+  </li>
   <li><a href="https://www.linkedin.com/in/minda-belete-724511180/">Minda Belete</a> - NYU Abu Dhabi</li>
-  <li><a href="https://www.linkedin.com/in/vladimir-sharkovski-37a30818a/">Vladimir Sharkovski</a> - NYU Abu Dhabi</li>
+  <li><a href="https://www.linkedin.com/in/kayaprat/">Pratik Kayastha</a> - NYU Abu Dhabi</li>
 </ul>
 
 <h5>References</h5>
@@ -171,9 +174,8 @@ There are more than 700,000 such individuals, almost a third of the database we 
   license and from Wikidata under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a> license.
 </p>
 <p>
-  This paper is a discussion paper aiming at getting comments and feedback and sharing freely a sample of 100,000
-  observations. The final version of the full database will be published under the terms of the Creative Commons
-  Attribution-ShareAlike license at the time of the scientific publication.
+  The final version of the full database is published under the terms of the Creative Commons Attribution-ShareAlike
+  license at the time of the scientific publication.
 </p>
 <p>
   Financial support from <a href="https://www.sciencespo.fr/liepp/en.html">LIEPP</a> (ANR-11-LABX-0091,
