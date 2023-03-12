@@ -1,15 +1,16 @@
 <div class="row" [class.d-flex]="!hasAskedForResults">
-  <div class="col-lg-auto mb-3 px-3 options-container" [class.mx-auto]="!hasAskedForResults">
+  <div class="col-lg-auto px-3 options-container" [class.mx-auto]="!hasAskedForResults">
     <h2 class="mb-3">Find people in history</h2>
     <dbw-search-options
       [pushedTerm]="termPushedToOptions"
       (termChanged)="onTermSet($event)"
       (submitted)="searchOptionsSubmitted.next()"
+      [shouldShowResultsLoadedMessage]="results && !waitingForResults"
       class="mb-2"
     ></dbw-search-options>
-    <p class="mt-1 mb-0 text-center fw-semibold d-block d-lg-none" *ngIf="results && !waitingForResults">
+    <!-- <p class="mt-1 mb-0 text-center fw-semibold d-block d-lg-none" *ngIf="results && !waitingForResults">
       Results loaded. Please scroll down.
-    </p>
+    </p> -->
     <!-- <p class="mt-1 mb-0 text-center" *ngIf="results && !waitingForResults">
       Tip: Click on a search result to see details.
     </p> -->
@@ -21,13 +22,14 @@
     <div class="results-header mb-2">
       <h3 *ngIf="results">Results</h3>
       <span *ngIf="results && results.persons && results.persons.length > 0 && !waitingForResults"
-        >Showing results {{ results.pageNumber * results.resultsPerPage + 1 }} -
-        {{ results.pageNumber * results.resultsPerPage + results.persons.length }} (out of
-        {{ results.totalResults }} total), sorted by {{ results.sort.variable | sortVariable }}
+        >Showing results {{ results.pageNumber * results.resultsPerPage + 1 }}-{{
+          results.pageNumber * results.resultsPerPage + results.persons.length
+        }}
+        (total: {{ results.totalResults }}), sorted by {{ results.sort.variable | sortVariable }},
         {{ results.sort.direction }}
       </span>
       <span *ngIf="waitingForResults" class="loading-label text-primary me-auto">Please wait...</span>
-      <div *ngIf="(results?.persons?.length ?? 0) > 0" class="d-flex px-md-3 mx-auto mx-sm-0 ms-sm-auto">
+      <div *ngIf="(results?.persons?.length ?? 0) > 0" class="d-flex px-md-3 mx-auto mx-sm-0 ms-sm-auto py-1">
         <span class="me-2 fw-semibold">Page:</span>
         <dbw-page-picker
           [currentPage]="results?.pageNumber ?? 0"
@@ -35,7 +37,6 @@
           [allowArbitraryChanging]="true"
           [disabled]="waitingForResults"
           (pageChanged)="onPageChanged($event)"
-          class=""
         ></dbw-page-picker>
       </div>
     </div>

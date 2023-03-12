@@ -13,9 +13,7 @@
       <label class="form-check-label">Advanced name search</label>
     </div>
     <div *ngIf="form.value.advancedMode" class="small">
-      <p class="mb-0">
-        Use <span class="fw-bold text-primary">*</span> to match 0 or more characters (try it at the start or end!)
-      </p>
+      <p class="mb-0">Use <span class="fw-bold text-primary">*</span> to match 0 or more characters</p>
       <p class="mb-0">Use <span class="fw-bold text-primary">?</span> to match a single character</p>
     </div>
     <div *ngIf="nameField.errors?.['pattern']" class="invalid-feedback">The name contains invalid characters.</div>
@@ -122,6 +120,9 @@
   </div>
 
   <div class="full-row d-flex">
+    <span *ngIf="shouldShowResultsLoadedMessage" class="d-block d-lg-none small fw-semibold align-self-center"
+      >Results loaded. Please scroll down.</span
+    >
     <button type="submit" class="btn btn-secondary ms-auto">Search</button>
   </div>
 </form>

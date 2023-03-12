@@ -42,6 +42,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   pushedTerms = new ReplaySubject<string>();
 
   @Input('pushedTerm') recentmostPushedTerm?: string;
+  @Input() shouldShowResultsLoadedMessage?: boolean;
   @Output() termChanged = new EventEmitter<string>();
   @Output() submitted = new EventEmitter<string>();
 
