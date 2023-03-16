@@ -39,4 +39,12 @@ video {
     background-repeat: no-repeat;
     /* background-position: center 0%; */
   }
+
+  .search-section .search-description {
+    padding-inline-end: 1rem;
+  }
+
+  .search-section .search-app {
+    border-left: 1px solid lightgray;
+  }
 }

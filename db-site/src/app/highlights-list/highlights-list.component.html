@@ -3,7 +3,7 @@
   <div class="col-lg-10">
     <div class="row search-section">
       <div class="col-md g-md-0">
-        <div class="bg-white py-2">
+        <div class="bg-white py-2 search-description">
           <h5>
             <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
           </h5>
@@ -13,7 +13,7 @@
           </p>
         </div>
       </div>
-      <div class="col-md d-flex justify-content-center bg-white">
+      <div class="col-md-auto p-md-3 d-flex justify-content-center bg-white search-app">
         <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
       </div>
     </div>
