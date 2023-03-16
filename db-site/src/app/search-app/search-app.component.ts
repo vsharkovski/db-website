@@ -37,8 +37,6 @@ export class SearchAppComponent implements OnInit {
   pageSet = new BehaviorSubject<number>(0);
   sortStateSet = new BehaviorSubject<SortState>(DEFAULT_SORT_STATE);
 
-  searchOptionsSubmitted = new Subject<void>();
-
   hasAskedForResults: boolean = false;
   waitingForResults: boolean = false;
 
@@ -75,14 +73,9 @@ export class SearchAppComponent implements OnInit {
       });
 
     // Observable which, whenever the route is updated or the search form is
-    // submitted, filters unnecessary options using debounceTime,
-    // distinctUntilChanged and by making sure the search query has a term.
-    const readyToAskForResults = merge(
-      this.searchOptionsSubmitted.pipe(
-        map(() => this.route.snapshot.queryParams)
-      ),
-      this.route.queryParams
-    ).pipe(
+    // submitted, filters unnecessary options using debounceTime and distinctUntilChanged,
+    // and filter ensure the term is present and non-empty.
+    const readyToAskForResults = this.route.queryParams.pipe(
       debounceTime(1000),
       // Necessary to convert to string because otherwise the objects coming from
       // each source observable would be considered different
@@ -154,6 +147,15 @@ export class SearchAppComponent implements OnInit {
         ? params['sortDirection']
         : DEFAULT_SORT_STATE.direction;
       this.sortStateSet.next({ variable: variable, direction: dir });
+    }
+  }
+
+  onSearchOptionsSubmitted() {
+    const params = this.route.snapshot.queryParams;
+    if (!params['term']) {
+      // Ensure that a term is present. In this case, match every result.
+      // This will later update the route and trigger a search.
+      this.termSet.next('name~*');
     }
   }
 

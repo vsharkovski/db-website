@@ -4,7 +4,7 @@
     <dbw-search-options
       [pushedTerm]="termPushedToOptions"
       (termChanged)="onTermSet($event)"
-      (submitted)="searchOptionsSubmitted.next()"
+      (submitted)="onSearchOptionsSubmitted()"
       [shouldShowResultsLoadedMessage]="results && !waitingForResults"
       class="mb-2"
     ></dbw-search-options>
