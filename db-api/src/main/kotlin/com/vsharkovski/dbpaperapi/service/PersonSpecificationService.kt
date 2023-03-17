@@ -44,29 +44,25 @@ class PersonSpecificationService(val nameService: NameService) {
         // Get the SearchOperation enum value from the string form.
         val operation = SearchOperation.getSimpleOperation(criterion.operation) ?: return null
 
-        var key = criterion.key
-        var value = criterion.value
-
         // Ensure the key corresponds to a valid variable.
-        val personProperty = Person::class.memberProperties.find { it.name == key } ?: return null
+        val personProperty = Person::class.memberProperties.find { it.name == criterion.key } ?: return null
 
         // Ensure the value can be cast to the variable's type in the case of numeric operators.
         if (SearchOperation.isOperationNumeric(operation)) {
             when (personProperty.returnType) {
-                typeOf<Int?>() -> if (value.toIntOrNull() == null) return null
-                typeOf<Short?>() -> if (value.toShortOrNull() == null) return null
-                typeOf<Long?>() -> if (value.toLongOrNull() == null) return null
-                typeOf<Float?>() -> if (value.toFloatOrNull() == null) return null
+                typeOf<Int?>() -> if (criterion.value.toIntOrNull() == null) return null
+                typeOf<Short?>() -> if (criterion.value.toShortOrNull() == null) return null
+                typeOf<Long?>() -> if (criterion.value.toLongOrNull() == null) return null
+                typeOf<Float?>() -> if (criterion.value.toFloatOrNull() == null) return null
             }
         }
 
         // If the criterion specifies to search for a specific name, we actually process the value
         // being searched for and compare it with the nameProcessed variable.
-        if (key == "name") {
-            key = "nameProcessed"
-            value = nameService.processForSearch(criterion.value)
+        return if (criterion.key == "name") {
+            SearchCriterion("nameProcessed", operation, nameService.processForSearch(criterion.value))
+        } else {
+            SearchCriterion(criterion.key, operation, criterion.value)
         }
-
-        return SearchCriterion(key, operation, value)
     }
 }
