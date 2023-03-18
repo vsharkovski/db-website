@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class CSVService(
+class ImportService(
     val personRepository: PersonRepository,
     val genderService: GenderService,
     val occupationService: OccupationService,
     val citizenshipService: CitizenshipService,
     val nameService: NameService
 ) {
-    val logger: Logger = LoggerFactory.getLogger(CSVService::class.java)
+    val logger: Logger = LoggerFactory.getLogger(ImportService::class.java)
 
     private val logStatusUpdateInterval = 100000
 

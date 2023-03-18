@@ -11,7 +11,7 @@ import java.sql.Timestamp
 
 @Component
 class DBManagementStartupListener(
-    val csvService: CSVService,
+    val csvService: ImportService,
     val citizenshipService: CitizenshipService,
     val personService: PersonService,
     val exportService: ExportService
