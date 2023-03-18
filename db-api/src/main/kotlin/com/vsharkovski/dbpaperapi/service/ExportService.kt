@@ -38,33 +38,17 @@ class ExportService(
     }
 
     @Scheduled(fixedDelay = 3000)
-    fun processJobs() {
+    fun processAllJobs() {
+        processUnprocessedJobs()
+        discardUnfinishedProcessingJobs()
+        discardExpiredJobs()
+    }
+
+    private fun processUnprocessedJobs() {
         // Start exporting process for new jobs.
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.UNPROCESSED)) {
             processUnprocessedJob(job)
         }
-
-        // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
-        assert(currentApplicationStartupTimestamp != null)
-        for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESSING)) {
-            if (job.updateTime.before(currentApplicationStartupTimestamp)) {
-                exportJobRepository.delete(job)
-            }
-        }
-
-        // Discard jobs that finished processing more than 10 minutes ago.
-        // Also delete their files.
-        val currentMoment = Timestamp(System.currentTimeMillis())
-
-        for (job in exportJobRepository.findExportJobsByStatus((EExportJobStatus.PROCESSED))) {
-            val expirationMoment = Timestamp(job.updateTime.time + (10L).minutes.inWholeMilliseconds)
-            if (expirationMoment.before(currentMoment)) {
-                exportJobRepository.delete(job)
-            }
-        }
-
-        // Possible problem: what if user is downloading the file when it is deleted.
-        // Possible exploit: downloading a file with a slow connection to prevent deleting it.
     }
 
     @Async
@@ -85,5 +69,31 @@ class ExportService(
     private fun searchAndWriteToFile(searchTerm: String, filePath: String) {
         // Open file.
         // Query database and stream writing results to file.
+    }
+
+    private fun discardUnfinishedProcessingJobs() {
+        // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
+        assert(currentApplicationStartupTimestamp != null)
+        for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESSING)) {
+            if (job.updateTime.before(currentApplicationStartupTimestamp)) {
+                exportJobRepository.delete(job)
+            }
+        }
+    }
+
+    private fun discardExpiredJobs() {
+        // Discard jobs that finished processing more than 10 minutes ago.
+        // Also delete their files.
+        val currentMoment = Timestamp(System.currentTimeMillis())
+
+        for (job in exportJobRepository.findExportJobsByStatus((EExportJobStatus.PROCESSED))) {
+            val expirationMoment = Timestamp(job.updateTime.time + (10L).minutes.inWholeMilliseconds)
+            if (expirationMoment.before(currentMoment)) {
+                exportJobRepository.delete(job)
+            }
+        }
+
+        // Possible problem: what if user is downloading the file when it is deleted.
+        // Possible exploit: downloading a file with a slow connection to prevent deleting it.
     }
 }
