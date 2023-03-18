@@ -39,7 +39,7 @@ class SearchService(
         term: String,
         pageNumber: Int,
         sortState: SortState,
-    ): SearchResult<Person> {
+    ): SearchResult<PersonPublicView> {
         // It is impossible to look for a page below 0.
         if (pageNumber < 0) {
             return SearchResult()
@@ -72,7 +72,7 @@ class SearchService(
         )
 
         // Query for results.
-        val resultsPage = personRepository.findAll(specification, paging)
+        val resultsPage = personRepository.findAll(specification, PersonPublicView::class.java, paging)
         return SearchResult(
             results = resultsPage.content,
             hasPreviousPage = resultsPage.hasPrevious(),

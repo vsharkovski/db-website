@@ -1,4 +1,3 @@
-# Should set logging level to ERROR on production, and INFO on dev / test
 spring:
   jpa:
     hibernate:
@@ -13,15 +12,16 @@ logging:
   level:
     ROOT: INFO
 db-management:
-  csv-file-path: no-file-override-me
+  csv-file-path: no-file
   import:
-    relational-all: false
-    raw-all: false
+    all: false
   process:
     citizenship-names:
       readability: false
       search: false
     person-names:
       search: false
+exporting:
+  path: exported
 search:
   results-per-page: 1000

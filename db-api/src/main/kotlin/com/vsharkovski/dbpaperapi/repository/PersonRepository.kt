@@ -2,6 +2,7 @@ package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
+import com.vsharkovski.dbpaperapi.model.PersonPublicView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
@@ -12,15 +13,14 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import th.co.geniustree.springdata.jpa.repository.JpaSpecificationExecutorWithProjection
 import javax.transaction.Transactional
+import kotlin.reflect.KClass
 
 @Repository
-interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
-    fun findAll(specification: Specification<Person>, pageable: Pageable): Page<Person>
-
+interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long>,
+    JpaSpecificationExecutorWithProjection<Person> {
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
-
-    fun findByNameLikeIgnoreCase(name: String): List<PersonIdAndNames>
 
     @Query("select p.id from Person p where p.wikidataCode = :wikidataCode")
     fun findIdByWikidataCode(wikidataCode: Int): Long?

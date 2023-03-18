@@ -7,20 +7,19 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.core.io.FileSystemResource
 import org.springframework.stereotype.Component
+import java.sql.Timestamp
 
 @Component
 class DBManagementStartupListener(
     val csvService: CSVService,
     val citizenshipService: CitizenshipService,
-    val personService: PersonService
+    val personService: PersonService,
+    val exportService: ExportService
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Value("\${db-management.import.relational-all}")
-    val shouldImportRelationalDatabase: Boolean = false
-
-    @Value("\${db-management.import.raw-all}")
-    val shouldImportRawDatabase: Boolean = false
+    @Value("\${db-management.import.all}")
+    val shouldImportAll: Boolean = false
 
     @Value("\${db-management.process.citizenship-names.readability}")
     val shouldProcessCitizenshipNamesReadability: Boolean = false
@@ -36,21 +35,12 @@ class DBManagementStartupListener(
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
-        if (shouldImportRelationalDatabase && csvFilePath != null) {
+        if (shouldImportAll && csvFilePath != null && csvFilePath != "no-file") {
             val resource = FileSystemResource(csvFilePath!!)
             if (resource.exists()) {
-                csvService.addFileRelational(resource.file)
+                csvService.importAll(resource.file)
             } else {
                 logger.error("Failed attempt to import relational database: file not found [{}]", csvFilePath)
-            }
-        }
-        if (shouldImportRawDatabase && csvFilePath != null) {
-            // Will only work if the relational database has already been imported.
-            val resource = FileSystemResource(csvFilePath!!)
-            if (resource.exists()) {
-                csvService.addFileRaw(resource.file)
-            } else {
-                logger.error("Failed attempt to import raw database: file not found [{}]", csvFilePath)
             }
         }
         if (shouldProcessCitizenshipNamesSearch) {
@@ -62,5 +52,10 @@ class DBManagementStartupListener(
         if (shouldProcessPersonNamesSearch) {
             personService.processAllPersonNamesForSearch()
         }
+    }
+
+    @EventListener
+    fun trackApplicationStartupTimestamp(event: ContextRefreshedEvent) {
+        exportService.currentApplicationStartupTimestamp = Timestamp(System.currentTimeMillis())
     }
 }

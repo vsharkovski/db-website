@@ -1,9 +1,7 @@
 package com.vsharkovski.dbpaperapi.service
 
 import com.vsharkovski.dbpaperapi.model.Person
-import com.vsharkovski.dbpaperapi.model.RawCSVData
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
-import com.vsharkovski.dbpaperapi.repository.RawCSVDataRepository
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
@@ -15,7 +13,6 @@ import java.io.File
 @Service
 class CSVService(
     val personRepository: PersonRepository,
-    val rawCSVDataRepository: RawCSVDataRepository,
     val genderService: GenderService,
     val occupationService: OccupationService,
     val citizenshipService: CitizenshipService,
@@ -25,38 +22,20 @@ class CSVService(
 
     private val logStatusUpdateInterval = 100000
 
-    fun addFileRelational(file: File) {
-        // Add all records of the file into the relational tables.
-        logger.info("Add file relational: starting [{}]", file.path)
+    fun importAll(file: File) {
+        // Import all records of the file.
+        logger.info("Import all: starting [{}]", file.path)
         file.forEachCSVRecordBuffered(
-            this::addRecordToRelationalDB,
-            createLogStatusUpdateFunction("Add file relational")
+            this::addRecordToDB,
+            createLogStatusUpdateFunction("Import all")
         )
-        logger.info("Add file relational: ended [{}]", file.path)
+        logger.info("Import all: ended [{}]", file.path)
     }
 
-    fun addFileRaw(file: File) {
-        // Add all lines of the file into the raw table.
-        logger.info("Add file raw: starting [{}]", file.path)
-
-        val logFunction = createLogStatusUpdateFunction("Add file raw")
-        var index = 0
-        file.forEachLine { line ->
-            if (index > 0) {
-                // Skip the first line as it is the header of the csv.
-                addLineToRawDB(line)
-            }
-
-            index++
-            logFunction(index)
-        }
-
-        logger.info("Add file relational: ended [{}]", file.path)
-    }
-
-    private fun addRecordToRelationalDB(record: CSVRecord) {
+    private fun addRecordToDB(record: CSVRecord, rawData: String) {
         val name = record.get("name").ifEmpty { null }
         val person = Person(
+            rawData = rawData,
             wikidataCode = record.get("wikidata_code").substring(1).toIntOrNull(),
             birth = record.get("birth").toShortOrNull(),
             death = record.get("death").toShortOrNull(),
@@ -81,18 +60,6 @@ class CSVService(
         personRepository.save(person)
     }
 
-    private fun addLineToRawDB(line: String) {
-        // Extract wikidata code from the line. It should be the first column.
-        val firstCommaPosition = line.indexOf(',')
-        val wikidataCode = line.substring(1, firstCommaPosition).toIntOrNull() ?: return
-
-        // Get relational ID from the wikidata ID.
-        val id = personRepository.findIdByWikidataCode(wikidataCode) ?: return
-
-        // Save the record using the new ID.
-        rawCSVDataRepository.save(RawCSVData(personId = id, data = line))
-    }
-
     private fun createLogStatusUpdateFunction(taskName: String): (Int) -> Unit {
         return { index ->
             if (index % logStatusUpdateInterval == 0)
@@ -108,10 +75,15 @@ fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
         predicate(this)
     }
 
-fun File.forEachCSVRecordBuffered(predicate: (CSVRecord) -> Unit, logFunction: (Int) -> Unit) {
-    val bufferedReader = this.bufferedReader()
+fun File.forEachCSVRecordBuffered(predicate: (CSVRecord, String) -> Unit, logFunction: (Int) -> Unit) {
+    // We use two buffered readers in parallel: one that reads the raw lines, and one that
+    // reads the lines and creates a CSVRecord for each one.
+    val rawBufferedReader = this.bufferedReader()
+    rawBufferedReader.readLine()
+
+    val csvBufferedReader = this.bufferedReader()
     val csvParser = CSVParser(
-        bufferedReader,
+        csvBufferedReader,
         CSVFormat.Builder
             .create()
             .setSkipHeaderRecord(true)
@@ -121,9 +93,12 @@ fun File.forEachCSVRecordBuffered(predicate: (CSVRecord) -> Unit, logFunction: (
             .build()
     )
 
+    // Read each record.
     var index = 0
+
     for (record in csvParser) {
-        predicate(record)
+        val line = rawBufferedReader.readLine()
+        predicate(record, line)
 
         index++
         logFunction(index)
