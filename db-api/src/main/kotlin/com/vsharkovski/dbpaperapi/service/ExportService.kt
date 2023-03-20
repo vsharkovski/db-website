@@ -3,6 +3,8 @@ package com.vsharkovski.dbpaperapi.service
 import com.vsharkovski.dbpaperapi.model.EExportJobStatus
 import com.vsharkovski.dbpaperapi.model.ExportJob
 import com.vsharkovski.dbpaperapi.repository.ExportJobRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -14,8 +16,10 @@ import kotlin.time.Duration.Companion.minutes
 
 @Service
 class ExportService(val exportJobRepository: ExportJobRepository, val exportJobProcessor: ExportJobProcessor) {
+    val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
     @Value("\${exporting.job.lifetime}")
-    val jobLifetime: Long? = null
+    val jobLifetimeMinutes: Long? = null
 
     @Value("\${exporting.path}")
     val exportPath: String = ""
@@ -33,7 +37,11 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
 
     fun createJob(term: String) {
         val uuid = UUID.randomUUID()
-        val job = ExportJob(searchTerm = term, status = EExportJobStatus.UNPROCESSED, fileName = "${exportPath}/${uuid}.csv")
+        val job = ExportJob(
+            searchTerm = term,
+            status = EExportJobStatus.UNPROCESSED,
+            fileName = "${exportPath}/${uuid}.csv"
+        )
         exportJobRepository.save(job)
     }
 
@@ -47,8 +55,8 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         startProcessingUnprocessedJobs()
     }
 
+    // Start exporting process for new jobs.
     private fun startProcessingUnprocessedJobs() {
-        // Start exporting process for new jobs.
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.UNPROCESSED)) {
             // Update status to PROCESSING.
             exportJobRepository.save(job.copy(status = EExportJobStatus.PROCESSING))
@@ -59,8 +67,8 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         }
     }
 
+    // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
     private fun discardUnfinishedProcessingJobs() {
-        // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
         assert(currentApplicationStartupTimestamp != null)
 
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESSING)) {
@@ -70,13 +78,17 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         }
     }
 
+    // Discard jobs that finished processing more than 10 minutes ago.
     private fun discardExpiredJobs() {
-        // Discard jobs that finished processing more than 10 minutes ago.
-        assert(jobLifetime != null)
+        assert(jobLifetimeMinutes != null)
         val currentMoment = Timestamp(System.currentTimeMillis())
 
-        for (job in exportJobRepository.findExportJobsByStatus((EExportJobStatus.PROCESSED))) {
-            val expirationMoment = Timestamp(job.updateTime.time + jobLifetime!!.minutes.inWholeMilliseconds)
+        val successes = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_SUCCESS)
+        val failsBadInput = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_FAIL_BAD_INPUT)
+        val failsError = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_FAIL_INTERNAL_ERROR)
+
+        for (job in listOf(successes, failsBadInput, failsError).flatten()) {
+            val expirationMoment = Timestamp(job.updateTime.time + jobLifetimeMinutes!!.minutes.inWholeMilliseconds)
             if (expirationMoment.before(currentMoment)) {
                 discardJob(job)
             }
@@ -87,11 +99,18 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
     }
 
     private fun discardJob(job: ExportJob) {
-        // Delete file.
-        val filePath = Paths.get(job.fileName)
-        Files.delete(filePath)
+        deleteJobFile(job)
 
         // Remove from database.
         exportJobRepository.delete(job)
+    }
+
+    private fun deleteJobFile(job: ExportJob) {
+        try {
+            val filePath = Paths.get(job.fileName)
+            Files.delete(filePath)
+        } catch (e: Exception) {
+            logger.error("Failed to file for job [{}]: [{}]", job, e.message, e)
+        }
     }
 }
