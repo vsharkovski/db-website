@@ -8,6 +8,7 @@ import org.springframework.context.event.EventListener
 import org.springframework.core.io.FileSystemResource
 import org.springframework.stereotype.Component
 import java.sql.Timestamp
+//import java.time.LocalDateTime
 
 @Component
 class DBManagementStartupListener(
@@ -35,7 +36,8 @@ class DBManagementStartupListener(
 
     @EventListener
     fun importDataset(event: ContextRefreshedEvent) {
-        if (shouldImportAll && csvFilePath != null && csvFilePath != "no-file") {
+        if (shouldImportAll) {
+            assert(csvFilePath != null && csvFilePath != "no-file")
             val resource = FileSystemResource(csvFilePath!!)
             if (resource.exists()) {
                 csvService.importAll(resource.file)
@@ -58,4 +60,10 @@ class DBManagementStartupListener(
     fun trackApplicationStartupTimestamp(event: ContextRefreshedEvent) {
         exportService.currentApplicationStartupTimestamp = Timestamp(System.currentTimeMillis())
     }
+
+//    @EventListener
+//    fun debugThing(event: ContextRefreshedEvent) {
+//        val currentTime = LocalDateTime.now()
+//        exportService.createJob("notabilityIndex>38,birth>${currentTime.hour}${currentTime.minute}")
+//    }
 }

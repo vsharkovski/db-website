@@ -3,23 +3,16 @@ package com.vsharkovski.dbpaperapi.service
 import com.vsharkovski.dbpaperapi.model.EExportJobStatus
 import com.vsharkovski.dbpaperapi.model.ExportJob
 import com.vsharkovski.dbpaperapi.repository.ExportJobRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
 import kotlin.time.Duration.Companion.minutes
 
 @Service
-class ExportService(
-    val exportJobRepository: ExportJobRepository
-) {
-    private val logger: Logger = LoggerFactory.getLogger(ExportService::class.java)
-
-    @Value("\${exporting.path}")
-    val exportPath: String = ""
+class ExportService(val exportJobRepository: ExportJobRepository, val exportJobProcessor: ExportJobProcessor) {
+    @Value("\${exporting.job.lifetime}")
+    val jobLifetime: Long? = null
 
     /*
     Used to track which jobs are processing in the current application.
@@ -37,63 +30,52 @@ class ExportService(
         exportJobRepository.save(job)
     }
 
-    @Scheduled(fixedDelay = 3000)
-    fun processAllJobs() {
-        processUnprocessedJobs()
-        discardUnfinishedProcessingJobs()
-        discardExpiredJobs()
-    }
+    // TODO: All processing should be in a single method and in a single big transaction?
+    // TODO: And individual job processing should be in another new transaction?
 
-    private fun processUnprocessedJobs() {
+    @Scheduled(fixedDelay = 3000)
+    fun startProcessingUnprocessedJobs() {
         // Start exporting process for new jobs.
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.UNPROCESSED)) {
-            processUnprocessedJob(job)
+            // Update status to PROCESSING.
+            exportJobRepository.save(job.copy(status = EExportJobStatus.PROCESSING))
+
+            // Start processing in another thread.
+            // Has to use another service because @Async and @Transactional methods can't be called inside same class.
+            exportJobProcessor.processJob(job)
         }
     }
 
-    @Async
-    fun processUnprocessedJob(job: ExportJob) {
-        assert(job.status == EExportJobStatus.UNPROCESSED)
-
-        // Update status to PROCESSING.
-        job.status = EExportJobStatus.PROCESSING
-        exportJobRepository.save(job)
-
-        searchAndWriteToFile(job.searchTerm, "${exportPath}/${job.id}.csv")
-
-        // Update status to PROCESSED.
-        job.status = EExportJobStatus.PROCESSED
-        exportJobRepository.save(job)
-    }
-
-    private fun searchAndWriteToFile(searchTerm: String, filePath: String) {
-        // Open file.
-        // Query database and stream writing results to file.
-    }
-
-    private fun discardUnfinishedProcessingJobs() {
+    @Scheduled(fixedDelay = 3000)
+    fun discardUnfinishedProcessingJobs() {
         // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
         assert(currentApplicationStartupTimestamp != null)
+        assert(jobLifetime != null)
+
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESSING)) {
             if (job.updateTime.before(currentApplicationStartupTimestamp)) {
-                exportJobRepository.delete(job)
+                discardJob(job)
             }
         }
     }
 
-    private fun discardExpiredJobs() {
+    @Scheduled(fixedDelay = 3000)
+    fun discardExpiredJobs() {
         // Discard jobs that finished processing more than 10 minutes ago.
-        // Also delete their files.
         val currentMoment = Timestamp(System.currentTimeMillis())
 
         for (job in exportJobRepository.findExportJobsByStatus((EExportJobStatus.PROCESSED))) {
             val expirationMoment = Timestamp(job.updateTime.time + (10L).minutes.inWholeMilliseconds)
             if (expirationMoment.before(currentMoment)) {
-                exportJobRepository.delete(job)
+                discardJob(job)
             }
         }
 
-        // Possible problem: what if user is downloading the file when it is deleted.
-        // Possible exploit: downloading a file with a slow connection to prevent deleting it.
+        // TODO: Possible problem: what if user is downloading the file when it is deleted.
+        // TODO: Possible exploit: downloading a file with a slow connection to prevent deleting it.
+    }
+
+    private fun discardJob(job: ExportJob) {
+        exportJobRepository.delete(job)
     }
 }

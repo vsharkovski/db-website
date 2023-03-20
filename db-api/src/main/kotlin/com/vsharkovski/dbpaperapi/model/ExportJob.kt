@@ -21,7 +21,7 @@ data class ExportJob(
 
     @Enumerated(EnumType.STRING)
     @field:NotNull
-    var status: EExportJobStatus = EExportJobStatus.UNPROCESSED,
+    val status: EExportJobStatus = EExportJobStatus.UNPROCESSED,
 
     @field:NotNull
     val searchTerm: String = "",

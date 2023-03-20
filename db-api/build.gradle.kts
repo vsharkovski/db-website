@@ -10,7 +10,7 @@ plugins {
 
 group = "com.vsharkovski"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
 	mavenCentral()
@@ -25,8 +25,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("org.apache.commons:commons-csv:1.9.0")
-	implementation("th.co.geniustree.springdata.jpa:specification-with-projections:2.0.1")
+	implementation("org.apache.commons:commons-csv:1.10.0")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")

@@ -9,7 +9,7 @@ data class Person(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
 
-    val rawData: String?,
+    val rawData: String,
 
     val wikidataCode: Int?,
 

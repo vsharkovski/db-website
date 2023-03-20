@@ -1,6 +1,8 @@
+@file:Suppress("unused")
+
 package com.vsharkovski.dbpaperapi.model
 
-interface PersonPublicView {
+interface PersonNoRawData {
     val id: Long
     val wikidataCode: Int?
     val birth: Short?

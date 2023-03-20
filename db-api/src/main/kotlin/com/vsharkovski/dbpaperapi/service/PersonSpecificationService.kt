@@ -12,11 +12,10 @@ class PersonSpecificationService(val nameService: NameService) {
 
     fun createSpecification(
         unprocessedCriteria: List<UnprocessedSearchCriterion>,
-        sortState: SortState
+        sortState: SortState? = null
     ): Specification<Person>? {
         var foundAtLeastOneValidCriterion = false
         var specification: Specification<Person> = Specification.where(null)
-
         for (unprocessedCriterion in unprocessedCriteria) {
             val criterion = createCriterion(unprocessedCriterion)
             if (criterion != null) {
@@ -24,14 +23,13 @@ class PersonSpecificationService(val nameService: NameService) {
                 specification = Specification.where(specification).and(PersonSpecification(criterion))
             }
         }
-
         // If there are no valid criteria, there is no need for a specification.
         if (!foundAtLeastOneValidCriterion) {
             return null
         }
 
         // If sorting by a variable that is nullable, also exclude results with that case.
-        if (sortState.variable in sortableNullableVariables) {
+        if (sortState != null && sortState.variable in sortableNullableVariables) {
             specification = Specification.where(specification).and { root, _, builder ->
                 builder.isNotNull(root.get<Any>(sortState.variable))
             }

@@ -23,5 +23,7 @@ db-management:
       search: false
 exporting:
   path: exported
+  job:
+    lifetime: 10
 search:
   results-per-page: 1000
