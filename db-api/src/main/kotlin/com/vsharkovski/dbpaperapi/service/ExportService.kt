@@ -6,6 +6,7 @@ import com.vsharkovski.dbpaperapi.repository.ExportJobRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.nio.file.Files
@@ -15,7 +16,11 @@ import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
 @Service
-class ExportService(val exportJobRepository: ExportJobRepository, val exportJobProcessor: ExportJobProcessor) {
+class ExportService(
+    val exportJobRepository: ExportJobRepository,
+    val exportJobProcessor: ExportJobProcessor,
+    val searchService: SearchService
+) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Value("\${exporting.job.lifetime}")
@@ -35,14 +40,20 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
             if (field == null) field = value
         }
 
-    fun createJob(term: String) {
+    fun findJobById(id: Long): ExportJob? = exportJobRepository.findByIdOrNull(id)
+
+    fun createJob(term: String): ExportJob? {
+        if (!searchService.isSearchTermValid(term)) {
+            return null
+        }
+
         val uuid = UUID.randomUUID()
         val job = ExportJob(
             searchTerm = term,
             status = EExportJobStatus.UNPROCESSED,
-            fileName = "${exportPath}/${uuid}.csv"
+            fileName = "${uuid}.csv"
         )
-        exportJobRepository.save(job)
+        return exportJobRepository.save(job)
     }
 
     // TODO: All processing should be in a single method and in a single big transaction?
@@ -84,11 +95,12 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         val currentMoment = Timestamp(System.currentTimeMillis())
 
         val successes = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_SUCCESS)
-        val failsBadInput = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_FAIL_BAD_INPUT)
-        val failsError = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_FAIL_INTERNAL_ERROR)
+        val fails = exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESS_FAIL)
 
-        for (job in listOf(successes, failsBadInput, failsError).flatten()) {
-            val expirationMoment = Timestamp(job.updateTime.time + jobLifetimeMinutes!!.minutes.inWholeMilliseconds)
+        for (job in listOf(successes, fails).flatten()) {
+            val expirationMoment = Timestamp(
+                job.updateTime.time + jobLifetimeMinutes!!.minutes.inWholeMilliseconds
+            )
             if (expirationMoment.before(currentMoment)) {
                 discardJob(job)
             }
@@ -107,10 +119,10 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
 
     private fun deleteJobFile(job: ExportJob) {
         try {
-            val filePath = Paths.get(job.fileName)
+            val filePath = Paths.get("${exportPath}/${job.fileName}")
             Files.delete(filePath)
         } catch (e: Exception) {
-            logger.error("Failed to file for job [{}]: [{}]", job, e.message, e)
+            logger.error("Failed to delete file for job [{}]: [{}]", job, e.message, e)
         }
     }
 }

@@ -33,6 +33,14 @@ class SearchService(
         )
     }
 
+    /**
+     * A term is valid if it has at least one valid criterion.
+     */
+    fun isSearchTermValid(term: String): Boolean {
+        val criteria = createCriteriaFromSearchTerm(term)
+        return personSpecificationService.isAnyCriterionValid(criteria)
+    }
+
     fun findPeopleBySearchTerm(term: String, pageNumber: Int, sortState: SortState): SearchResult<PersonNoRawData> {
         // It is impossible to look for a page below 0.
         if (pageNumber < 0) {
@@ -66,11 +74,17 @@ class SearchService(
             personRepository.streamBy(it, PersonOnlyRawData::class.java)
         }
 
-
     private fun createSpecificationFromSearchTerm(term: String, sortState: SortState? = null): Specification<Person>? {
+        val criteria = createCriteriaFromSearchTerm(term)
+
+        // Create a specification from the found criteria.
+        return personSpecificationService.createSpecification(criteria, sortState)
+    }
+
+    private fun createCriteriaFromSearchTerm(term: String): List<UnprocessedSearchCriterion> {
         // Pattern match individual search criterions in the term string.
         // Note: If the string has forbidden characters, the matcher will either
-        // not match it or match it incorrectly. Either case is fine.
+        // not match it or match it incorrectly. Either case is fine and handled later.
         val criteria = mutableListOf<UnprocessedSearchCriterion>()
 
         val matcher = criteriaPattern.matcher("$term,")
@@ -84,7 +98,6 @@ class SearchService(
             )
         }
 
-        // Create a specification from the found criteria.
-        return personSpecificationService.createSpecification(criteria, sortState)
+        return criteria
     }
 }

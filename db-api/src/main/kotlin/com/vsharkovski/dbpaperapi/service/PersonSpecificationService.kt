@@ -10,12 +10,21 @@ import kotlin.reflect.typeOf
 class PersonSpecificationService(val nameService: NameService) {
     val sortableNullableVariables = listOf("birth", "death")
 
+    fun isAnyCriterionValid(criteria: List<UnprocessedSearchCriterion>): Boolean =
+        criteria.any { createCriterion(it) != null }
+
+    /**
+     * Create a specification by processing unprocessed criteria and using the valid ones.
+     * @return The resulting specification, or null if there were no valid criteria.
+     * This includes the case of no criteria.
+     */
     fun createSpecification(
         unprocessedCriteria: List<UnprocessedSearchCriterion>,
         sortState: SortState? = null
     ): Specification<Person>? {
         var foundAtLeastOneValidCriterion = false
         var specification: Specification<Person> = Specification.where(null)
+
         for (unprocessedCriterion in unprocessedCriteria) {
             val criterion = createCriterion(unprocessedCriterion)
             if (criterion != null) {
@@ -23,8 +32,9 @@ class PersonSpecificationService(val nameService: NameService) {
                 specification = Specification.where(specification).and(PersonSpecification(criterion))
             }
         }
-        // If there are no valid criteria, there is no need for a specification.
+
         if (!foundAtLeastOneValidCriterion) {
+            // No valid criteria found.
             return null
         }
 
