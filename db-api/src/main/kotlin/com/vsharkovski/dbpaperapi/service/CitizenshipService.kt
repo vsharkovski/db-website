@@ -11,9 +11,10 @@ class CitizenshipService(
     val citizenshipRepository: CitizenshipRepository,
     val nameService: NameService
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(CitizenshipService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     val resultsThisSession: MutableMap<String, Citizenship> = mutableMapOf()
+
     fun findAll(): List<Citizenship> = citizenshipRepository.findAll()
 
     fun findOrAddByName(name: String): Citizenship {

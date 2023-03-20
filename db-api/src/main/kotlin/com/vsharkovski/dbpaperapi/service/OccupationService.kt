@@ -18,5 +18,4 @@ class OccupationService(val occupationRepository: OccupationRepository) {
         } ?: occupationRepository.save(Occupation(name = name, type = type))
 
     fun findAll(): List<Occupation> = occupationRepository.findAll()
-
 }

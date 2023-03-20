@@ -20,7 +20,7 @@ class AuthTokenFilter : OncePerRequestFilter() {
 //    @Autowired
 //    private lateinit var userDetailsService: UserDetailsServiceImpl
 
-//    val loggerSLF4J: Logger = LoggerFactory.getLogger(AuthTokenFilter::class.java)
+//    val loggerSLF4J: Logger = LoggerFactory.getLogger(this::class.java)
 
     override fun doFilterInternal(
         request: HttpServletRequest,
