@@ -103,4 +103,6 @@ fun File.forEachCSVRecordBuffered(predicate: (CSVRecord, String) -> Unit, logFun
         index++
         logFunction(index)
     }
+
+    logFunction(index)
 }
