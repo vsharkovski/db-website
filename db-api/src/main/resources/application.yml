@@ -13,14 +13,22 @@ logging:
     ROOT: INFO
 db-management:
   csv-file-path: no-file
-  import:
-    all: false
-  process:
-    citizenship-names:
-      readability: false
-      search: false
-    person-names:
-      search: false
+  threading:
+    multithreaded: true
+    # Negative number for threads means unlimited.
+    threads: 16
+    queue-capacity: 500
+  log:
+    update-interval: 100000
+  actions:
+    import:
+      all: false
+    process:
+      citizenship-names:
+        readability: false
+        search: false
+      person-names:
+        search: false
 exporting:
   path: exported
   job:

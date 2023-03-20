@@ -18,16 +18,16 @@ class DBManagementStartupListener(
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Value("\${db-management.import.all}")
+    @Value("\${db-management.actions.import.all}")
     val shouldImportAll: Boolean = false
 
-    @Value("\${db-management.process.citizenship-names.readability}")
+    @Value("\${db-management.actions.process.citizenship-names.readability}")
     val shouldProcessCitizenshipNamesReadability: Boolean = false
 
-    @Value("\${db-management.process.citizenship-names.search}")
+    @Value("\${db-management.actions.process.citizenship-names.search}")
     val shouldProcessCitizenshipNamesSearch: Boolean = false
 
-    @Value("\${db-management.process.person-names.search}")
+    @Value("\${db-management.actions.process.person-names.search}")
     val shouldProcessPersonNamesSearch: Boolean = false
 
     @Value("\${db-management.csv-file-path}")

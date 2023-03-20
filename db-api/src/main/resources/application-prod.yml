@@ -8,3 +8,6 @@ logging:
     path: logs
   level:
     ROOT: ERROR
+db-management:
+  threading:
+    threads: 16
