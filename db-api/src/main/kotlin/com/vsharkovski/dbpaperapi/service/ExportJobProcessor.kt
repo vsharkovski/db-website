@@ -3,7 +3,6 @@ package com.vsharkovski.dbpaperapi.service
 import com.vsharkovski.dbpaperapi.model.EExportJobStatus
 import com.vsharkovski.dbpaperapi.model.ExportJob
 import com.vsharkovski.dbpaperapi.repository.ExportJobRepository
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.io.BufferedWriter
@@ -13,9 +12,6 @@ import javax.transaction.Transactional
 
 @Service
 class ExportJobProcessor(val searchService: SearchService, val exportJobRepository: ExportJobRepository) {
-    @Value("\${exporting.path}")
-    val exportPath: String = ""
-
     @Async
     @Transactional
     fun processJob(job: ExportJob) {
@@ -27,7 +23,7 @@ class ExportJobProcessor(val searchService: SearchService, val exportJobReposito
     }
 
     private fun queryJobSearchTermAndWriteToFile(job: ExportJob) {
-        val writer = getBufferedWriter("${exportPath}/${job.id}.csv")
+        val writer = getBufferedWriter(job.fileName)
         val stream = searchService.streamPeopleBySearchTerm(job.searchTerm)
 
         stream?.use {

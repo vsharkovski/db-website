@@ -6,13 +6,19 @@ import com.vsharkovski.dbpaperapi.repository.ExportJobRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.sql.Timestamp
+import java.util.*
 import kotlin.time.Duration.Companion.minutes
 
 @Service
 class ExportService(val exportJobRepository: ExportJobRepository, val exportJobProcessor: ExportJobProcessor) {
     @Value("\${exporting.job.lifetime}")
     val jobLifetime: Long? = null
+
+    @Value("\${exporting.path}")
+    val exportPath: String = ""
 
     /*
     Used to track which jobs are processing in the current application.
@@ -26,7 +32,8 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         }
 
     fun createJob(term: String) {
-        val job = ExportJob(searchTerm = term, status = EExportJobStatus.UNPROCESSED)
+        val uuid = UUID.randomUUID()
+        val job = ExportJob(searchTerm = term, status = EExportJobStatus.UNPROCESSED, fileName = "${exportPath}/${uuid}.csv")
         exportJobRepository.save(job)
     }
 
@@ -34,7 +41,13 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
     // TODO: And individual job processing should be in another new transaction?
 
     @Scheduled(fixedDelay = 3000)
-    fun startProcessingUnprocessedJobs() {
+    fun processJobs() {
+        discardUnfinishedProcessingJobs()
+        discardExpiredJobs()
+        startProcessingUnprocessedJobs()
+    }
+
+    private fun startProcessingUnprocessedJobs() {
         // Start exporting process for new jobs.
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.UNPROCESSED)) {
             // Update status to PROCESSING.
@@ -46,11 +59,9 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         }
     }
 
-    @Scheduled(fixedDelay = 3000)
-    fun discardUnfinishedProcessingJobs() {
+    private fun discardUnfinishedProcessingJobs() {
         // Discard jobs that were started to be processed but never finished, due to an application crash or kill.
         assert(currentApplicationStartupTimestamp != null)
-        assert(jobLifetime != null)
 
         for (job in exportJobRepository.findExportJobsByStatus(EExportJobStatus.PROCESSING)) {
             if (job.updateTime.before(currentApplicationStartupTimestamp)) {
@@ -59,13 +70,13 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
         }
     }
 
-    @Scheduled(fixedDelay = 3000)
-    fun discardExpiredJobs() {
+    private fun discardExpiredJobs() {
         // Discard jobs that finished processing more than 10 minutes ago.
+        assert(jobLifetime != null)
         val currentMoment = Timestamp(System.currentTimeMillis())
 
         for (job in exportJobRepository.findExportJobsByStatus((EExportJobStatus.PROCESSED))) {
-            val expirationMoment = Timestamp(job.updateTime.time + (10L).minutes.inWholeMilliseconds)
+            val expirationMoment = Timestamp(job.updateTime.time + jobLifetime!!.minutes.inWholeMilliseconds)
             if (expirationMoment.before(currentMoment)) {
                 discardJob(job)
             }
@@ -76,6 +87,11 @@ class ExportService(val exportJobRepository: ExportJobRepository, val exportJobP
     }
 
     private fun discardJob(job: ExportJob) {
+        // Delete file.
+        val filePath = Paths.get(job.fileName)
+        Files.delete(filePath)
+
+        // Remove from database.
         exportJobRepository.delete(job)
     }
 }
