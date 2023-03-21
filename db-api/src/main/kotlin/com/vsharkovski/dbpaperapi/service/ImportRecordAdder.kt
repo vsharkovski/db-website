@@ -43,3 +43,10 @@ class ImportRecordAdder(
         personRepository.save(person)
     }
 }
+
+fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
+    if (this.isEmpty()) {
+        null
+    } else {
+        predicate(this)
+    }

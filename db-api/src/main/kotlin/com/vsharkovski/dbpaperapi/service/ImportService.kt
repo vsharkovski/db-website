@@ -34,13 +34,6 @@ class ImportService(val importRecordAdder: ImportRecordAdder) {
     }
 }
 
-fun <T> String.ifNotEmptyOrNull(predicate: (String) -> T): T? =
-    if (this.isEmpty()) {
-        null
-    } else {
-        predicate(this)
-    }
-
 fun File.forEachCSVRecordBuffered(predicate: (CSVRecord, String) -> Unit, logFunction: (Int) -> Unit) {
     // We use two buffered readers in parallel: one that reads the raw lines, and one that
     // reads the lines and creates a CSVRecord for each one.
