@@ -30,6 +30,7 @@ db-management:
         search: false
 exporting:
   path: bin/exported
+  included: classpath:/static/included/README.txt
   csv:
     header: classpath:/static/header.csv
   job:

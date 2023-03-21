@@ -26,7 +26,6 @@ data class ExportJob(
     @field:NotNull
     val searchTerm: String = "",
 
-    @Column(name = "file_name")
     @field:NotNull
-    val filePath: String,
+    val fileName: String,
 )
