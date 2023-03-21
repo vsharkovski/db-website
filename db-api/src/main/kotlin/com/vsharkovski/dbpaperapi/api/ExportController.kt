@@ -44,7 +44,7 @@ class ExportController(val exportService: ExportService) {
         response.contentType = MediaType.TEXT_PLAIN_VALUE
         // Make response be interpreted as a file to be downloaded automatically.
         // Using 'inline' instead of attachment would display it in the browser.
-        response.setHeader("Content-Disposition", "attachment; filename=${job.id}.csv")
+        response.setHeader("Content-Disposition", "attachment; filename=export_result_${job.id}.csv")
 
         return ResponseEntity.ok(resource)
     }

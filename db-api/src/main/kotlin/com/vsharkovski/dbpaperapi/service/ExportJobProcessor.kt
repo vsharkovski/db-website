@@ -23,6 +23,9 @@ class ExportJobProcessor(
     @Value("\${exporting.path}")
     val exportPath: String = ""
 
+    @Value("\${exporting.csv.header}")
+    val csvHeader: String = ""
+
     @Async
     @Transactional
     fun processJob(job: ExportJob) {
@@ -42,12 +45,15 @@ class ExportJobProcessor(
         val stream = searchService.streamPeopleBySearchTerm(searchTerm)
         val writer = createBufferedWriter(filePath)
 
-        stream.use {
-            writer.use {
-                stream?.forEach {
-                    writer.write(it.rawData)
-                    writer.newLine()
-                }
+        writer.use {
+            // Write header on first line.
+            writer.write(csvHeader)
+            writer.newLine()
+
+            // Write all results.
+            stream?.forEach {
+                writer.write(it.rawData)
+                writer.newLine()
             }
         }
     }
