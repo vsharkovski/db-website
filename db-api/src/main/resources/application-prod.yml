@@ -4,8 +4,6 @@ spring:
     username: vlatko
     password: vlatko
 logging:
-  file:
-    path: logs
   level:
     ROOT: ERROR
 db-management:
