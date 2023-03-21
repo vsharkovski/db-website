@@ -14,7 +14,10 @@ import java.nio.file.Paths
 import javax.transaction.Transactional
 
 @Service
-class ExportJobProcessor(val searchService: SearchService, val exportJobRepository: ExportJobRepository) {
+class ExportJobProcessor(
+    val searchService: SearchService,
+    val exportJobRepository: ExportJobRepository
+) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Value("\${exporting.path}")
@@ -37,7 +40,7 @@ class ExportJobProcessor(val searchService: SearchService, val exportJobReposito
 
     private fun searchAndWriteToFile(searchTerm: String, filePath: String) {
         val stream = searchService.streamPeopleBySearchTerm(searchTerm)
-        val writer = getBufferedWriter(filePath)
+        val writer = createBufferedWriter(filePath)
 
         stream.use {
             writer.use {
@@ -49,7 +52,7 @@ class ExportJobProcessor(val searchService: SearchService, val exportJobReposito
         }
     }
 
-    private fun getBufferedWriter(path: String): BufferedWriter {
+    private fun createBufferedWriter(path: String): BufferedWriter {
         val filePath = Paths.get(path)
         Files.createDirectories(filePath.parent)
         return Files.newBufferedWriter(filePath)
