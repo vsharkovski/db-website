@@ -21,7 +21,7 @@ class ImportAsyncConfig {
     @Value("\${db-management.threading.queue-capacity}")
     val queueCapacity: Int = 1000
 
-    @Bean(name = ["importTaskExecutor"])
+    @Bean
     fun importTaskExecutor(): TaskExecutor {
         return if (shouldMultithread) {
             val executor = ThreadPoolTaskExecutor()

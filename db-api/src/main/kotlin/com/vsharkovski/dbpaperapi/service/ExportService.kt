@@ -51,7 +51,7 @@ class ExportService(
         val job = ExportJob(
             searchTerm = term,
             status = EExportJobStatus.UNPROCESSED,
-            fileName = "${uuid}.csv"
+            filePath = "${exportPath}/${uuid}.csv"
         )
         return exportJobRepository.save(job)
     }
@@ -119,7 +119,7 @@ class ExportService(
 
     private fun deleteJobFile(job: ExportJob) {
         try {
-            val filePath = Paths.get("${exportPath}/${job.fileName}")
+            val filePath = Paths.get(job.filePath)
             Files.delete(filePath)
         } catch (e: Exception) {
             logger.error("Failed to delete file for job [{}]: [{}]", job, e.message, e)
