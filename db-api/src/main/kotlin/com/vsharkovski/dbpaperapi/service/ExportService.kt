@@ -119,7 +119,7 @@ class ExportService(
 
     private fun deleteJobFile(job: ExportJob) {
         try {
-            val filePath = Paths.get("${exportPath}/${job.fileName}.csv")
+            val filePath = Paths.get("${exportPath}/${job.fileName}.zip")
             Files.delete(filePath)
         } catch (e: Exception) {
             logger.info("Failed to delete file for job [{}]: [{}]", job, e.message, e)
