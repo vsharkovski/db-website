@@ -36,6 +36,6 @@ exporting:
   job:
     lifetime: 10
 search:
-  results-per-page: 1000
+  results-per-page: 200
 temp:
   path: bin/temp

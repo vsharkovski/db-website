@@ -34,6 +34,7 @@ import { ViewportScroller } from '@angular/common';
 import { filter, pairwise } from 'rxjs';
 import { VariableSearchComponent } from './variable-search/variable-search.component';
 import { PagePickerComponent } from './page-picker/page-picker.component';
+import { ExportAppComponent } from './export-app/export-app.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import { PagePickerComponent } from './page-picker/page-picker.component';
     FooterComponent,
     VariableSearchComponent,
     PagePickerComponent,
+    ExportAppComponent,
   ],
   imports: [
     BrowserModule,
