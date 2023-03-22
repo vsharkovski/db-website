@@ -51,7 +51,6 @@ export class VariablesService {
     return this.http.get<VariablesAllResponse>('api/variables').pipe(
       catchError(
         this.errorService.handleError('getAllVariables', {
-          success: false,
           genders: [],
           occupations: [],
           citizenships: [],

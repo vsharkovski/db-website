@@ -1,7 +1,6 @@
-import { Response } from './response.model';
 import { Variable } from './variable.model';
 
-export interface VariablesAllResponse extends Response {
+export interface VariablesAllResponse {
   genders: Variable[];
   occupations: Variable[];
   citizenships: Variable[];
