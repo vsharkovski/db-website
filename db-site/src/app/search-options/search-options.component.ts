@@ -15,6 +15,7 @@ import {
 } from '@angular/forms';
 import { delayWhen, ReplaySubject, skip } from 'rxjs';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
+import { SearchService } from '../search.service';
 import { Variable } from '../variable.model';
 import { VariablesService } from '../variables.service';
 
@@ -27,7 +28,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   readonly LIFE_YEAR_MIN = -3500;
   readonly LIFE_YEAR_MAX = 2020;
   readonly SAFE_NAME_PATTERN = '^[^,:!=><~]+$';
-  readonly termRegex: RegExp;
 
   form: FormGroup;
 
@@ -48,7 +48,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
 
   constructor(
     fb: NonNullableFormBuilder,
-    private variablesService: VariablesService
+    private variablesService: VariablesService,
+    private searchService: SearchService
   ) {
     // Create the form.
     this.form = fb.group({
@@ -68,18 +69,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       notabilityMax: fb.control<number | null>(null),
       advancedMode: fb.control<boolean>(false),
     });
-
-    // Create the regular expression for terms.
-    const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
-    const searchOperatorsJoinedOr = searchOperators.join('|');
-    const forbiddenCharacters = `,${searchOperators.join('')}`;
-    const regexpString = [
-      `(\\w+?)`,
-      `(${searchOperatorsJoinedOr})`,
-      `([^${forbiddenCharacters}]+?)`,
-      `,`,
-    ].join('');
-    this.termRegex = new RegExp(regexpString, 'g');
   }
 
   ngOnInit(): void {
@@ -225,13 +214,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   private pushTermToForm(term: string): void {
-    // Match regex groups in term and create a list of all matches.
-    const criteria = [...`${term},`.matchAll(this.termRegex)].map((match) => ({
-      key: match[1],
-      operation: match[2],
-      value: match[3],
-    }));
-
     const values: FormValues = {
       name: '',
       birthMin: null,
@@ -246,6 +228,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       notabilityMax: null,
       advancedMode: false,
     };
+    const criteria = this.searchService.getSearchCriteriaFromTerm(term);
 
     for (let c of criteria) {
       if (c.key == 'name' && (c.operation == ':' || c.operation == '~')) {
