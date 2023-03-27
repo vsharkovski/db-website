@@ -37,6 +37,6 @@ export class ExportService {
   }
 
   getFileDownloadUrl(id: number): string {
-    return `api/export/file/${id}`;
+    return `download/${id}`;
   }
 }
