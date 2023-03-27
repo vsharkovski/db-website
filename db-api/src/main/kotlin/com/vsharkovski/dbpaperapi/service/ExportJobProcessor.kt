@@ -80,7 +80,8 @@ class ExportJobProcessor(
         }
     }
 
-    private fun searchAndWriteToFile(searchTerm: String, filePath: Path) {
+    @Transactional
+    fun searchAndWriteToFile(searchTerm: String, filePath: Path) {
         Files.createDirectories(filePath.parent)
         Files.newBufferedWriter(filePath).use { writer ->
             val stream = searchService.streamPeopleBySearchTerm(searchTerm)
@@ -113,7 +114,7 @@ class ExportJobProcessor(
                         while (true) {
                             val length = fileInput.read(bytes)
                             if (length < 0) break
-                            zipOutput.write(bytes)
+                            zipOutput.write(bytes, 0, length)
                         }
                     }
                 }
