@@ -6,6 +6,7 @@
   "/download": {
     "target": "http://localhost:8080/api/export/file",
     "secure": false,
+    "changeOrigin": true,
     "pathRewrite": {
       "^/download": ""
     }

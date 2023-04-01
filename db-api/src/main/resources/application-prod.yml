@@ -4,8 +4,15 @@ spring:
     username: vlatko
     password: vlatko
 logging:
+  file:
+    path: /data/bin/logs
   level:
     ROOT: ERROR
 db-management:
+  csv-file-path: /opt/db-website/server/cross-verified-database.csv
   threading:
-    threads: 16
+    threads: 4
+exporting:
+  path: /data/bin/exported
+temp:
+  path: /data/bin/temp
