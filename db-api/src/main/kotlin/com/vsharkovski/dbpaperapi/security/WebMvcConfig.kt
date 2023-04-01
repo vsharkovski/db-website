@@ -10,7 +10,8 @@ class WebMvcConfig : WebMvcConfigurer {
         registry.addMapping("/**")
             .allowedOrigins(
                 "http://localhost:4200",
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "https://bhht.abudhabi.nyu.edu/",
             )
             .maxAge(3600)
             .allowCredentials(true)
