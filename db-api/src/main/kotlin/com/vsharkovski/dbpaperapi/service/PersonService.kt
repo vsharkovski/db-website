@@ -1,6 +1,5 @@
 package com.vsharkovski.dbpaperapi.service
 
-import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.slf4j.Logger
@@ -14,7 +13,7 @@ class PersonService(
     val personRepository: PersonRepository,
     val nameService: NameService
 ) {
-    private val logger: Logger = LoggerFactory.getLogger(PersonService::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Value("\${search.results-per-page}")
     val batchSize: Int = 1000

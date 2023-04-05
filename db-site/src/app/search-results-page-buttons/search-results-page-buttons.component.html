@@ -1,14 +1,15 @@
 <div class="d-flex">
   <div class="btn-group ms-auto">
     <button
+      type="button"
       class="btn btn-secondary"
       (click)="onPreviousPageButtonClick()"
       [disabled]="disabled || !results.hasPreviousPage"
     >
       <
     </button>
-    <!-- prettier-ignore -->
     <button
+      type="button"
       class="btn btn-secondary"
       (click)="onNextPageButtonClick()"
       [disabled]="disabled || !results.hasNextPage"

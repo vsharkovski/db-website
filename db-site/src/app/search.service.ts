@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable } from 'rxjs';
 import { ErrorService } from './error.service';
+import { SearchCriterion } from './search-criterion.model';
 import { SearchResponse } from './search-response.model';
 import { SortState } from './sort-state.model';
 
@@ -9,7 +10,21 @@ import { SortState } from './sort-state.model';
   providedIn: 'root',
 })
 export class SearchService {
-  constructor(private http: HttpClient, private errorService: ErrorService) {}
+  readonly termRegex: RegExp;
+
+  constructor(private http: HttpClient, private errorService: ErrorService) {
+    // Create the regular expression for terms.
+    const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
+    const searchOperatorsJoinedOr = searchOperators.join('|');
+    const forbiddenCharacters = `,${searchOperators.join('')}`;
+    const regexpString = [
+      `(\\w+?)`,
+      `(${searchOperatorsJoinedOr})`,
+      `([^${forbiddenCharacters}]+?)`,
+      `,`,
+    ].join('');
+    this.termRegex = new RegExp(regexpString, 'g');
+  }
 
   getSearchResults(
     term: string,
@@ -31,7 +46,6 @@ export class SearchService {
       .pipe(
         catchError(
           this.errorService.handleError('getSearchResults', {
-            success: false,
             persons: [],
             hasNextPage: false,
             hasPreviousPage: false,
@@ -46,5 +60,14 @@ export class SearchService {
           })
         )
       );
+  }
+
+  getSearchCriteriaFromTerm(term: string): SearchCriterion[] {
+    // Match regex groups in term and create a list of all matches.
+    return [...`${term},`.matchAll(this.termRegex)].map((match) => ({
+      key: match[1],
+      operation: match[2],
+      value: match[3],
+    }));
   }
 }

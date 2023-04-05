@@ -2,10 +2,9 @@ package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
-import org.springframework.data.domain.Page
+import com.vsharkovski.dbpaperapi.repository.custom.JpaSpecificationStreamExecutorWithProjection
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -15,12 +14,9 @@ import org.springframework.stereotype.Repository
 import javax.transaction.Transactional
 
 @Repository
-interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long> {
-    fun findAll(specification: Specification<Person>, pageable: Pageable): Page<Person>
-
+interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingRepository<Person, Long>,
+    JpaSpecificationStreamExecutorWithProjection<Person, Long> {
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
-
-    fun findByNameLikeIgnoreCase(name: String): List<PersonIdAndNames>
 
     @Query("select p.id from Person p where p.wikidataCode = :wikidataCode")
     fun findIdByWikidataCode(wikidataCode: Int): Long?

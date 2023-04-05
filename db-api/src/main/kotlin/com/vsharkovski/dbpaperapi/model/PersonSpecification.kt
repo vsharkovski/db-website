@@ -6,11 +6,11 @@ import javax.persistence.criteria.CriteriaQuery
 import javax.persistence.criteria.Predicate
 import javax.persistence.criteria.Root
 
-data class PersonSpecification(
+data class PersonSpecification<T>(
     private val criterion: SearchCriterion
-) : Specification<Person> {
+) : Specification<T> {
     override fun toPredicate(
-        root: Root<Person>,
+        root: Root<T>,
         query: CriteriaQuery<*>,
         builder: CriteriaBuilder
     ): Predicate? = when (criterion.operation) {

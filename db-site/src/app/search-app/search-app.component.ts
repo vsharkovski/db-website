@@ -30,8 +30,11 @@ const DEFAULT_SORT_STATE: SortState = {
   styleUrls: ['./search-app.component.css'],
 })
 export class SearchAppComponent implements OnInit {
+  navActiveId: string = 'results';
+
   results?: SearchResponse;
   termPushedToOptions?: string;
+  recentmostSearchedTerm?: string;
 
   termSet = new BehaviorSubject<string>('');
   pageSet = new BehaviorSubject<number>(0);
@@ -86,14 +89,17 @@ export class SearchAppComponent implements OnInit {
 
     // Observable which asks the API for results.
     const results$ = readyToAskForResults.pipe(
-      switchMap((params) =>
-        this.searchService.getSearchResults(
-          params['term'] ?? '',
+      switchMap((params) => {
+        const term = params['term'] ?? '';
+        this.recentmostSearchedTerm = term;
+
+        return this.searchService.getSearchResults(
+          term,
           params['page'] ?? 0,
           params['sortVariable'] ?? DEFAULT_SORT_STATE.variable,
           params['sortDirection'] ?? DEFAULT_SORT_STATE.direction
-        )
-      )
+        );
+      })
     );
 
     // Subscribe to the observable described above. Whenever results are received,
@@ -123,6 +129,7 @@ export class SearchAppComponent implements OnInit {
       if (newWaitStatus) {
         this.hasAskedForResults = true;
       }
+      this.navActiveId = 'results';
     });
   }
 
@@ -175,5 +182,10 @@ export class SearchAppComponent implements OnInit {
     // The page is also reset to 0.
     this.termSet.next(term);
     this.pageSet.next(0);
+    this.navActiveId = 'results';
+  }
+
+  onExportButtonClicked(): void {
+    this.navActiveId = 'export';
   }
 }

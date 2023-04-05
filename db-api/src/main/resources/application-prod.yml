@@ -5,6 +5,14 @@ spring:
     password: vlatko
 logging:
   file:
-    path: logs
+    path: /data/bin/logs
   level:
     ROOT: ERROR
+db-management:
+  csv-file-path: /opt/db-website/server/cross-verified-database.csv
+  threading:
+    threads: 4
+exporting:
+  path: /data/bin/exported
+temp:
+  path: /data/bin/temp

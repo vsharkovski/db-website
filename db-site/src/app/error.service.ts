@@ -8,7 +8,7 @@ import { Observable, of } from 'rxjs';
 export class ErrorService {
   handleError<T>(operation = 'operation', fallbackValue: T | undefined) {
     return (error: HttpErrorResponse): Observable<T> => {
-      console.error(error);
+      console.error(operation, error);
       const castAttempt = error.error as T;
       if (castAttempt) {
         return of(castAttempt);

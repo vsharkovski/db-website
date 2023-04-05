@@ -1,0 +1,35 @@
+<h4>About downloading</h4>
+<p>
+  After performing a search, you can download the whole set of results in <span class="fw-semibold">.csv</span> format.
+  This file will have all data (columns) as described in <a [routerLink]="['/about']" target="_blank">the paper</a>, not
+  just the columns displayed on this page.
+</p>
+<p>
+  Once we create the file, you will have 10 minutes to download it. After 10 minutes, it will be deleted from our
+  system.
+</p>
+<p>Please do not close this page or change your search until you receive a download link.</p>
+<button
+  type="button"
+  class="btn btn-secondary mb-3"
+  (click)="onExportRequestButtonClick()"
+  [disabled]="status != 'not requested' && status != 'fail' && status != 'expired'"
+>
+  Request full results
+</button>
+<div *ngIf="status != 'not requested'">
+  <h4>Status</h4>
+  <div *ngIf="status == 'requested' || status == 'processing'">
+    <div class="alert alert-info d-inline-block">Please wait. The file is being created.</div>
+  </div>
+  <div *ngIf="status == 'expired'">
+    <div class="alert alert-warning d-inline-block">The file expired. You can request a new one.</div>
+  </div>
+  <div *ngIf="status == 'fail'">
+    <div class="alert alert-danger d-inline-block">An error occured. Please try again later.</div>
+  </div>
+  <div *ngIf="status == 'success'">
+    <div class="alert alert-success d-inline-block">File successfully created. Please download it now.</div>
+    <p><a [href]="downloadUrl" target="_blank" class="fw-bold">Download</a></p>
+  </div>
+</div>

@@ -1,4 +1,3 @@
-# Should set logging level to ERROR on production, and INFO on dev / test
 spring:
   jpa:
     hibernate:
@@ -9,19 +8,34 @@ spring:
       - classpath:db/migration
 logging:
   file:
-    path: logs
+    path: bin/logs
   level:
     ROOT: INFO
 db-management:
-  csv-file-path: no-file-override-me
-  import:
-    relational-all: false
-    raw-all: false
-  process:
-    citizenship-names:
-      readability: false
-      search: false
-    person-names:
-      search: false
+  csv-file-path: no-file
+  threading:
+    multithreaded: true
+    threads: 16
+    queue-capacity: 500
+  log:
+    update-interval: 100000
+  actions:
+    import:
+      all: false
+    process:
+      citizenship-names:
+        readability: false
+        search: false
+      person-names:
+        search: false
+exporting:
+  path: bin/exported
+  included: classpath:static/included/*
+  csv:
+    header: classpath:static/header.csv
+  job:
+    lifetime: 10
 search:
-  results-per-page: 1000
+  results-per-page: 200
+temp:
+  path: bin/temp

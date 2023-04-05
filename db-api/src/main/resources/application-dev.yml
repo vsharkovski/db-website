@@ -4,7 +4,5 @@ spring:
     username: vlatko
     password: vlatko
 logging:
-  file:
-    path: logs
   level:
     ROOT: INFO
