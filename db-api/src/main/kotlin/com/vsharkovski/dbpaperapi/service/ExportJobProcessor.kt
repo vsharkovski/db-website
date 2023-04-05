@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
@@ -24,6 +22,7 @@ class ExportJobProcessor(
     val resourceLoader: ResourceLoader,
     val searchService: SearchService,
     val tempDirectoryService: TempDirectoryService,
+    val filesService: FilesService,
     val exportJobRepository: ExportJobRepository
 ) {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -52,25 +51,30 @@ class ExportJobProcessor(
     @Async
     @Transactional
     fun processJob(job: ExportJob) {
+        val tempFilePath = Paths.get("${tempDirectoryService.tempDirectoryPath}/result.csv")
+        val zipPath = Paths.get("${exportPath}/${job.fileName}.zip")
+
         try {
             // Create temp file: the result of the query.
-            tempDirectoryService.clearDirectory(tempDirectoryService.tempDirectoryPath)
-            val tempFilePath = Paths.get("${tempDirectoryService.tempDirectoryPath}/result.csv")
+            filesService.clearDirectory(tempDirectoryService.tempDirectoryPath)
             searchAndWriteToFile(job.searchTerm, tempFilePath)
 
             // Zip files to an archive in the exported folder.
             val filesToZip = listOf(includedFilesPaths, listOf(tempFilePath)).flatten()
-            val zipOutput = Paths.get("${exportPath}/${job.fileName}.zip")
-            zipFiles(filesToZip, zipOutput)
+            filesService.zipFiles(filesToZip, zipPath)
 
-            // Update status to PROCESSED.
+            // Update status to successfully processed.
             exportJobRepository.save(job.copy(status = EExportJobStatus.PROCESS_SUCCESS))
         } catch (e: Exception) {
             // Some other error, either with file writing or database.
             logger.error("Failed exporting job [{}]: [{}]", job, e.message, e)
             exportJobRepository.save(job.copy(status = EExportJobStatus.PROCESS_FAIL))
 
-            // TODO: Clean up files
+            // Delete zip file.
+            Files.deleteIfExists(zipPath)
+        } finally {
+            // Delete temp file.
+            Files.deleteIfExists(tempFilePath)
         }
     }
 
@@ -89,29 +93,6 @@ class ExportJobProcessor(
                 stream.forEach {
                     writer.write(it.rawData)
                     writer.newLine()
-                }
-            }
-        }
-    }
-
-    private fun zipFiles(files: List<Path>, outputPath: Path) {
-        Files.createDirectories(outputPath.parent)
-        Files.newOutputStream(outputPath).use { fileOutput ->
-            ZipOutputStream(fileOutput).use { zipOutput ->
-                for (filePath in files) {
-                    // Add entry to zip archive.
-                    val zipEntry = ZipEntry(filePath.fileName.toString())
-                    zipOutput.putNextEntry(zipEntry)
-
-                    // Add bytes of file to zip archive.
-                    Files.newInputStream(filePath).use { fileInput ->
-                        val bytes = ByteArray(1024)
-                        while (true) {
-                            val length = fileInput.read(bytes)
-                            if (length < 0) break
-                            zipOutput.write(bytes, 0, length)
-                        }
-                    }
                 }
             }
         }
@@ -142,26 +123,12 @@ class ExportJobProcessor(
         // Copy files from classpath to another place in the filesystem.
         // This is necessary because we can't use Resource.getFile() in a .jar.
         val copiedDirectory = Paths.get("${exportPath}/prepared")
-        tempDirectoryService.clearDirectory(copiedDirectory)
-        includedFilesPaths = copyResourcesToFileSystem(includedFilesResources.filter { it.exists() }, copiedDirectory)
+        filesService.clearDirectory(copiedDirectory)
+        includedFilesPaths = filesService.copyResourcesToDirectory(
+            includedFilesResources.filter { it.exists() },
+            copiedDirectory
+        )
 
         logger.info("Included files: {}", includedFilesPaths)
-    }
-
-    private fun copyResourcesToFileSystem(resources: List<Resource>, directory: Path): List<Path> {
-        Files.createDirectories(directory)
-
-        val outputPaths = mutableListOf<Path>()
-        resources.forEach {
-            val outputPath = directory.resolve(it.filename!!)
-            try {
-                Files.copy(it.inputStream, outputPath)
-                outputPaths.add(outputPath)
-            } catch (e: Exception) {
-                logger.error("Error copying resource to directory: [{}, {}]", it.filename, directory)
-            }
-        }
-
-        return outputPaths
     }
 }

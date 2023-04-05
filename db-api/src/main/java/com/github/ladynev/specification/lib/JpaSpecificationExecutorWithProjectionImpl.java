@@ -249,7 +249,7 @@ public class JpaSpecificationExecutorWithProjectionImpl<T, ID extends Serializab
         if (model instanceof ManagedType) {
 
             /*
-             *  Required to keep support for EclipseLink 2.4.x. TODO: Remove once we drop that (probably Dijkstra M1)
+             *  Required to keep support for EclipseLink 2.4.x.
              *  See: https://bugs.eclipse.org/bugs/show_bug.cgi?id=413892
              */
             propertyPathModel = (Bindable<?>) ((ManagedType<?>) model).getAttribute(segment);

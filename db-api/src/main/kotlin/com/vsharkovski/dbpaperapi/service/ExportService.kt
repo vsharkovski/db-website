@@ -56,9 +56,6 @@ class ExportService(
         return exportJobRepository.save(job)
     }
 
-    // TODO: All processing should be in a single method and in a single big transaction?
-    // TODO: And individual job processing should be in another new transaction?
-
     @Scheduled(fixedDelay = 3000)
     fun processJobs() {
         discardUnfinishedProcessingJobs()
@@ -105,9 +102,6 @@ class ExportService(
                 discardJob(job)
             }
         }
-
-        // TODO: Possible problem: what if user is downloading the file when it is deleted.
-        // TODO: Possible exploit: downloading a file with a slow connection to prevent deleting it.
     }
 
     private fun discardJob(job: ExportJob) {
@@ -120,7 +114,7 @@ class ExportService(
     private fun deleteJobFile(job: ExportJob) {
         try {
             val filePath = Paths.get("${exportPath}/${job.fileName}.zip")
-            Files.delete(filePath)
+            Files.deleteIfExists(filePath)
         } catch (e: Exception) {
             logger.info("Failed to delete file for job [{}]: [{}]", job, e.message, e)
         }
