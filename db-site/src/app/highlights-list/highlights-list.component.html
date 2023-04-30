@@ -2,7 +2,7 @@
   <div class="d-0 d-lg-block col-lg-1"></div>
   <div class="col-lg-10">
     <div class="row search-section">
-      <div class="col-md g-md-0">
+      <div class="col-md g-md-0 search-info">
         <div class="bg-white py-2 search-description">
           <h5>
             <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
@@ -12,6 +12,7 @@
             filtering by name, birth and death year, gender, occupation, or citizenship.
           </p>
         </div>
+        <div class="sunburst"></div>
       </div>
       <div class="col-md-auto p-md-3 d-flex justify-content-center bg-white search-app">
         <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
