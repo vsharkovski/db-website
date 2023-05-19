@@ -8,7 +8,7 @@ import { Observable, catchError } from 'rxjs';
 https://api.altmetric.com/
 */
 
-const apiUrl = 'http://api.altmetric.com/v1/id/129575296';
+const apiUrl = 'https://api.altmetric.com/v1/id/129575296';
 
 @Injectable({
   providedIn: 'root',
