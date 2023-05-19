@@ -48,12 +48,23 @@
         </video>
       </div>
     </div>
-    <div class="mt-5 row">
+
+    <div class="mt-5 row" *ngIf="altmetricResponse">
       <h5 class="mb-3"><a [href]="altmetricLink" class="text-reset">Paper metrics</a></h5>
-      <p>
-        So far, our database has been downloaded more than 155,000 times. There have also been at least
-        <a [href]="altmetricLink">144 news stories from 117 outlets</a>.
-      </p>
+      <div class="row">
+        <div class="col-auto"><img [src]="altmetricResponse.images.medium" /></div>
+        <div class="col">
+          <p class="mb-0">So far:</p>
+          <ul>
+            <li>Our database has more than 155,000 downloads.</li>
+            <li>
+              <a [href]="altmetricLink"
+                >We have news stories from {{ altmetricResponse.cited_by_msm_count }} outlets.</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
   <div class="d-0 d-lg-block col-lg-1"></div>
