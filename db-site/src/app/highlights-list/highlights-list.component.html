@@ -54,7 +54,7 @@
       <div class="row">
         <div class="col-auto"><img [src]="altmetricResponse.images.medium" /></div>
         <div class="col">
-          <p class="mb-0">So far:</p>
+          <p class="mb-2">So far:</p>
           <ul>
             <li>Our database has more than 155,000 downloads.</li>
             <li>
@@ -64,6 +64,18 @@
             </li>
           </ul>
         </div>
+      </div>
+    </div>
+
+    <div class="mt-5 row" *ngIf="articlesUsingUs.length > 0">
+      <h5 class="mb-3">Articles using our data</h5>
+      <div class="col">
+        <p class="mb-2">Some articles using our data:</p>
+        <ul>
+          <li *ngFor="let article of articlesUsingUs">
+            <a [href]="article.url">{{ article.title }}</a>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

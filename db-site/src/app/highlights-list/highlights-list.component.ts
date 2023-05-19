@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AltmetricService } from '../altmetric.service';
 import { AltmetricResponse } from '../altmetric-response.model';
+import ArticlesUsingUsJson from '../../assets/data/articles-using-us.json';
 
 @Component({
   selector: 'dbw-highlights-list',
@@ -14,6 +15,8 @@ export class HighlightsListComponent implements OnInit {
   altmetricLink: string = 'https://nature.altmetric.com/details/129575296/news';
   inquisitiveBirdTwitterLink: string =
     'https://web.archive.org/web/20221024113028/https://twitter.com/Scientific_Bird/status/1584237159006945280';
+
+  articlesUsingUs: { url: string; title: string }[] = ArticlesUsingUsJson;
 
   altmetricResponse: AltmetricResponse | null = null;
 
