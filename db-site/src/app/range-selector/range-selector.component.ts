@@ -39,14 +39,14 @@ export class RangeSelectorComponent implements OnInit {
 
   onMouseDown(element: ElementName) {
     this.selectedElement = element;
-    console.log('Selected element', element);
+    // console.log('Selected element', element);
   }
 
   @HostListener('window:mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
     if (this.selectedElement) {
       this.selectedElement = null;
-      console.log('Deselected');
+      // console.log('Deselected');
     }
   }
 
@@ -60,16 +60,19 @@ export class RangeSelectorComponent implements OnInit {
     // X position of selector on the page. Takes scrolling into account.
     const selectorPositionX = selectorBoundingBox.x + window.scrollX;
 
-    // Get difference between mouse X and selector X positions,
-    // as a fraction of the size of the selector.
-    const xDifferencePixels = event.pageX - selectorPositionX;
-    const xDifferenceFraction = xDifferencePixels / selectorBoundingBox.width;
+    const getValueFromPageX = (pageX: number): number => {
+      // Get difference between the X and selector X position (both page coordinates),
+      // as a fraction of the size of the selector.
+      let fraction = (pageX - selectorPositionX) / selectorBoundingBox.width;
+
+      // Get value using the fraction.
+      // Round, clamp, and return it.
+      let value = this.minValue + fraction * (this.maxValue - this.minValue);
+      return this.clampValue(Math.round(value));
+    };
 
     // Get new value.
-    let value =
-      this.minValue + xDifferenceFraction * (this.maxValue - this.minValue);
-    value = Math.round(value);
-    value = Math.max(this.minValue, Math.min(this.maxValue, value));
+    let value = getValueFromPageX(event.pageX);
 
     if (this.selectedElement == 'left') {
       // Update min selected value if below max selected.
@@ -82,7 +85,25 @@ export class RangeSelectorComponent implements OnInit {
         this.maxValueSelected = value;
       }
     } else {
-      // Bar
+      // Bar. Move both min and max selected values, if it would not decrease range size.
+
+      // Get value from previous mouse position. Use it to calculate the difference
+      // in values that the mouse movement would cause.
+      const prevValue = getValueFromPageX(event.pageX + event.movementX);
+      const valueDifference = prevValue - value;
+
+      // Get new min and max values.
+      const newMin = this.clampValue(this.minValueSelected + valueDifference);
+      const newMax = this.clampValue(this.maxValueSelected + valueDifference);
+
+      // Get range sizes. Only update min and max selected if they are the same.
+      const prevRangeSize = this.maxValueSelected - this.minValueSelected;
+      const rangeSize = newMax - newMin;
+
+      if (rangeSize == prevRangeSize) {
+        this.minValueSelected = newMin;
+        this.maxValueSelected = newMax;
+      }
     }
   }
 
@@ -106,5 +127,9 @@ export class RangeSelectorComponent implements OnInit {
       this.getPositionFractionFromValue(max) -
       this.getPositionFractionFromValue(min);
     return this.getPercentageFromFraction(sizeFraction);
+  }
+
+  clampValue(value: number): number {
+    return Math.max(this.minValue, Math.min(this.maxValue, value));
   }
 }
