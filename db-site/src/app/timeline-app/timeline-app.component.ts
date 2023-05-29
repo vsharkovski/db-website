@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { RangeSelectorComponent } from '../range-selector/range-selector.component';
+import { NumberRange } from '../number-range.model';
 
 @Component({
   selector: 'dbw-timeline-app',
@@ -18,5 +19,9 @@ export class TimelineAppComponent implements OnInit {
       const amount = 0.5 * (event.deltaX + event.deltaY + event.deltaZ);
       this.rangeSelector.doZoom(amount);
     }
+  }
+
+  onYearSelectionChanged(range: NumberRange): void {
+    console.log('New selection', range);
   }
 }

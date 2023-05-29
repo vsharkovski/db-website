@@ -54,8 +54,8 @@ export class RangeSelectorComponent implements OnInit {
     this.selectedElement = element;
   }
 
-  @HostListener('window:mouseup', ['$event'])
-  onMouseUp(event: MouseEvent): void {
+  @HostListener('window:mouseup')
+  onMouseUp(): void {
     if (this.selectedElement) {
       this.selectedElement = null;
     }
@@ -84,16 +84,19 @@ export class RangeSelectorComponent implements OnInit {
 
     // Get new value.
     let value = getValueFromPageX(event.pageX);
+    let updatedAnySelected = false;
 
     if (this.selectedElement == 'left') {
       // Update min selected value if below max selected.
       if (value <= this.maxValueSelected) {
         this.minValueSelected = value;
+        updatedAnySelected = true;
       }
     } else if (this.selectedElement == 'right') {
       // Update max selected value if above min selected.
       if (this.minValueSelected <= value) {
         this.maxValueSelected = value;
+        updatedAnySelected = true;
       }
     } else {
       // Bar. Move both min and max selected values, if it would not decrease range size.
@@ -114,7 +117,15 @@ export class RangeSelectorComponent implements OnInit {
       if (rangeSize == prevRangeSize) {
         this.minValueSelected = newMin;
         this.maxValueSelected = newMax;
+        updatedAnySelected = true;
       }
+    }
+
+    if (updatedAnySelected) {
+      this.selectionChanged.next({
+        min: this.minValueSelected,
+        max: this.maxValueSelected,
+      });
     }
   }
 
@@ -142,6 +153,7 @@ export class RangeSelectorComponent implements OnInit {
     // Update selected values.
     this.minValueSelected = newMin;
     this.maxValueSelected = newMax;
+    this.selectionChanged.next({ min: newMin, max: newMax });
   }
 
   getPercentageFromFraction(fraction: number): string {
