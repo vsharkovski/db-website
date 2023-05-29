@@ -87,17 +87,15 @@ export class RangeSelectorComponent implements OnInit {
     let updatedAnySelected = false;
 
     if (this.selectedElement == 'left') {
-      // Update min selected value if below max selected.
-      if (value <= this.maxValueSelected) {
-        this.minValueSelected = value;
-        updatedAnySelected = true;
-      }
+      // Update min selected value if new.
+      if (this.maxValueSelected < value) value = this.maxValueSelected;
+      updatedAnySelected = value != this.minValueSelected;
+      this.minValueSelected = value;
     } else if (this.selectedElement == 'right') {
-      // Update max selected value if above min selected.
-      if (this.minValueSelected <= value) {
-        this.maxValueSelected = value;
-        updatedAnySelected = true;
-      }
+      // Update max selected value if new.
+      if (value < this.minValueSelected) value = this.minValueSelected;
+      updatedAnySelected = value != this.maxValueSelected;
+      this.maxValueSelected = value;
     } else {
       // Bar. Move both min and max selected values, if it would not decrease range size.
 
