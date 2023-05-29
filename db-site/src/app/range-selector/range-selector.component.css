@@ -21,12 +21,26 @@
   z-index: 2;
 }
 
-.tick-label {
+.tick .label {
   position: absolute;
   bottom: 100%;
-  transform: translate(-50%, 20%) scaleY(0%);
-  transition: transform 100ms ease-in-out;
   white-space: nowrap;
+  user-select: none;
+  transition: transform 100ms ease-in-out;
+}
+
+.left-tick .label {
+  right: 0%;
+  transform: translateY(20%) scaleY(0%);
+}
+
+.right-tick .label {
+  left: 0%;
+  transform: translateY(20%) scaleY(0%);
+}
+
+.selector:hover .tick .label:not(.hidden) {
+  transform: translateY(0%) scaleY(100%);
 }
 
 .bar {
@@ -38,6 +52,6 @@
   z-index: 1;
 }
 
-.selector:hover .tick-label {
-  transform: translate(-50%, 0%) scaleY(100%);
+.hidden {
+  transform: translateY(20%) scaleY(0%);
 }
