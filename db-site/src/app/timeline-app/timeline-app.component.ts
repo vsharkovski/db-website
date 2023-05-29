@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { RangeSelectorComponent } from '../range-selector/range-selector.component';
 import { NumberRange } from '../number-range.model';
 
@@ -7,10 +7,9 @@ import { NumberRange } from '../number-range.model';
   templateUrl: './timeline-app.component.html',
   styleUrls: ['./timeline-app.component.css'],
 })
-export class TimelineAppComponent implements OnInit {
-  constructor() {}
-
-  ngOnInit(): void {}
+export class TimelineAppComponent {
+  selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
+  selectedYears: NumberRange = { min: -600, max: 2000 };
 
   @ViewChild(RangeSelectorComponent) rangeSelector?: RangeSelectorComponent;
 
@@ -21,7 +20,7 @@ export class TimelineAppComponent implements OnInit {
     }
   }
 
-  onYearSelectionChanged(range: NumberRange): void {
-    console.log('New selection', range);
+  onYearSelectionChanged(selection: NumberRange): void {
+    this.selectedYears = selection;
   }
 }

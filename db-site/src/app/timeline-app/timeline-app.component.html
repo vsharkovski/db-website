@@ -3,12 +3,12 @@
     <dbw-timeline-options></dbw-timeline-options>
   </div>
   <div class="col canvas-and-selector" (wheel)="onWheel($event)">
-    <dbw-timeline-canvas></dbw-timeline-canvas>
+    <dbw-timeline-canvas [selectedYears]="selectedYears"></dbw-timeline-canvas>
     <dbw-range-selector
-      [minValue]="-3500"
-      [maxValue]="2020"
-      [minValueSelected]="-600"
-      [maxValueSelected]="2000"
+      [minValue]="selectedYearsBoundary.min"
+      [maxValue]="selectedYearsBoundary.max"
+      [minValueSelected]="selectedYears.min"
+      [maxValueSelected]="selectedYears.max"
       [enableZoomOnWheel]="false"
       (selectionChanged)="onYearSelectionChanged($event)"
     ></dbw-range-selector>

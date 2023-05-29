@@ -1,0 +1,5 @@
+.canvas {
+  height: calc(100vh - 10rem);
+  margin-bottom: 1rem;
+  background-color: var(--bs-light);
+}

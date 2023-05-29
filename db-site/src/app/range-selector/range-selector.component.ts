@@ -4,10 +4,8 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  OnChanges,
   OnInit,
   Output,
-  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
@@ -37,8 +35,6 @@ export class RangeSelectorComponent implements OnInit {
   selectedElement: ElementName | null = null;
 
   @ViewChild('selector') selectorElementRef?: ElementRef;
-
-  constructor() {}
 
   ngOnInit(): void {
     // If selected values are not provided, set them to the boundaries.
