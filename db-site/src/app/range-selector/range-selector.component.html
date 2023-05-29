@@ -2,16 +2,16 @@
 
 <div class="selector-wrapper">
   <div class="selector" #selector>
-    <div
-      class="tick"
-      [style.left]="getPositionPercentageFromValue(minValueSelected)"
-      (mousedown)="onMouseDown('left')"
-    ></div>
+    <div class="tick" [style.left]="getPositionPercentageFromValue(minValueSelected)" (mousedown)="onMouseDown('left')">
+      <span class="tick-label">{{ minValueSelected | dateYear }}</span>
+    </div>
     <div
       class="tick"
       [style.left]="getPositionPercentageFromValue(maxValueSelected)"
       (mousedown)="onMouseDown('right')"
-    ></div>
+    >
+      <span class="tick-label">{{ maxValueSelected | dateYear }}</span>
+    </div>
     <div
       class="bar"
       [style.left]="getPositionPercentageFromValue(minValueSelected)"

@@ -17,8 +17,16 @@
   width: 0.5rem;
   cursor: ew-resize;
   position: absolute;
-  transform: translateX(-50%);
+  transform: translate(-50%);
   z-index: 2;
+}
+
+.tick-label {
+  position: absolute;
+  bottom: 100%;
+  transform: translate(-50%, 20%) scaleY(0%);
+  transition: transform 100ms ease-in-out;
+  white-space: nowrap;
 }
 
 .bar {
@@ -28,4 +36,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+}
+
+.selector:hover .tick-label {
+  transform: translate(-50%, 0%) scaleY(100%);
 }

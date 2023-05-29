@@ -21,8 +21,8 @@ export class RangeSelectorComponent implements OnInit {
   @Input() minValue!: number;
   @Input() maxValue!: number;
 
-  minValueSelected!: number;
-  maxValueSelected!: number;
+  @Input() minValueSelected!: number;
+  @Input() maxValueSelected!: number;
 
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
@@ -33,8 +33,13 @@ export class RangeSelectorComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    this.minValueSelected = this.minValue;
-    this.maxValueSelected = this.maxValue;
+    // If selected values are not provided, set them to the boundaries.
+    if (this.minValueSelected === undefined) {
+      this.minValueSelected = this.minValue;
+    }
+    if (this.maxValueSelected === undefined) {
+      this.maxValueSelected = this.maxValue;
+    }
   }
 
   onMouseDown(element: ElementName) {
