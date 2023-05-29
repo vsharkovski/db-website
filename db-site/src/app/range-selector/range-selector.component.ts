@@ -4,8 +4,10 @@ import {
   EventEmitter,
   HostListener,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
@@ -23,6 +25,12 @@ export class RangeSelectorComponent implements OnInit {
 
   @Input() minValueSelected!: number;
   @Input() maxValueSelected!: number;
+
+  // Whether to enable zoom when using mouse wheel *on the range selector itself.*
+  @Input() enableZoomOnWheel: boolean = false;
+
+  @Input() requestedZoomAmount?: number;
+  @Output() requestedZoomAmountChange = new EventEmitter<undefined>();
 
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
@@ -42,21 +50,19 @@ export class RangeSelectorComponent implements OnInit {
     }
   }
 
-  onMouseDown(element: ElementName) {
+  onMouseDown(element: ElementName): void {
     this.selectedElement = element;
-    // console.log('Selected element', element);
   }
 
   @HostListener('window:mouseup', ['$event'])
-  onMouseUp(event: MouseEvent) {
+  onMouseUp(event: MouseEvent): void {
     if (this.selectedElement) {
       this.selectedElement = null;
-      // console.log('Deselected');
     }
   }
 
   @HostListener('window:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
+  onMouseMove(event: MouseEvent): void {
     if (!this.selectedElement || !this.selectorElementRef) return;
 
     const selectorBoundingBox =
@@ -110,6 +116,32 @@ export class RangeSelectorComponent implements OnInit {
         this.maxValueSelected = newMax;
       }
     }
+  }
+
+  @HostListener('wheel', ['$event'])
+  onWheel(event: WheelEvent): void {
+    if (this.enableZoomOnWheel) {
+      const amount = 0.5 * (event.deltaX + event.deltaY + event.deltaZ);
+      this.doZoom(amount);
+    }
+  }
+
+  doZoom(amount: number) {
+    const amountOne = Math.round(amount * 0.5);
+
+    let newMin = this.clampValue(this.minValueSelected - amountOne);
+    let newMax = this.clampValue(this.maxValueSelected + amountOne);
+
+    // In case they pass each other, set them to the middle.
+    if (newMin > newMax) {
+      const middle = Math.round((newMin + newMax) / 2);
+      newMin = middle;
+      newMax = middle;
+    }
+
+    // Update selected values.
+    this.minValueSelected = newMin;
+    this.maxValueSelected = newMax;
   }
 
   getPercentageFromFraction(fraction: number): string {
