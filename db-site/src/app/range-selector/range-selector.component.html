@@ -1,0 +1,9 @@
+<div class="bar">
+  <div class="tick left-tick" [style.left]="getPositionPercentage(minValueSelected)"></div>
+  <div class="tick right-tick" [style.left]="getPositionPercentage(maxValueSelected)"></div>
+  <div
+    class="selection-range"
+    [style.left]="getPositionPercentage(minValueSelected)"
+    [style.width]="getSizePercentage(minValueSelected, maxValueSelected)"
+  ></div>
+</div>

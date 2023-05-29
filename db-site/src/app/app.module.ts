@@ -36,6 +36,9 @@ import { VariableSearchComponent } from './variable-search/variable-search.compo
 import { PagePickerComponent } from './page-picker/page-picker.component';
 import { ExportAppComponent } from './export-app/export-app.component';
 import { TimelineAppComponent } from './timeline-app/timeline-app.component';
+import { TimelineOptionsComponent } from './timeline-options/timeline-options.component';
+import { TimelineCanvasComponent } from './timeline-canvas/timeline-canvas.component';
+import { RangeSelectorComponent } from './range-selector/range-selector.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +71,9 @@ import { TimelineAppComponent } from './timeline-app/timeline-app.component';
     PagePickerComponent,
     ExportAppComponent,
     TimelineAppComponent,
+    TimelineOptionsComponent,
+    TimelineCanvasComponent,
+    RangeSelectorComponent,
   ],
   imports: [
     BrowserModule,
