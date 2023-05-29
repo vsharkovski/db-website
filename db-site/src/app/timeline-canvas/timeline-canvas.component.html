@@ -1,4 +1,5 @@
 <div class="canvas">
-  <p>{{ selectedYears | json }}</p>
-  <p>{{ dataFiltered.length }}</p>
+  <div *ngFor="let bucket of buckets" class="bucket">
+    <div *ngFor="let person of bucket" class="point"></div>
+  </div>
 </div>

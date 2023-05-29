@@ -2,4 +2,19 @@
   height: calc(100vh - 10rem);
   margin-bottom: 1rem;
   background-color: var(--bs-light);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.bucket {
+  display: flex;
+  flex-direction: column;
+}
+
+.point {
+  margin: 1px;
+  width: 4px;
+  height: 4px;
+  background-color: black;
 }
