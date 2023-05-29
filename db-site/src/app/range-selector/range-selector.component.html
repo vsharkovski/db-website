@@ -1,9 +1,20 @@
-<div class="bar">
-  <div class="tick left-tick" [style.left]="getPositionPercentage(minValueSelected)"></div>
-  <div class="tick right-tick" [style.left]="getPositionPercentage(maxValueSelected)"></div>
-  <div
-    class="selection-range"
-    [style.left]="getPositionPercentage(minValueSelected)"
-    [style.width]="getSizePercentage(minValueSelected, maxValueSelected)"
-  ></div>
+<div class="selector-wrapper">
+  <div class="selector" #selector>
+    <div
+      class="tick"
+      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      (mousedown)="onMouseDown('left')"
+    ></div>
+    <div
+      class="tick"
+      [style.left]="getPositionPercentageFromValue(maxValueSelected)"
+      (mousedown)="onMouseDown('right')"
+    ></div>
+    <div
+      class="bar"
+      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      [style.width]="getSizePercentageFromValues(minValueSelected, maxValueSelected)"
+      (mousedown)="onMouseDown('bar')"
+    ></div>
+  </div>
 </div>

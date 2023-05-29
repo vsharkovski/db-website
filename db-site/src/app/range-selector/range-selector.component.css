@@ -1,5 +1,9 @@
-.bar {
-  background-color: var(--bs-gray-500);
+.selector-wrapper {
+  padding-inline: 1rem;
+}
+
+.selector {
+  background-color: var(--bs-light);
   height: 2rem;
   width: 100%;
   display: flex;
@@ -17,7 +21,7 @@
   z-index: 2;
 }
 
-.selection-range {
+.bar {
   background-color: var(--bs-gray-300);
   height: 50%;
   position: absolute;
