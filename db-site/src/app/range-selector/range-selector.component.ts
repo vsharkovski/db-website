@@ -51,14 +51,14 @@ export class RangeSelectorComponent implements OnInit {
   }
 
   @HostListener('window:mouseup')
-  onMouseUp(): void {
+  onWindowMouseUp(): void {
     if (this.selectedElement) {
       this.selectedElement = null;
     }
   }
 
   @HostListener('window:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent): void {
+  onWindowMouseMove(event: MouseEvent): void {
     if (!this.selectedElement || !this.selectorElementRef) return;
 
     const selectorBoundingBox =
