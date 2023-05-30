@@ -54,7 +54,7 @@ export class TimelineCanvasComponent
   yMiddle = 0;
   numBuckets = 10;
 
-  initializeCanvas$ = new ReplaySubject<void>();
+  initializeCanvas$ = new ReplaySubject<NumberRange | null>();
 
   constructor() {
     for (let i = 0; i < 100000; i++) {
@@ -86,8 +86,19 @@ export class TimelineCanvasComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedYears']) {
-      this.initializeCanvas$.next();
+    const change = changes['selectedYears'];
+    if (change) {
+      const range = change.currentValue;
+      const prevRange = change.previousValue;
+
+      if (
+        change.isFirstChange() ||
+        range.min != prevRange.min ||
+        range.max != prevRange.max
+      ) {
+        // (Re)initialize canvas.
+        this.initializeCanvas$.next(range);
+      }
     }
   }
 
@@ -96,21 +107,28 @@ export class TimelineCanvasComponent
     // speed up updates on selection change.
     this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
 
-    this.initializeCanvas$.pipe(debounceTime(100)).subscribe(() => {
-      this.resizeCanvas();
-      this.selectData(this.selectedYears);
-      this.drawCanvas();
-    });
+    this.initializeCanvas$
+      .pipe(debounceTime(100))
+      .subscribe((range: NumberRange | null) => {
+        const didResize = this.resizeCanvas();
+
+        // Re-select data and draw canvas again
+        // only if canvas was resized or new (different) range was provided.
+        if (didResize || range != null) {
+          this.selectData(this.selectedYears);
+          this.drawCanvas();
+        }
+      });
   }
 
   ngAfterViewInit(): void {
     // Draw canvas initially.
-    this.initializeCanvas$.next();
+    this.initializeCanvas$.next(null);
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    this.initializeCanvas$.next();
+    this.initializeCanvas$.next(null);
   }
 
   @HostListener('mousemove', ['$event'])
@@ -123,16 +141,22 @@ export class TimelineCanvasComponent
     }
   }
 
-  resizeCanvas(): void {
+  resizeCanvas(): boolean {
     // Resize canvas to fit available space.
     const canvasElement = this.canvasRef.nativeElement;
     this.canvasBoundingBox = canvasElement.getBoundingClientRect();
+
+    const didResize =
+      canvasElement.height != this.canvasBoundingBox.height ||
+      canvasElement.width != this.canvasBoundingBox.width;
 
     canvasElement.height = this.canvasBoundingBox.height;
     canvasElement.width = this.canvasBoundingBox.width;
 
     // Used later in drawing and identifying mouse hovering over some point.
     this.yMiddle = Math.round(this.canvasBoundingBox.height / 2);
+
+    return didResize;
   }
 
   /*
@@ -187,15 +211,15 @@ export class TimelineCanvasComponent
     );
     this.numBuckets = Math.max(this.numBuckets, 1);
 
-    console.log(
-      `maxPointsInYear=${maxPointsInYear} pointSizeRaw=${pointSizeRaw} pointSize=${
-        this.pointSize
-      } rows=${
-        this.canvasBoundingBox.height / this.pointSizePlusMargin
-      } pointMargin=${this.pointMargin} numBuckets=${
-        this.numBuckets
-      } toSelect=${this.numSelected} range=[${range.min},${range.max}]`
-    );
+    // console.log(
+    //   `maxPointsInYear=${maxPointsInYear} pointSizeRaw=${pointSizeRaw} pointSize=${
+    //     this.pointSize
+    //   } rows=${
+    //     this.canvasBoundingBox.height / this.pointSizePlusMargin
+    //   } pointMargin=${this.pointMargin} numBuckets=${
+    //     this.numBuckets
+    //   } toSelect=${this.numSelected} range=[${range.min},${range.max}]`
+    // );
 
     // Initialize empty buckets.
     this.buckets = [];
@@ -228,12 +252,12 @@ export class TimelineCanvasComponent
       }
     }
 
-    const printBucketSizes = () => {
-      if (this.buckets.length < 35)
-        console.log('Buckets\n', this.buckets.map((it) => it.length).join(' '));
-    };
+    // const printBucketSizes = () => {
+    //   if (this.buckets.length < 35)
+    //     console.log('Buckets\n', this.buckets.map((it) => it.length).join(' '));
+    // };
 
-    printBucketSizes();
+    // printBucketSizes();
 
     /*
     Due to the linear mapping, there are probably gaps of successive empty buckets.
@@ -270,7 +294,7 @@ export class TimelineCanvasComponent
       bucketIndex = end - 1;
     }
 
-    printBucketSizes();
+    // printBucketSizes();
   }
 
   drawCanvas(): void {
