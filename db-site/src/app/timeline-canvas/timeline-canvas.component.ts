@@ -11,13 +11,7 @@ import {
 } from '@angular/core';
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
-import {
-  ReplaySubject,
-  Subject,
-  debounceTime,
-  distinctUntilChanged,
-  throttleTime,
-} from 'rxjs';
+import { ReplaySubject, debounceTime } from 'rxjs';
 
 // Standard Normal variate using Box-Muller transform.
 function gaussianRandom(mean = 0, stdev = 1) {
@@ -41,8 +35,15 @@ export class TimelineCanvasComponent
   @ViewChild('canvas') canvasRef!: ElementRef;
 
   data: Person[] = [];
+  numDataPointsInYear: number[] = [];
+  minYear = Number.MAX_SAFE_INTEGER;
+  maxYear = Number.MIN_SAFE_INTEGER;
 
-  maxTotalSelectable = 10000;
+  readonly maxTotalSelectable = 10000;
+  readonly minPointSize = 4;
+  readonly maxPointSize = 36;
+  readonly pointMarginFractionOfSize = 0.5;
+
   numSelected = 0;
   buckets: Person[][] = [];
 
@@ -52,9 +53,6 @@ export class TimelineCanvasComponent
   pointSizePlusMargin = 6;
   yMiddle = 0;
   numBuckets = 10;
-
-  // selectData$ = new Subject<NumberRange>();
-  // drawCanvas$ = new Subject<void>();
 
   initializeCanvas$ = new ReplaySubject<void>();
 
@@ -75,12 +73,20 @@ export class TimelineCanvasComponent
         citizenship2BId: 0,
         notabilityIndex: ni,
       });
+      this.minYear = Math.min(this.minYear, b);
+      this.maxYear = Math.max(this.maxYear, b);
+    }
+
+    for (let i = 0; i < this.maxYear - this.minYear + 1; i++) {
+      this.numDataPointsInYear[i] = 0;
+    }
+    for (const person of this.data) {
+      this.numDataPointsInYear[person.birth! - this.minYear]++;
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYears']) {
-      // const range = changes['selectedYears'].currentValue;
       this.initializeCanvas$.next();
     }
   }
@@ -89,18 +95,6 @@ export class TimelineCanvasComponent
     // Sort people by notability index descending, in order to
     // speed up updates on selection change.
     this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
-
-    // this.selectData$
-    //   .pipe(
-    //     debounceTime(100),
-    //     distinctUntilChanged((a, b) => a.min == b.min && a.max == b.max)
-    //   )
-    //   .subscribe((range) => {
-    //     this.selectData(range);
-    //     this.drawCanvas$.next();
-    //   });
-
-    // this.drawCanvas$.pipe(debounceTime(100)).subscribe(() => this.drawCanvas());
 
     this.initializeCanvas$.pipe(debounceTime(100)).subscribe(() => {
       this.resizeCanvas();
@@ -111,19 +105,16 @@ export class TimelineCanvasComponent
 
   ngAfterViewInit(): void {
     // Draw canvas initially.
-    // this.drawCanvas$.next();
     this.initializeCanvas$.next();
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    // this.drawCanvas$.next();
     this.initializeCanvas$.next();
   }
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    // console.log(event.offsetX, event.offsetY);
     const hovered = this.getPointFromCoordinates(event.offsetX, event.offsetY);
     if (hovered != null) {
       console.log(
@@ -139,76 +130,133 @@ export class TimelineCanvasComponent
 
     canvasElement.height = this.canvasBoundingBox.height;
     canvasElement.width = this.canvasBoundingBox.width;
+
+    // Used later in drawing and identifying mouse hovering over some point.
+    this.yMiddle = Math.round(this.canvasBoundingBox.height / 2);
   }
 
   /*
   Sort valid data into buckets.
   Uses canvas size and number of persons in a range to calculate:
-  - How many buckets there should be
-  - The size of the points when drawing the canvas later.
+  - The size of the points in pixels, for drawing later.
+  - How many buckets there should be.
   */
   selectData(range: NumberRange) {
-    // Returns whether the person is in the range.
+    // Lambda that returns whether the person is in the range.
     const isValid = (person: Person) =>
       range.min <= person.birth! && person.birth! <= range.max;
 
-    let numPointsLeftToSelect = 0;
+    // Determine how many people will be placed in buckets, up to the maximum provided.
+    // Also determine the maximum number of points in a year in the range.
+    this.numSelected = 0;
+    let maxPointsInYear = 0;
+
     for (const person of this.data) {
       if (isValid(person)) {
-        numPointsLeftToSelect++;
         this.numSelected++;
-        if (numPointsLeftToSelect >= this.maxTotalSelectable) break;
+        maxPointsInYear = Math.max(
+          maxPointsInYear,
+          this.numDataPointsInYear[person.birth! - this.minYear]
+        );
+
+        if (this.numSelected >= this.maxTotalSelectable) break;
       }
     }
 
-    // Used later in drawing.
-    this.pointSize = 4;
-    this.pointMargin = Math.round(this.pointSize / 2);
+    // Assume the buckets are [0, range.max-range.min], i.e. a bucket for each year.
+    // Determine biggest point size that would not make any bucket (column) exceed
+    // the height of the campus if drawn later.
+    // We are assuming pointMargin will be a fraction of pointSize in order to
+    // simplify calculations and do everything with math instead of binary searching.
+    this.pointSize = Math.floor(
+      this.canvasBoundingBox.height /
+        ((1 + this.pointMarginFractionOfSize) * maxPointsInYear)
+    );
+    this.pointSize = Math.max(this.minPointSize, this.pointSize);
+    this.pointSize = Math.min(this.maxPointSize, this.pointSize);
+
+    this.pointMargin = Math.floor(this.pointSize / 2);
     this.pointSizePlusMargin = this.pointSize + this.pointMargin;
 
-    // Used later in drawing and identifying mouse hovering over some point.
-    this.yMiddle = Math.round(this.canvasBoundingBox!.height / 2);
-
     this.numBuckets = Math.floor(
-      this.canvasBoundingBox.width / (this.pointSize + this.pointMargin)
+      this.canvasBoundingBox.width / this.pointSizePlusMargin
     );
     this.numBuckets = Math.max(this.numBuckets, 1);
 
     console.log(
-      `pointSize=${this.pointSize} pointMargin=${this.pointMargin} numBuckets=${this.numBuckets} toSelect=${numPointsLeftToSelect} range=[${range.min},${range.max}]`
+      `maxPointsInYear=${maxPointsInYear} pointSizeRaw=${
+        this.canvasBoundingBox.height / (1.5 * maxPointsInYear)
+      } pointSize=${this.pointSize} rows=${
+        this.canvasBoundingBox.height / this.pointSizePlusMargin
+      } pointMargin=${this.pointMargin} numBuckets=${
+        this.numBuckets
+      } toSelect=${this.numSelected} range=[${range.min},${range.max}]`
     );
 
     // Initialize empty buckets.
     this.buckets = [];
-    const buckets = this.buckets;
-
     for (let i = 0; i < this.numBuckets; i++) {
-      buckets.push([]);
+      this.buckets.push([]);
     }
 
-    if (numPointsLeftToSelect > 0 && this.numBuckets > 0) {
-      // Range size. The range is inclusive at both ends. [min, max].
-      const rangeSize = range.max + 1 - range.min;
-      // Scale factor. Used in the following lambda to map a year in
-      // the range [range.min, range.max] to [0, numBuckets-1].
-      const scaleFactor = this.numBuckets / rangeSize;
+    if (this.numSelected == 0) return;
 
-      const getBucketFromYear = (year: number): Person[] =>
-        buckets[Math.floor((year - range.min) * scaleFactor)];
+    // Place points into buckets.
+    // Range size. The range is inclusive at both ends. [min, max].
+    const rangeSize = range.max + 1 - range.min;
+    // Scale factor. Used in the following lambda to *linearly*
+    // map a year in the range [range.min, range.max] to [0, numBuckets-1].
+    const scaleFactor = this.numBuckets / rangeSize;
 
-      for (const person of this.data) {
-        // Ensure person birth year is in the range.
-        if (!isValid(person)) continue;
+    let numPointsRemaining = this.numSelected;
 
-        // Add to bucket.
-        const bucket = getBucketFromYear(person.birth!);
-        bucket.push(person);
+    for (const person of this.data) {
+      // Ensure person birth year is in the range.
+      if (!isValid(person)) continue;
 
-        numPointsLeftToSelect--;
-        if (numPointsLeftToSelect == 0) {
-          break;
-        }
+      const index = Math.floor((person.birth! - range.min) * scaleFactor);
+      this.buckets[index].push(person);
+
+      // Stop if enough were placed.
+      numPointsRemaining--;
+      if (numPointsRemaining == 0) {
+        break;
       }
+    }
+
+    /*
+    Due to the linear mapping, there are probably gaps of successive empty buckets.
+    For example, by looking at the sizes of the buckets:
+    2 0 0 0 5 0 0 4 0 0 0 2 0 0
+    Due to the Math.floor in the linear map, the pattern looks like this:
+    2 0 0 0 | 5 0 0 | 4 0 0 0 | 2 0 0
+    Now we try to fill those empty buckets in each 'group' with points
+    from the bucket at the start of the group, so things look more
+    evenly distributed. For example:
+    0 1 0 1 | 2 1 1 | 1 1 0 2 | 1 1 0
+    */
+    for (let bucketIndex = 0; bucketIndex < this.numBuckets; bucketIndex++) {
+      // Find ending index of the group. The group will be [start, end).
+      // (start is included, end is excluded)
+      let start = bucketIndex;
+      let end = start + 1;
+      while (end < this.numBuckets && this.buckets[end].length == 0) {
+        end++;
+      }
+
+      // For each point in this group (all of which are currently in the
+      // bucket at the start), move it to its new position.
+      const groupSize = end - start;
+      const group = this.buckets[start];
+      this.buckets[start] = [];
+
+      for (const person of group) {
+        const index = start + Math.floor(Math.random() * (end - start));
+        this.buckets[index].push(person);
+      }
+
+      // Next loop iteration, bucketIndex will be end, i.e. start of new group.
+      bucketIndex = end - 1;
     }
   }
 
