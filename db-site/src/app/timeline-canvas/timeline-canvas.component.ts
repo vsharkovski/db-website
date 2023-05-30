@@ -12,11 +12,21 @@ import {
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
 import {
+  ReplaySubject,
   Subject,
   debounceTime,
   distinctUntilChanged,
   throttleTime,
 } from 'rxjs';
+
+// Standard Normal variate using Box-Muller transform.
+function gaussianRandom(mean = 0, stdev = 1) {
+  const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+  const v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  // Transform to the desired mean and standard deviation:
+  return z * stdev + mean;
+}
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -32,16 +42,22 @@ export class TimelineCanvasComponent
 
   data: Person[] = [];
 
-  numBuckets = 500;
-  maxTotalSelectable = 4000;
+  maxTotalSelectable = 3000;
   buckets: Person[][] = [];
 
-  selectData$ = new Subject<NumberRange>();
-  drawCanvas$ = new Subject<void>();
+  canvasBoundingBox?: DOMRect;
+  pointSize = 4;
+  pointMargin = 2;
+  numBuckets = 10;
+
+  // selectData$ = new Subject<NumberRange>();
+  // drawCanvas$ = new Subject<void>();
+
+  initializeCanvas$ = new ReplaySubject<void>();
 
   constructor() {
-    for (let i = 0; i < 10000; i++) {
-      const b = Math.random() * 2000;
+    for (let i = 0; i < 1000; i++) {
+      const b = gaussianRandom(1600, 100);
       const ni = 30 + Math.random() * 10;
       this.data.push({
         id: i,
@@ -61,8 +77,8 @@ export class TimelineCanvasComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYears']) {
-      const range = changes['selectedYears'].currentValue;
-      this.selectData$.next(range);
+      // const range = changes['selectedYears'].currentValue;
+      this.initializeCanvas$.next();
     }
   }
 
@@ -71,86 +87,131 @@ export class TimelineCanvasComponent
     // speed up updates on selection change.
     this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
 
-    this.selectData$
-      .pipe(
-        debounceTime(100),
-        distinctUntilChanged((a, b) => a.min == b.min && a.max == b.max)
-      )
-      .subscribe((range) => {
-        this.selectData(range);
-        this.drawCanvas$.next();
-      });
+    // this.selectData$
+    //   .pipe(
+    //     debounceTime(100),
+    //     distinctUntilChanged((a, b) => a.min == b.min && a.max == b.max)
+    //   )
+    //   .subscribe((range) => {
+    //     this.selectData(range);
+    //     this.drawCanvas$.next();
+    //   });
 
-    this.drawCanvas$.pipe(debounceTime(100)).subscribe(() => this.drawCanvas());
+    // this.drawCanvas$.pipe(debounceTime(100)).subscribe(() => this.drawCanvas());
+
+    this.initializeCanvas$.pipe(debounceTime(100)).subscribe(() => {
+      this.resizeCanvas();
+      this.selectData(this.selectedYears);
+      this.drawCanvas();
+    });
   }
 
   ngAfterViewInit(): void {
     // Draw canvas initially.
-    this.drawCanvas$.next();
+    // this.drawCanvas$.next();
+    this.initializeCanvas$.next();
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    this.drawCanvas$.next();
+    // this.drawCanvas$.next();
+    this.initializeCanvas$.next();
   }
 
+  resizeCanvas(): void {
+    // Resize canvas to fit available space.
+    const canvasElement = this.canvasRef.nativeElement;
+    this.canvasBoundingBox = canvasElement.getBoundingClientRect();
+
+    canvasElement.height = this.canvasBoundingBox!.height;
+    canvasElement.width = this.canvasBoundingBox!.width;
+  }
+
+  /*
+  Sort valid data into buckets.
+  Uses canvas size to calculate:
+  - How many buckets there should be
+  - The size of the points when drawing the canvas later.
+  */
   selectData(range: NumberRange) {
-    this.buckets = new Array(this.numBuckets).fill([]);
-    const buckets = this.buckets;
+    const isValid = (person: Person) =>
+      range.min <= person.birth! && person.birth! <= range.max;
 
-    // Range size. The range is inclusive at both ends. [min, max].
-    const rangeSize = range.max - range.min + 1;
-    // Scale factor. Used in the following lambda to map a year in
-    // the range [range.min, range.max] to [0, numBuckets-1].
-    const scaleFactor = (this.numBuckets - 1) / rangeSize;
-    const rangeMinMinusOne = range.min - 1;
-
-    const getBucketFromYear = (year: number): Person[] =>
-      buckets[Math.round((year - rangeMinMinusOne) * scaleFactor)];
-
-    let numSpacesLeft = this.maxTotalSelectable;
-    if (numSpacesLeft == 0) return;
-
+    let numPointsLeftToSelect = 0;
     for (const person of this.data) {
-      // Ensure person birth year is in the range.
-      if (person.birth! < range.min || person.birth! > range.max) continue;
+      if (isValid(person)) {
+        numPointsLeftToSelect++;
+        if (numPointsLeftToSelect == this.maxTotalSelectable) break;
+      }
+    }
 
-      // Add to bucket.
-      const bucket = getBucketFromYear(person.birth!);
-      bucket.push(person);
+    this.pointSize = 4;
+    this.pointMargin = Math.round(this.pointSize / 2);
 
-      numSpacesLeft--;
-      if (numSpacesLeft == 0) {
-        break;
+    this.numBuckets = Math.floor(
+      this.canvasBoundingBox!.width / (this.pointSize + this.pointMargin)
+    );
+    this.numBuckets = Math.max(this.numBuckets, 1);
+
+    console.log(
+      `pointSize=${this.pointSize} pointMargin=${this.pointMargin} numBuckets=${this.numBuckets}`
+    );
+
+    if (numPointsLeftToSelect > 0) {
+      this.buckets = new Array(this.numBuckets).fill([]);
+      const buckets = this.buckets;
+
+      // Range size. The range is inclusive at both ends. [min, max].
+      const rangeSize = range.max - range.min + 1;
+      // Scale factor. Used in the following lambda to map a year in
+      // the range [range.min, range.max] to [0, numBuckets-1].
+      const scaleFactor = (this.numBuckets - 1) / rangeSize;
+      const rangeMinMinusOne = range.min - 1;
+
+      const getBucketFromYear = (year: number): Person[] =>
+        buckets[Math.round((year - rangeMinMinusOne) * scaleFactor)];
+
+      for (const person of this.data) {
+        // Ensure person birth year is in the range.
+        if (!isValid(person)) continue;
+
+        // Add to bucket.
+        const bucket = getBucketFromYear(person.birth!);
+        bucket.push(person);
+
+        numPointsLeftToSelect--;
+        if (numPointsLeftToSelect == 0) {
+          break;
+        }
       }
     }
   }
 
   drawCanvas(): void {
-    console.log('Drawing canvas');
+    // Draw all buckets.
     const canvasElement = this.canvasRef.nativeElement;
 
-    // Resize canvas to fit available space.
-    const boundingBox = canvasElement.getBoundingClientRect();
-    canvasElement.height = boundingBox.height;
-    canvasElement.width = boundingBox.width;
-
-    // Draw all buckets.
     const ctx = canvasElement.getContext('2d', {
       alpha: false,
     });
 
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, boundingBox.width, boundingBox.height);
+    ctx.fillRect(
+      0,
+      0,
+      this.canvasBoundingBox!.width,
+      this.canvasBoundingBox!.height
+    );
 
     ctx.fillStyle = 'black';
 
-    const pointSize = 4;
-    const margin = 2;
-    const pointSizePlusMargin = pointSize + margin;
+    const pointSize = this.pointSize;
+    const pointSizePlusMargin = this.pointSize + this.pointMargin;
 
-    const yMiddle = Math.round(boundingBox.height / 2 - pointSize / 2);
-    let x = margin;
+    const yMiddle = Math.round(
+      this.canvasBoundingBox!.height / 2 - pointSize / 2
+    );
+    let x = this.pointMargin;
 
     for (let bucketIndex = 0; bucketIndex < this.numBuckets; bucketIndex++) {
       const bucket = this.buckets[bucketIndex];
