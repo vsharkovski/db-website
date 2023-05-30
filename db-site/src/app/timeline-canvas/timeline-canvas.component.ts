@@ -123,8 +123,13 @@ export class TimelineCanvasComponent
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    console.log(event.offsetX, event.offsetY);
-    this.getPointFromCoordinates(event.offsetX, event.offsetY);
+    // console.log(event.offsetX, event.offsetY);
+    const hovered = this.getPointFromCoordinates(event.offsetX, event.offsetY);
+    if (hovered != null) {
+      console.log(
+        `hovered birth=${hovered.birth} ni=${hovered.notabilityIndex}`
+      );
+    }
   }
 
   resizeCanvas(): void {
@@ -175,22 +180,21 @@ export class TimelineCanvasComponent
 
     // Initialize empty buckets.
     this.buckets = [];
+    const buckets = this.buckets;
+
     for (let i = 0; i < this.numBuckets; i++) {
-      this.buckets.push([]);
+      buckets.push([]);
     }
 
     if (numPointsLeftToSelect > 0 && this.numBuckets > 0) {
-      const buckets = this.buckets;
-
       // Range size. The range is inclusive at both ends. [min, max].
-      const rangeSize = range.max - range.min + 1;
+      const rangeSize = range.max + 1 - range.min;
       // Scale factor. Used in the following lambda to map a year in
       // the range [range.min, range.max] to [0, numBuckets-1].
-      const scaleFactor = (this.numBuckets - 1) / rangeSize;
-      const rangeMinMinusOne = range.min - 1;
+      const scaleFactor = this.numBuckets / rangeSize;
 
       const getBucketFromYear = (year: number): Person[] =>
-        buckets[Math.round((year - rangeMinMinusOne) * scaleFactor)];
+        buckets[Math.floor((year - range.min) * scaleFactor)];
 
       for (const person of this.data) {
         // Ensure person birth year is in the range.
@@ -267,42 +271,42 @@ export class TimelineCanvasComponent
       return null;
     }
 
-    let yDistToMiddle = y - this.yMiddle;
+    const yDistToMiddle = y - this.yMiddle;
     let pointIndex = null;
 
-    console.log(`x=${x} y=${y} i=${bucketIndex} yDTM=${yDistToMiddle}`);
+    // console.log(`x=${x} y=${y} i=${bucketIndex} yDTM=${yDistToMiddle}`);
 
     if (yDistToMiddle >= 0) {
       // Below the middle line.
-      const index = Math.floor(yDistToMiddle / this.pointSizePlusMargin);
+      const index = Math.floor(
+        (yDistToMiddle + this.pointMargin) / this.pointSizePlusMargin
+      );
       const slotStartY = index * this.pointSizePlusMargin;
-      const yInSlot = yDistToMiddle - slotStartY;
-      console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
+      const yInSlot = yDistToMiddle + this.pointMargin - slotStartY;
+      // console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
       if (this.pointMargin <= yInSlot && yInSlot < this.pointSizePlusMargin) {
         // Inside the point and not just inside the slot (not in a margin).
         pointIndex = 2 * index;
       }
     } else {
       // Above the middle line.
-      const index = Math.floor(
-        -(yDistToMiddle - this.pointMargin) / this.pointSizePlusMargin
-      );
+      const index = Math.floor(-yDistToMiddle / this.pointSizePlusMargin);
       const slotStartY = index * this.pointSizePlusMargin;
-      const yInSlot = -(yDistToMiddle - this.pointMargin) - slotStartY;
-      console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
+      const yInSlot = -yDistToMiddle - slotStartY;
+      // console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
       if (this.pointMargin <= yInSlot && yInSlot < this.pointSizePlusMargin) {
         // Inside the point and not just inside the slot (not in a margin).
         pointIndex = 2 * index + 1;
       }
     }
 
-    if (pointIndex == null) return null;
+    if (pointIndex == null || pointIndex >= this.buckets[bucketIndex].length)
+      return null;
 
     // console.log(
     //   `j=${pointIndex} not=${this.buckets[bucketIndex][pointIndex].notabilityIndex}`
     // );
-
-    console.log(`j=${pointIndex}`);
+    console.log(`i=${bucketIndex} j=${pointIndex}`);
     return this.buckets[bucketIndex][pointIndex];
   }
 }
