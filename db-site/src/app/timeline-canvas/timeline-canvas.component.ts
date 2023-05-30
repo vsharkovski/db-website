@@ -42,12 +42,15 @@ export class TimelineCanvasComponent
 
   data: Person[] = [];
 
-  maxTotalSelectable = 3000;
+  maxTotalSelectable = 10000;
+  numSelected = 0;
   buckets: Person[][] = [];
 
-  canvasBoundingBox?: DOMRect;
+  canvasBoundingBox!: DOMRect;
   pointSize = 4;
   pointMargin = 2;
+  pointSizePlusMargin = 6;
+  yMiddle = 0;
   numBuckets = 10;
 
   // selectData$ = new Subject<NumberRange>();
@@ -56,9 +59,9 @@ export class TimelineCanvasComponent
   initializeCanvas$ = new ReplaySubject<void>();
 
   constructor() {
-    for (let i = 0; i < 1000; i++) {
-      const b = gaussianRandom(1600, 100);
-      const ni = 30 + Math.random() * 10;
+    for (let i = 0; i < 100000; i++) {
+      const b = Math.round(gaussianRandom(1600, 100));
+      const ni = Math.round(30 + Math.random() * 10);
       this.data.push({
         id: i,
         wikidataCode: i,
@@ -118,22 +121,29 @@ export class TimelineCanvasComponent
     this.initializeCanvas$.next();
   }
 
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    console.log(event.offsetX, event.offsetY);
+    this.getPointFromCoordinates(event.offsetX, event.offsetY);
+  }
+
   resizeCanvas(): void {
     // Resize canvas to fit available space.
     const canvasElement = this.canvasRef.nativeElement;
     this.canvasBoundingBox = canvasElement.getBoundingClientRect();
 
-    canvasElement.height = this.canvasBoundingBox!.height;
-    canvasElement.width = this.canvasBoundingBox!.width;
+    canvasElement.height = this.canvasBoundingBox.height;
+    canvasElement.width = this.canvasBoundingBox.width;
   }
 
   /*
   Sort valid data into buckets.
-  Uses canvas size to calculate:
+  Uses canvas size and number of persons in a range to calculate:
   - How many buckets there should be
   - The size of the points when drawing the canvas later.
   */
   selectData(range: NumberRange) {
+    // Returns whether the person is in the range.
     const isValid = (person: Person) =>
       range.min <= person.birth! && person.birth! <= range.max;
 
@@ -141,24 +151,35 @@ export class TimelineCanvasComponent
     for (const person of this.data) {
       if (isValid(person)) {
         numPointsLeftToSelect++;
-        if (numPointsLeftToSelect == this.maxTotalSelectable) break;
+        this.numSelected++;
+        if (numPointsLeftToSelect >= this.maxTotalSelectable) break;
       }
     }
 
+    // Used later in drawing.
     this.pointSize = 4;
     this.pointMargin = Math.round(this.pointSize / 2);
+    this.pointSizePlusMargin = this.pointSize + this.pointMargin;
+
+    // Used later in drawing and identifying mouse hovering over some point.
+    this.yMiddle = Math.round(this.canvasBoundingBox!.height / 2);
 
     this.numBuckets = Math.floor(
-      this.canvasBoundingBox!.width / (this.pointSize + this.pointMargin)
+      this.canvasBoundingBox.width / (this.pointSize + this.pointMargin)
     );
     this.numBuckets = Math.max(this.numBuckets, 1);
 
     console.log(
-      `pointSize=${this.pointSize} pointMargin=${this.pointMargin} numBuckets=${this.numBuckets}`
+      `pointSize=${this.pointSize} pointMargin=${this.pointMargin} numBuckets=${this.numBuckets} toSelect=${numPointsLeftToSelect} range=[${range.min},${range.max}]`
     );
 
-    if (numPointsLeftToSelect > 0) {
-      this.buckets = new Array(this.numBuckets).fill([]);
+    // Initialize empty buckets.
+    this.buckets = [];
+    for (let i = 0; i < this.numBuckets; i++) {
+      this.buckets.push([]);
+    }
+
+    if (numPointsLeftToSelect > 0 && this.numBuckets > 0) {
       const buckets = this.buckets;
 
       // Range size. The range is inclusive at both ends. [min, max].
@@ -199,36 +220,89 @@ export class TimelineCanvasComponent
     ctx.fillRect(
       0,
       0,
-      this.canvasBoundingBox!.width,
-      this.canvasBoundingBox!.height
+      this.canvasBoundingBox.width,
+      this.canvasBoundingBox.height
     );
 
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'rgb(100, 100, 100)';
 
     const pointSize = this.pointSize;
-    const pointSizePlusMargin = this.pointSize + this.pointMargin;
-
-    const yMiddle = Math.round(
-      this.canvasBoundingBox!.height / 2 - pointSize / 2
-    );
+    const pointSizePlusMargin = this.pointSizePlusMargin;
+    const yMiddle = this.yMiddle;
     let x = this.pointMargin;
 
     for (let bucketIndex = 0; bucketIndex < this.numBuckets; bucketIndex++) {
       const bucket = this.buckets[bucketIndex];
-      let yTop = yMiddle;
-      let yBottom = yMiddle + pointSizePlusMargin;
+      let yTop = yMiddle - pointSizePlusMargin;
+      let yBottom = yMiddle;
 
-      for (let pointIndex = 0; pointIndex < bucket.length; ++pointIndex) {
+      for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
         if (pointIndex % 2 == 0) {
-          ctx.fillRect(x, yTop, pointSize, pointSize);
-          yTop -= pointSizePlusMargin;
-        } else {
           ctx.fillRect(x, yBottom, pointSize, pointSize);
           yBottom += pointSizePlusMargin;
+        } else {
+          ctx.fillRect(x, yTop, pointSize, pointSize);
+          yTop -= pointSizePlusMargin;
         }
       }
 
       x += pointSizePlusMargin;
     }
+  }
+
+  // Get point located at these pixel coordinates.
+  // Coordinates should be relative to the canvas.
+  getPointFromCoordinates(x: number, y: number): Person | null {
+    if (this.numSelected == 0) return null;
+
+    const bucketIndex = Math.floor(x / this.pointSizePlusMargin);
+    if (bucketIndex < 0 || bucketIndex >= this.numBuckets) return null;
+
+    const slotStartX = bucketIndex * this.pointSizePlusMargin;
+    const xInSlot = x - slotStartX;
+
+    if (xInSlot < this.pointMargin || this.pointSizePlusMargin <= xInSlot) {
+      // Might be inside the 'slot' containing both the margin and point,
+      // but not inside the point itself. I.e. may be in the margin.
+      return null;
+    }
+
+    let yDistToMiddle = y - this.yMiddle;
+    let pointIndex = null;
+
+    console.log(`x=${x} y=${y} i=${bucketIndex} yDTM=${yDistToMiddle}`);
+
+    if (yDistToMiddle >= 0) {
+      // Below the middle line.
+      const index = Math.floor(yDistToMiddle / this.pointSizePlusMargin);
+      const slotStartY = index * this.pointSizePlusMargin;
+      const yInSlot = yDistToMiddle - slotStartY;
+      console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
+      if (this.pointMargin <= yInSlot && yInSlot < this.pointSizePlusMargin) {
+        // Inside the point and not just inside the slot (not in a margin).
+        pointIndex = 2 * index;
+      }
+    } else {
+      // Above the middle line.
+      const index = Math.floor(
+        -(yDistToMiddle - this.pointMargin) / this.pointSizePlusMargin
+      );
+      const slotStartY = index * this.pointSizePlusMargin;
+      const yInSlot = -(yDistToMiddle - this.pointMargin) - slotStartY;
+      console.log(`ind=${index} sSY=${slotStartY} yIS=${yInSlot}`);
+      if (this.pointMargin <= yInSlot && yInSlot < this.pointSizePlusMargin) {
+        // Inside the point and not just inside the slot (not in a margin).
+        pointIndex = 2 * index + 1;
+      }
+    }
+
+    if (pointIndex == null) return null;
+
+    // console.log(
+    //   `j=${pointIndex} not=${this.buckets[bucketIndex][pointIndex].notabilityIndex}`
+    // );
+
+    console.log(`j=${pointIndex}`);
+    return this.buckets[bucketIndex][pointIndex];
   }
 }
