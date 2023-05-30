@@ -117,9 +117,9 @@ export class TimelineCanvasComponent
   onMouseMove(event: MouseEvent): void {
     const hovered = this.getPointFromCoordinates(event.offsetX, event.offsetY);
     if (hovered != null) {
-      console.log(
-        `hovered birth=${hovered.birth} ni=${hovered.notabilityIndex}`
-      );
+      // console.log(
+      //   `hovered birth=${hovered.birth} ni=${hovered.notabilityIndex}`
+      // );
     }
   }
 
@@ -167,11 +167,15 @@ export class TimelineCanvasComponent
     // Determine biggest point size that would not make any bucket (column) exceed
     // the height of the campus if drawn later.
     // We are assuming pointMargin will be a fraction of pointSize in order to
-    // simplify calculations and do everything with math instead of binary searching.
-    this.pointSize = Math.floor(
-      this.canvasBoundingBox.height /
-        ((1 + this.pointMarginFractionOfSize) * maxPointsInYear)
+    // simplify calculations and approximate a good number with math.
+    const pointSizeRaw = Math.sqrt(
+      (this.canvasBoundingBox.height * this.canvasBoundingBox.width) /
+        this.numSelected /
+        maxPointsInYear /
+        (1 + this.pointMarginFractionOfSize) ** 2
     );
+
+    this.pointSize = Math.floor(pointSizeRaw);
     this.pointSize = Math.max(this.minPointSize, this.pointSize);
     this.pointSize = Math.min(this.maxPointSize, this.pointSize);
 
@@ -184,9 +188,9 @@ export class TimelineCanvasComponent
     this.numBuckets = Math.max(this.numBuckets, 1);
 
     console.log(
-      `maxPointsInYear=${maxPointsInYear} pointSizeRaw=${
-        this.canvasBoundingBox.height / (1.5 * maxPointsInYear)
-      } pointSize=${this.pointSize} rows=${
+      `maxPointsInYear=${maxPointsInYear} pointSizeRaw=${pointSizeRaw} pointSize=${
+        this.pointSize
+      } rows=${
         this.canvasBoundingBox.height / this.pointSizePlusMargin
       } pointMargin=${this.pointMargin} numBuckets=${
         this.numBuckets
@@ -224,6 +228,13 @@ export class TimelineCanvasComponent
       }
     }
 
+    const printBucketSizes = () => {
+      if (this.buckets.length < 35)
+        console.log('Buckets\n', this.buckets.map((it) => it.length).join(' '));
+    };
+
+    printBucketSizes();
+
     /*
     Due to the linear mapping, there are probably gaps of successive empty buckets.
     For example, by looking at the sizes of the buckets:
@@ -251,13 +262,15 @@ export class TimelineCanvasComponent
       this.buckets[start] = [];
 
       for (const person of group) {
-        const index = start + Math.floor(Math.random() * (end - start));
+        const index = start + Math.floor(Math.random() * groupSize);
         this.buckets[index].push(person);
       }
 
       // Next loop iteration, bucketIndex will be end, i.e. start of new group.
       bucketIndex = end - 1;
     }
+
+    printBucketSizes();
   }
 
   drawCanvas(): void {
@@ -354,7 +367,7 @@ export class TimelineCanvasComponent
     // console.log(
     //   `j=${pointIndex} not=${this.buckets[bucketIndex][pointIndex].notabilityIndex}`
     // );
-    console.log(`i=${bucketIndex} j=${pointIndex}`);
+    // console.log(`i=${bucketIndex} j=${pointIndex}`);
     return this.buckets[bucketIndex][pointIndex];
   }
 }
