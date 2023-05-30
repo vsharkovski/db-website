@@ -46,7 +46,7 @@
 }
 
 .bar {
-  background-color: var(--bs-gray-300);
+  background-color: var(--bs-gray-400);
   height: 50%;
   position: absolute;
   top: 50%;
