@@ -1,36 +1,46 @@
 import {
+  AfterViewInit,
   Component,
+  ElementRef,
+  HostListener,
   Input,
   OnChanges,
   OnInit,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
-
-interface DataPoint {
-  person: Person;
-}
+import {
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  throttleTime,
+} from 'rxjs';
 
 @Component({
   selector: 'dbw-timeline-canvas',
   templateUrl: './timeline-canvas.component.html',
   styleUrls: ['./timeline-canvas.component.css'],
 })
-export class TimelineCanvasComponent implements OnInit, OnChanges {
+export class TimelineCanvasComponent
+  implements OnInit, OnChanges, AfterViewInit
+{
   @Input() selectedYears!: NumberRange;
+
+  @ViewChild('canvas') canvasRef!: ElementRef;
 
   data: Person[] = [];
 
-  numBuckets = 50;
-  maxTotalSelectable = 100;
+  numBuckets = 500;
+  maxTotalSelectable = 4000;
   buckets: Person[][] = [];
 
-  selectDataRequested = new Subject<NumberRange>();
+  selectData$ = new Subject<NumberRange>();
+  drawCanvas$ = new Subject<void>();
 
   constructor() {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 10000; i++) {
       const b = Math.random() * 2000;
       const ni = 30 + Math.random() * 10;
       this.data.push({
@@ -52,7 +62,7 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYears']) {
       const range = changes['selectedYears'].currentValue;
-      this.selectData(range);
+      this.selectData$.next(range);
     }
   }
 
@@ -61,12 +71,27 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
     // speed up updates on selection change.
     this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
 
-    this.selectDataRequested
+    this.selectData$
       .pipe(
-        debounceTime(200),
+        debounceTime(100),
         distinctUntilChanged((a, b) => a.min == b.min && a.max == b.max)
       )
-      .subscribe((range) => this.selectData(range));
+      .subscribe((range) => {
+        this.selectData(range);
+        this.drawCanvas$.next();
+      });
+
+    this.drawCanvas$.pipe(debounceTime(100)).subscribe(() => this.drawCanvas());
+  }
+
+  ngAfterViewInit(): void {
+    // Draw canvas initially.
+    this.drawCanvas$.next();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.drawCanvas$.next();
   }
 
   selectData(range: NumberRange) {
@@ -98,6 +123,51 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
       if (numSpacesLeft == 0) {
         break;
       }
+    }
+  }
+
+  drawCanvas(): void {
+    console.log('Drawing canvas');
+    const canvasElement = this.canvasRef.nativeElement;
+
+    // Resize canvas to fit available space.
+    const boundingBox = canvasElement.getBoundingClientRect();
+    canvasElement.height = boundingBox.height;
+    canvasElement.width = boundingBox.width;
+
+    // Draw all buckets.
+    const ctx = canvasElement.getContext('2d', {
+      alpha: false,
+    });
+
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, boundingBox.width, boundingBox.height);
+
+    ctx.fillStyle = 'black';
+
+    const pointSize = 4;
+    const margin = 2;
+    const pointSizePlusMargin = pointSize + margin;
+
+    const yMiddle = Math.round(boundingBox.height / 2 - pointSize / 2);
+    let x = margin;
+
+    for (let bucketIndex = 0; bucketIndex < this.numBuckets; bucketIndex++) {
+      const bucket = this.buckets[bucketIndex];
+      let yTop = yMiddle;
+      let yBottom = yMiddle + pointSizePlusMargin;
+
+      for (let pointIndex = 0; pointIndex < bucket.length; ++pointIndex) {
+        if (pointIndex % 2 == 0) {
+          ctx.fillRect(x, yTop, pointSize, pointSize);
+          yTop -= pointSizePlusMargin;
+        } else {
+          ctx.fillRect(x, yBottom, pointSize, pointSize);
+          yBottom += pointSizePlusMargin;
+        }
+      }
+
+      x += pointSizePlusMargin;
     }
   }
 }

@@ -1,13 +1,13 @@
-.canvas {
+.canvas-wrapper {
   height: calc(100vh - 10rem);
   margin-bottom: 1rem;
-  background-color: var(--bs-light);
+  /* background-color: var(--bs-light);
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-evenly; */
 }
 
-.bucket {
+/* .bucket {
   display: flex;
   flex-direction: column;
 }
@@ -17,4 +17,9 @@
   width: 4px;
   height: 4px;
   background-color: black;
+} */
+
+canvas {
+  height: 100%;
+  width: 100%;
 }
