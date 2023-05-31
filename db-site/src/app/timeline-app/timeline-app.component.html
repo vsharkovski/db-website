@@ -1,6 +1,6 @@
 <div class="row">
-  <div class="col-auto">
-    <dbw-timeline-options></dbw-timeline-options>
+  <div class="col-2">
+    <dbw-timeline-options [selectedYears]="selectedYears"></dbw-timeline-options>
   </div>
   <div class="col canvas-and-selector" (wheel)="onWheel($event)">
     <dbw-timeline-canvas [selectedYears]="selectedYears"></dbw-timeline-canvas>

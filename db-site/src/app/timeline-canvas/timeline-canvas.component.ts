@@ -34,6 +34,8 @@ export class TimelineCanvasComponent
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
+  initializeCanvas$ = new ReplaySubject<NumberRange | null>();
+
   data: Person[] = [];
   numDataPointsInYear: number[] = [];
   minYear = Number.MAX_SAFE_INTEGER;
@@ -54,7 +56,7 @@ export class TimelineCanvasComponent
   yMiddle = 0;
   numBuckets = 10;
 
-  initializeCanvas$ = new ReplaySubject<NumberRange | null>();
+  currentHoveredPoint: Person | null = null;
 
   constructor() {
     for (let i = 0; i < 100000; i++) {
@@ -134,11 +136,7 @@ export class TimelineCanvasComponent
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
     const hovered = this.getPointFromCoordinates(event.offsetX, event.offsetY);
-    if (hovered != null) {
-      // console.log(
-      //   `hovered birth=${hovered.birth} ni=${hovered.notabilityIndex}`
-      // );
-    }
+    this.currentHoveredPoint = hovered;
   }
 
   resizeCanvas(): boolean {

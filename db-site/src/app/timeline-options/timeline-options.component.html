@@ -1,1 +1,7 @@
-<p>timeline-options works!</p>
+<h2 class="text-center mt-3">Timeline</h2>
+<div class="py-3 text-center fst-italic">
+  <h4 *ngIf="selectedYears.min == selectedYears.max" class="fw-normal">The year {{ selectedYears.min | dateYear }}</h4>
+  <h4 *ngIf="selectedYears.min < selectedYears.max" class="fw-normal">
+    Years {{ selectedYears.min | dateYear }} - {{ selectedYears.max | dateYear }}
+  </h4>
+</div>
