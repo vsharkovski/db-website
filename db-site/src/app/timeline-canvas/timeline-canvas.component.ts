@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
-import { ReplaySubject, debounceTime } from 'rxjs';
+import { ReplaySubject, debounceTime, delay } from 'rxjs';
 
 // Standard Normal variate using Box-Muller transform.
 function gaussianRandom(mean = 0, stdev = 1) {
@@ -35,21 +35,23 @@ interface Point {
 export class TimelineCanvasComponent
   implements OnInit, OnChanges, AfterViewInit
 {
+  readonly maxPlaceable = 10000;
+  readonly minPointSizePixels = 4;
+  readonly maxPointSizePixels = 36;
+  readonly pointMarginFractionOfSize = 0.5;
+  readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
+
   @Input() selectedYears!: NumberRange;
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
   initializeCanvas$ = new ReplaySubject<boolean>();
+  removeHoveredPoint$ = new ReplaySubject<number>();
 
   data: Point[] = [];
   numPointsAtTime: number[] = [];
   minTime = Number.MAX_SAFE_INTEGER;
   maxTime = Number.MIN_SAFE_INTEGER;
-
-  readonly maxPlaceable = 10000;
-  readonly minPointSizePixels = 4;
-  readonly maxPointSizePixels = 36;
-  readonly pointMarginFractionOfSize = 0.5;
 
   buckets: Person[][] = [];
 
@@ -61,7 +63,9 @@ export class TimelineCanvasComponent
   pointMarginSizeCombined = 6;
 
   hoverRadiusPixels = 32;
+  hoverPointerPixels: { x: number; y: number } = { x: 0, y: 0 };
   hoveredPoint: Person | null = null;
+  hoveredPointLastTimeNotNullMs: number = 0;
 
   constructor() {
     for (let i = 0; i < 100000; i++) {
@@ -114,12 +118,20 @@ export class TimelineCanvasComponent
 
   ngOnInit(): void {
     // Sort people by notability index descending, in order to
-    // speed up updates on selection change.
+    // be able to select the most notable people faster.
     this.data.sort((a, b) => b.data.notabilityIndex! - a.data.notabilityIndex!);
 
     this.initializeCanvas$
       .pipe(debounceTime(100))
       .subscribe((hasNewRange) => this.initializeCanvas(hasNewRange));
+
+    this.removeHoveredPoint$
+      .pipe(delay(this.hoverPointerVisibileTimeAfterUpdateMs))
+      .subscribe((timeRequested) => {
+        if (timeRequested > this.hoveredPointLastTimeNotNullMs) {
+          this.hoveredPoint = null;
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -135,11 +147,22 @@ export class TimelineCanvasComponent
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
-    const hovered = this.getBestPointAroundPixel(event.offsetX, event.offsetY);
-    if (hovered != this.hoveredPoint) {
-      console.log('New hovered', hovered);
+    this.hoverPointerPixels = {
+      x: Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
+      y: Math.round(event.pageY - (this.canvasBoundingBox.y + window.scrollY)),
+    };
+    const hovered = this.getBestPointAroundPixel(
+      this.hoverPointerPixels.x,
+      this.hoverPointerPixels.y
+    );
+    const time = new Date().getTime();
+
+    if (hovered == null) {
+      this.removeHoveredPoint$.next(time);
+    } else {
+      this.hoveredPoint = hovered;
+      this.hoveredPointLastTimeNotNullMs = time;
     }
-    this.hoveredPoint = hovered;
   }
 
   /**
@@ -151,7 +174,7 @@ export class TimelineCanvasComponent
 
     // Re-select data and draw canvas again only if the canvas was
     // actually resized, or new (different) range was provided.
-    if (didResize || hasNewRange != null) {
+    if (didResize || hasNewRange !== null) {
       this.updateDrawData(this.selectedYears);
       this.fillBuckets(this.selectedYears);
       this.normalizeBuckets();
@@ -318,11 +341,11 @@ export class TimelineCanvasComponent
    * Draw all points onto the canvas.
    */
   drawCanvas(): void {
-    // Draw white background.
     const ctx = this.canvasRef.nativeElement.getContext('2d', {
       alpha: false,
     });
 
+    // Draw white background.
     ctx.fillStyle = 'white';
     ctx.fillRect(
       0,
@@ -426,7 +449,7 @@ export class TimelineCanvasComponent
       }
     }
 
-    if (pointIndex == null || pointIndex >= this.buckets[bucketIndex].length)
+    if (pointIndex === null || pointIndex >= this.buckets[bucketIndex].length)
       return null;
 
     return this.buckets[bucketIndex][pointIndex];
@@ -455,9 +478,13 @@ export class TimelineCanvasComponent
 
   getBestPointAroundPixel(pixelX: number, pixelY: number): Person | null {
     const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
-    const maxDist = Math.ceil(
-      this.hoverRadiusPixels / this.pointMarginSizeCombined
+    const maxDist = Math.max(
+      0,
+      Math.ceil(this.hoverRadiusPixels / this.pointMarginSizeCombined) - 1
     );
+    // console.log(
+    //   `mouse=(${pixelX},${pixelY}) center=(${center.row},${center.col}) maxDist=${maxDist}`
+    // );
 
     // Look at cells in diamond shape around center (square rotated 45 degrees).
     let bestPoint: Person | null = null;
@@ -471,7 +498,7 @@ export class TimelineCanvasComponent
 
       for (let deltaRow = -maxRowDist; deltaRow <= maxRowDist; deltaRow++) {
         const row = center.row + deltaRow;
-        const index = row >= 0 ? 2 * row : 2 * row + 1;
+        const index = row >= 0 ? 2 * row : 2 * -row + 1;
 
         if (
           index >= 0 &&

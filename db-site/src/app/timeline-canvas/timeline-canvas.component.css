@@ -1,23 +1,8 @@
 .canvas-wrapper {
   height: calc(100vh - 10rem);
   margin-bottom: 1rem;
-  /* background-color: var(--bs-light);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly; */
+  position: relative;
 }
-
-/* .bucket {
-  display: flex;
-  flex-direction: column;
-}
-
-.point {
-  margin: 1px;
-  width: 4px;
-  height: 4px;
-  background-color: black;
-} */
 
 canvas {
   height: 100%;
@@ -27,7 +12,7 @@ canvas {
   border-color: var(--bs-gray-400);
 }
 
-/* .pointer {
+.pointer {
   border-radius: 50%;
   border-width: 3px;
   border-style: solid;
@@ -36,4 +21,10 @@ canvas {
   width: 1.75rem;
   position: absolute;
   z-index: 3;
-} */
+  transform: translate(-50%, -50%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
+}
+
+.hidden {
+  transform: translate(-50%, -50%) scale(0%, 0%);
+}

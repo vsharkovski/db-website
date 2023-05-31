@@ -1,4 +1,9 @@
 <div class="canvas-wrapper">
   <canvas #canvas></canvas>
-  <!-- <div class="pointer"></div> -->
+  <div
+    class="pointer"
+    [class.hidden]="hoveredPoint == null"
+    style.left="{{ hoverPointerPixels.x }}px"
+    style.top="{{ hoverPointerPixels.y }}px"
+  ></div>
 </div>
