@@ -5,14 +5,20 @@ import { ErrorService } from './error.service';
 import { SearchCriterion } from './search-criterion.model';
 import { SearchResponse } from './search-response.model';
 import { SortState } from './sort-state.model';
+import { SearchParameters } from './search-parameters.model';
+import { PersonService } from './person.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SearchService {
-  readonly termRegex: RegExp;
+  private readonly termRegex: RegExp;
 
-  constructor(private http: HttpClient, private errorService: ErrorService) {
+  constructor(
+    private http: HttpClient,
+    private errorService: ErrorService,
+    private personService: PersonService
+  ) {
     // Create the regular expression for terms.
     const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
     const searchOperatorsJoinedOr = searchOperators.join('|');
@@ -69,5 +75,56 @@ export class SearchService {
       operation: match[2],
       value: match[3],
     }));
+  }
+
+  getTermFromSearchParameters(params: SearchParameters): string {
+    let term = '';
+
+    if (params.name) {
+      // When advanced mode is disabled, add wildcards at start and end.
+      let operator = ':';
+      if (params.name.includes('*') || params.name.includes('_')) {
+        operator = '~';
+      }
+      term += `name${operator}${params.name},`;
+    }
+    if (params.birthMin !== null) {
+      term += `birth>=${this.personService.clampLifeYear(params.birthMin)},`;
+    }
+    if (params.birthMax !== null) {
+      term += `birth<=${this.personService.clampLifeYear(params.birthMax)},`;
+    }
+    if (params.deathMin !== null) {
+      term += `death>=${this.personService.clampLifeYear(params.deathMin)},`;
+    }
+    if (params.deathMax !== null) {
+      term += `death<=${this.personService.clampLifeYear(params.deathMax)},`;
+    }
+    if (params.citizenshipId) {
+      term += `citizenship1BId:${params.citizenshipId},`;
+    }
+    if (params.occupationLevel1Id) {
+      term += `level1MainOccId:${params.occupationLevel1Id},`;
+    }
+    if (params.occupationLevel3Id) {
+      term += `level3MainOccId:${params.occupationLevel3Id},`;
+    }
+    if (params.genderId) {
+      term += `genderId:${params.genderId},`;
+    }
+    if (params.notabilityMin !== null) {
+      term += `notabilityIndex>=${this.personService.clampNotability(
+        params.notabilityMin
+      )},`;
+    }
+    if (params.notabilityMax !== null) {
+      term += `notabilityIndex<=${this.personService.clampNotability(
+        params.notabilityMax
+      )},`;
+    }
+    if (term.endsWith(',')) {
+      term = term.substring(0, term.length - 1);
+    }
+    return term;
   }
 }

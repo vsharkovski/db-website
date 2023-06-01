@@ -18,6 +18,8 @@ import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
 import { SearchService } from '../search.service';
 import { Variable } from '../variable.model';
 import { VariablesService } from '../variables.service';
+import { SearchParameters } from '../search-parameters.model';
+import { PersonService } from '../person.service';
 
 @Component({
   selector: 'dbw-search-options',
@@ -25,9 +27,9 @@ import { VariablesService } from '../variables.service';
   styleUrls: ['./search-options.component.css'],
 })
 export class SearchOptionsComponent implements OnInit, OnChanges {
-  readonly LIFE_YEAR_MIN = -3500;
-  readonly LIFE_YEAR_MAX = 2020;
   readonly SAFE_NAME_PATTERN = '^[^,:!=><~]+$';
+  lifeYearMin = -3500;
+  lifeYearMax = 2020;
 
   form: FormGroup;
 
@@ -49,7 +51,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   constructor(
     fb: NonNullableFormBuilder,
     private variablesService: VariablesService,
-    private searchService: SearchService
+    private searchService: SearchService,
+    private personService: PersonService
   ) {
     // Create the form.
     this.form = fb.group({
@@ -72,6 +75,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
+    this.lifeYearMin = this.personService.LIFE_YEAR_MIN;
+    this.lifeYearMax = this.personService.LIFE_YEAR_MAX;
+
     // Get the variable lists from the API, and sort them by name.
     this.variablesService.getGenders().subscribe((genders) => {
       this.genders = genders;
@@ -126,7 +132,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
         }
 
         // Compile term from form values and emit.
-        this.termChanged.emit(this.compileTermFromFormValues(values));
+        this.termChanged.emit(this.getTermFromFormValues(values));
       }
     });
   }
@@ -146,7 +152,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   onFormSubmit(): void {
-    const term = this.compileTermFromFormValues(this.form.value);
+    const term = this.getTermFromFormValues(this.form.value);
     this.submitted.next(term);
   }
 
@@ -166,51 +172,14 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     return false;
   }
 
-  private compileTermFromFormValues(values: FormValues): string {
-    let term = '';
-    if (values.name) {
-      // When advanced mode is disabled, add wildcards at start and end.
-      const name = values.advancedMode ? values.name : `*${values.name}*`;
-      let operator = ':';
-      if (name.includes('*') || name.includes('_')) {
-        operator = '~';
-      }
-      term += `name${operator}${name},`;
+  private getTermFromFormValues(values: FormValues): string {
+    // Map values to search parameters.
+    const params: SearchParameters = { ...values };
+    if (values.name && !values.advancedMode) {
+      params.name = `*${values.name}*`;
     }
-    if (values.birthMin !== null) {
-      term += `birth>=${this.clampLifeYear(values.birthMin)},`;
-    }
-    if (values.birthMax !== null) {
-      term += `birth<=${this.clampLifeYear(values.birthMax)},`;
-    }
-    if (values.deathMin !== null) {
-      term += `death>=${this.clampLifeYear(values.deathMin)},`;
-    }
-    if (values.deathMax !== null) {
-      term += `death<=${this.clampLifeYear(values.deathMax)},`;
-    }
-    if (values.citizenshipId) {
-      term += `citizenship1BId:${values.citizenshipId},`;
-    }
-    if (values.occupationLevel1Id) {
-      term += `level1MainOccId:${values.occupationLevel1Id},`;
-    }
-    if (values.occupationLevel3Id) {
-      term += `level3MainOccId:${values.occupationLevel3Id},`;
-    }
-    if (values.genderId) {
-      term += `genderId:${values.genderId},`;
-    }
-    if (values.notabilityMin !== null) {
-      term += `notabilityIndex>=${this.clampNotability(values.notabilityMin)},`;
-    }
-    if (values.notabilityMax !== null) {
-      term += `notabilityIndex<=${this.clampNotability(values.notabilityMax)},`;
-    }
-    if (term.endsWith(',')) {
-      term = term.substring(0, term.length - 1);
-    }
-    return term;
+
+    return this.searchService.getTermFromSearchParameters(params);
   }
 
   private pushTermToForm(term: string): void {
@@ -257,7 +226,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'birth') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.clampLifeYear(num);
+          num = this.personService.clampLifeYear(num);
           if (c.operation == '>=') {
             values.birthMin = num;
           } else if (c.operation == '<=') {
@@ -267,7 +236,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'death') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.clampLifeYear(num);
+          num = this.personService.clampLifeYear(num);
           if (c.operation == '>=') {
             values.deathMin = num;
           } else if (c.operation == '<=') {
@@ -301,7 +270,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'notabilityIndex') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.clampNotability(num);
+          num = this.personService.clampNotability(num);
           if (c.operation == '>=') {
             values.notabilityMin = num;
           } else if (c.operation == '<=') {
@@ -314,14 +283,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     // Do not emit an event to not trigger the default behavior that happens
     // when the user changes the form.
     this.form.setValue(values, { emitEvent: false });
-  }
-
-  private clampLifeYear(year: number): number {
-    return Math.min(Math.max(year, this.LIFE_YEAR_MIN), this.LIFE_YEAR_MAX);
-  }
-
-  private clampNotability(notability: number): number {
-    return Math.min(Math.max(notability, 0), 100);
   }
 
   get pageField(): AbstractControl {
@@ -369,17 +330,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 }
 
-interface FormValues {
-  name: string;
-  birthMin: number | null;
-  birthMax: number | null;
-  deathMin: number | null;
-  deathMax: number | null;
-  citizenshipId: number | null;
-  occupationLevel1Id: number | null;
-  occupationLevel3Id: number | null;
-  genderId: number | null;
-  notabilityMin: number | null;
-  notabilityMax: number | null;
+interface FormValues extends SearchParameters {
   advancedMode: boolean;
 }
