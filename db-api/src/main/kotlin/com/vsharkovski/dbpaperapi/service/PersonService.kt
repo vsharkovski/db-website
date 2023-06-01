@@ -1,6 +1,7 @@
 package com.vsharkovski.dbpaperapi.service
 
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
+import com.vsharkovski.dbpaperapi.model.TimelinePoint
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,6 +18,19 @@ class PersonService(
 
     @Value("\${search.results-per-page}")
     val batchSize: Int = 1000
+
+    fun getTimelineData(minimumNotability: Float): List<TimelinePoint> =
+        personRepository.findTimelineData(minimumNotability)
+            .map {
+                TimelinePoint(
+                    wikidataCode = it.wikidataCode!!,
+                    time = it.birth!!,
+                    notabilityIndex = it.notabilityIndex!!,
+                    genderId = it.genderId,
+                    level1MainOccId = it.level1MainOccId,
+                    citizenship1BId = it.citizenship1BId
+                )
+            }
 
     fun processAllPersonNamesForSearch() {
         logger.info("Person names processing for search: starting")

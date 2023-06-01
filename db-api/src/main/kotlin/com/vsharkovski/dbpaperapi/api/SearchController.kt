@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/search")
 class SearchController(
-    val searchService: SearchService
+    val searchService: SearchService,
 ) {
     private final val sortDirectionStringToEnum: Map<String, Sort.Direction> =
         mapOf("ascending" to Sort.Direction.ASC, "descending" to Sort.Direction.DESC)
@@ -22,7 +22,7 @@ class SearchController(
         sortDirectionStringToEnum.entries.associate { it.value to it.key }
 
     @GetMapping
-    fun findPageBySpecification(
+    fun findPeopleBySpecification(
         @RequestParam term: String,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "notabilityIndex") sortVariable: String,
@@ -52,5 +52,4 @@ class SearchController(
             )
         )
     }
-
 }
