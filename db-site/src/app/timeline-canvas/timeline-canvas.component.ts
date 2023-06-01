@@ -498,20 +498,20 @@ export class TimelineCanvasComponent
             (yDistToMiddle + this.marginSizePixels) /
               this.pointMarginSizeCombined
           )
-        : -Math.floor(-yDistToMiddle / this.pointMarginSizeCombined);
+        : Math.floor(yDistToMiddle / this.pointMarginSizeCombined);
 
     return { col: bucketIndex, row: row };
   }
 
-  getBestPointAroundPixel(pixelX: number, pixelY: number): TimelinePoint | null {
+  getBestPointAroundPixel(
+    pixelX: number,
+    pixelY: number
+  ): TimelinePoint | null {
     const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
     const maxDist = Math.max(
       0,
       Math.ceil(this.hoverRadiusPixels / this.pointMarginSizeCombined) - 1
     );
-    // console.log(
-    //   `mouse=(${pixelX},${pixelY}) center=(${center.row},${center.col}) maxDist=${maxDist}`
-    // );
 
     // Look at cells in diamond shape around center (square rotated 45 degrees).
     let bestPoint: TimelinePoint | null = null;
@@ -525,7 +525,7 @@ export class TimelineCanvasComponent
 
       for (let deltaRow = -maxRowDist; deltaRow <= maxRowDist; deltaRow++) {
         const row = center.row + deltaRow;
-        const index = row >= 0 ? 2 * row : 2 * -row + 1;
+        const index = row >= 0 ? 2 * row : 2 * -row - 1;
 
         if (
           index >= 0 &&
