@@ -46,7 +46,7 @@ export class SearchService {
       .pipe(
         catchError(
           this.errorService.handleError('getSearchResults', {
-            persons: [],
+            results: [],
             hasNextPage: false,
             hasPreviousPage: false,
             pageNumber: 0,

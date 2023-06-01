@@ -8,6 +8,6 @@ export interface SearchResponse {
   totalPages: number;
   totalResults: number;
   resultsPerPage: number;
-  persons: Person[];
+  results: Person[];
   sort: SortState;
 }

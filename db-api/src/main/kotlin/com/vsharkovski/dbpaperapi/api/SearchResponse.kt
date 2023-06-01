@@ -1,9 +1,7 @@
 package com.vsharkovski.dbpaperapi.api
 
-import com.vsharkovski.dbpaperapi.model.PersonNoRawData
-
-data class SearchResponse(
-    val persons: List<PersonNoRawData>,
+data class SearchResponse<T>(
+    val results: List<T>,
     val hasPreviousPage: Boolean,
     val hasNextPage: Boolean,
     val pageNumber: Int,

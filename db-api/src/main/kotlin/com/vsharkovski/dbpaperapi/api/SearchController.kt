@@ -1,5 +1,6 @@
 package com.vsharkovski.dbpaperapi.api
 
+import com.vsharkovski.dbpaperapi.model.PersonNoRawData
 import com.vsharkovski.dbpaperapi.model.SortState
 import com.vsharkovski.dbpaperapi.service.SearchService
 import org.springframework.data.domain.Sort
@@ -21,12 +22,12 @@ class SearchController(
         sortDirectionStringToEnum.entries.associate { it.value to it.key }
 
     @GetMapping
-    fun findAllBySpecification(
+    fun findPageBySpecification(
         @RequestParam term: String,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "notabilityIndex") sortVariable: String,
         @RequestParam(defaultValue = "descending") sortDirection: String,
-    ): ResponseEntity<SearchResponse> {
+    ): ResponseEntity<SearchResponse<PersonNoRawData>> {
         val result = searchService.findPeopleBySearchTerm(
             term,
             page,
@@ -37,7 +38,7 @@ class SearchController(
         )
         return ResponseEntity.ok(
             SearchResponse(
-                persons = result.results,
+                results = result.results,
                 hasPreviousPage = result.hasPreviousPage,
                 hasNextPage = result.hasNextPage,
                 pageNumber = page,
