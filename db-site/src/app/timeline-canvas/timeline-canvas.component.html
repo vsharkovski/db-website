@@ -1,8 +1,15 @@
 <div class="canvas-wrapper">
   <canvas #canvas></canvas>
   <div
-    class="pointer"
-    [class.hidden]="hoveredPoint == null"
+    class="pointer border-primary"
+    [class.hidden]="hoveredPoint === null"
+    style.width="{{ hoverRadiusPixels * 2 }}px"
+    style.left="{{ hoverPointerPixels.x }}px"
+    style.top="{{ hoverPointerPixels.y }}px"
+  ></div>
+  <div
+    class="hovered-info border-primary"
+    [class.hidden]="hoveredPoint === null"
     style.left="{{ hoverPointerPixels.x }}px"
     style.top="{{ hoverPointerPixels.y }}px"
   ></div>

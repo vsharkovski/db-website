@@ -12,19 +12,36 @@ canvas {
   border-color: var(--bs-gray-400);
 }
 
-.pointer {
-  border-radius: 50%;
+.border-primary {
   border-width: 3px;
   border-style: solid;
   border-color: var(--bs-primary);
-  height: 1.75rem;
-  width: 1.75rem;
+}
+
+.pointer {
+  /* width: 1rem; */
+  height: auto;
+  aspect-ratio: 1 / 1;
   position: absolute;
   z-index: 3;
+  border-radius: 50%;
   transform: translate(-50%, -50%) scale(100%, 100%);
   transition: transform 200ms ease-in-out;
 }
 
-.hidden {
+.pointer.hidden {
   transform: translate(-50%, -50%) scale(0%, 0%);
+}
+
+.hovered-info {
+  height: 6rem;
+  width: 10rem;
+  position: absolute;
+  border-radius: 1rem;
+  z-index: 3;
+  transform: translate(-50%, -100%) scale(100%, 100%);
+}
+
+.hovered-info.hidden {
+  transform: translate(-50%, -100%) scale(0%, 0%);
 }

@@ -35,10 +35,6 @@ interface Point {
 export class TimelineCanvasComponent
   implements OnInit, OnChanges, AfterViewInit
 {
-  readonly maxPlaceable = 10000;
-  readonly minPointSizePixels = 4;
-  readonly maxPointSizePixels = 36;
-  readonly pointMarginFractionOfSize = 0.5;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
 
   @Input() selectedYears!: NumberRange;
@@ -48,6 +44,7 @@ export class TimelineCanvasComponent
   initializeCanvas$ = new ReplaySubject<boolean>();
   removeHoveredPoint$ = new ReplaySubject<number>();
 
+  readonly maxPlaceable = 10000;
   data: Point[] = [];
   numPointsAtTime: number[] = [];
   minTime = Number.MAX_SAFE_INTEGER;
@@ -56,16 +53,20 @@ export class TimelineCanvasComponent
   buckets: Person[][] = [];
 
   // Data for drawing. Point size is also used to determine number of buckets.
+  readonly minPointSizePixels = 4;
+  readonly maxPointSizePixels = 36;
+  readonly pointMarginFractionOfSize = 0.5;
   canvasBoundingBox!: DOMRect;
   canvasMiddleYPixels = 0;
   pointSizePixels = 4;
   marginSizePixels = 2;
   pointMarginSizeCombined = 6;
 
-  hoverRadiusPixels = 32;
+  readonly hoverRadiusPixels = 16;
   hoverPointerPixels: { x: number; y: number } = { x: 0, y: 0 };
   hoveredPoint: Person | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
+  hoveredPointLastTimeValueChangedMs: number = 0;
 
   constructor() {
     for (let i = 0; i < 100000; i++) {
@@ -130,6 +131,7 @@ export class TimelineCanvasComponent
       .subscribe((timeRequested) => {
         if (timeRequested > this.hoveredPointLastTimeNotNullMs) {
           this.hoveredPoint = null;
+          this.hoveredPointLastTimeValueChangedMs = new Date().getTime();
         }
       });
   }
@@ -147,6 +149,8 @@ export class TimelineCanvasComponent
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent): void {
+    if (!this.canvasBoundingBox) return;
+
     this.hoverPointerPixels = {
       x: Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
       y: Math.round(event.pageY - (this.canvasBoundingBox.y + window.scrollY)),
@@ -162,6 +166,7 @@ export class TimelineCanvasComponent
     } else {
       this.hoveredPoint = hovered;
       this.hoveredPointLastTimeNotNullMs = time;
+      this.hoveredPointLastTimeValueChangedMs = time;
     }
   }
 
