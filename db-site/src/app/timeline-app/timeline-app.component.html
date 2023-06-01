@@ -3,7 +3,7 @@
     <dbw-timeline-options [selectedYears]="selectedYears"></dbw-timeline-options>
   </div>
   <div class="col canvas-and-selector" (wheel)="onWheel($event)">
-    <dbw-timeline-canvas [selectedYears]="selectedYears"></dbw-timeline-canvas>
+    <dbw-timeline-canvas [selectedYears]="selectedYears" [data]="timelineData"></dbw-timeline-canvas>
     <dbw-range-selector
       [minValue]="selectedYearsBoundary.min"
       [maxValue]="selectedYearsBoundary.max"

@@ -12,6 +12,8 @@ import {
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
 import { ReplaySubject, debounceTime, delay } from 'rxjs';
+import { TimelinePoint } from '../timeline-point.model';
+import { TimelineService } from '../timeline.service';
 
 // Standard Normal variate using Box-Muller transform.
 function gaussianRandom(mean = 0, stdev = 1) {
@@ -20,11 +22,6 @@ function gaussianRandom(mean = 0, stdev = 1) {
   const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   // Transform to the desired mean and standard deviation:
   return z * stdev + mean;
-}
-
-interface Point {
-  time: number;
-  data: Person;
 }
 
 @Component({
@@ -38,6 +35,7 @@ export class TimelineCanvasComponent
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
 
   @Input() selectedYears!: NumberRange;
+  @Input() data: TimelinePoint[] = [];
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
@@ -45,12 +43,11 @@ export class TimelineCanvasComponent
   removeHoveredPoint$ = new ReplaySubject<number>();
 
   readonly maxPlaceable = 10000;
-  data: Point[] = [];
   numPointsAtTime: number[] = [];
   minTime = Number.MAX_SAFE_INTEGER;
   maxTime = Number.MIN_SAFE_INTEGER;
 
-  buckets: Person[][] = [];
+  buckets: TimelinePoint[][] = [];
 
   // Data for drawing. Point size is also used to determine number of buckets.
   readonly minPointSizePixels = 4;
@@ -64,45 +61,44 @@ export class TimelineCanvasComponent
 
   readonly hoverRadiusPixels = 16;
   hoverPointerPixels: { x: number; y: number } = { x: 0, y: 0 };
-  hoveredPoint: Person | null = null;
+  hoveredPoint: TimelinePoint | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
   hoveredPointLastTimeValueChangedMs: number = 0;
 
   constructor() {
-    for (let i = 0; i < 100000; i++) {
-      const b = Math.round(gaussianRandom(1600, 100));
-      const ni = Math.round(30 + Math.random() * 10);
-      this.data.push({
-        time: b,
-        data: {
-          id: i,
-          wikidataCode: i,
-          birth: b,
-          death: b,
-          name: `Person ${i}`,
-          genderId: 0,
-          level1MainOccId: 0,
-          level3MainOccId: 0,
-          citizenship1BId: 0,
-          citizenship2BId: 0,
-          notabilityIndex: ni,
-        },
-      });
-      this.minTime = Math.min(this.minTime, b);
-      this.maxTime = Math.max(this.maxTime, b);
-    }
-
-    for (let i = 0; i < this.maxTime - this.minTime + 1; i++) {
-      this.numPointsAtTime[i] = 0;
-    }
-    for (const point of this.data) {
-      this.numPointsAtTime[point.time - this.minTime]++;
-    }
+    // for (let i = 0; i < 100000; i++) {
+    //   const b = Math.round(gaussianRandom(1600, 100));
+    //   const ni = Math.round(30 + Math.random() * 10);
+    //   this.data.push({
+    //     time: b,
+    //     data: {
+    //       id: i,
+    //       wikidataCode: i,
+    //       birth: b,
+    //       death: b,
+    //       name: `Person ${i}`,
+    //       genderId: 0,
+    //       level1MainOccId: 0,
+    //       level3MainOccId: 0,
+    //       citizenship1BId: 0,
+    //       citizenship2BId: 0,
+    //       notabilityIndex: ni,
+    //     },
+    //   });
+    //   this.minTime = Math.min(this.minTime, b);
+    //   this.maxTime = Math.max(this.maxTime, b);
+    // }
+    // for (let i = 0; i < this.maxTime - this.minTime + 1; i++) {
+    //   this.numPointsAtTime.push(0);
+    // }
+    // for (const point of this.data) {
+    //   this.numPointsAtTime[point.time - this.minTime]++;
+    // }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const change = changes['selectedYears'];
-    if (change) {
+    if (changes['selectedYears']) {
+      const change = changes['selectedYears'];
       const range = change.currentValue;
       const prevRange = change.previousValue;
 
@@ -115,16 +111,19 @@ export class TimelineCanvasComponent
         this.initializeCanvas$.next(true);
       }
     }
+
+    if (changes['data']) {
+      this.sortDataAndUpdateTimeData();
+
+      // (Re)initialize canvas.
+      this.initializeCanvas$.next(true);
+    }
   }
 
   ngOnInit(): void {
-    // Sort people by notability index descending, in order to
-    // be able to select the most notable people faster.
-    this.data.sort((a, b) => b.data.notabilityIndex! - a.data.notabilityIndex!);
-
     this.initializeCanvas$
       .pipe(debounceTime(100))
-      .subscribe((hasNewRange) => this.initializeCanvas(hasNewRange));
+      .subscribe((isForced) => this.initializeCanvas(isForced));
 
     this.removeHoveredPoint$
       .pipe(delay(this.hoverPointerVisibileTimeAfterUpdateMs))
@@ -171,15 +170,38 @@ export class TimelineCanvasComponent
   }
 
   /**
-   * (Re)initialize the canvas.
-   * @param hasNewRange Whether a new selected time range was provided.
+   * Sort data and update time data.
    */
-  initializeCanvas(hasNewRange: boolean): void {
+  sortDataAndUpdateTimeData(): void {
+    // Sort data by notability index descending, in order to
+    // be able to select the most notable points faster.
+    this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
+
+    // Update time data.
+    const times = this.data.map((it) => it.time);
+    this.minTime = Math.min(...times);
+    this.maxTime = Math.max(...times);
+
+    this.numPointsAtTime = [];
+    for (let i = 0; i < this.maxTime - this.minTime + 1; i++) {
+      this.numPointsAtTime.push(0);
+    }
+
+    for (const point of this.data) {
+      this.numPointsAtTime[point.time - this.minTime]++;
+    }
+  }
+
+  /**
+   * (Re)initialize the canvas.
+   * @param isForced Whether to force the initialization,.
+   */
+  initializeCanvas(isForced: boolean): void {
     const didResize = this.updateCanvasSize();
 
     // Re-select data and draw canvas again only if the canvas was
     // actually resized, or new (different) range was provided.
-    if (didResize || hasNewRange !== null) {
+    if (isForced || didResize) {
       this.updateDrawData(this.selectedYears);
       this.fillBuckets(this.selectedYears);
       this.normalizeBuckets();
@@ -284,12 +306,12 @@ export class TimelineCanvasComponent
     let numPlaced = 0;
 
     for (const point of this.data) {
-      // Ensure person birth year is in the range.
+      // Ensure point time is in the range.
       if (range.max < point.time || point.time < range.min) continue;
 
       // Place into bucket.
       const index = Math.floor((point.time - range.min) * scaleFactor);
-      this.buckets[index].push(point.data);
+      this.buckets[index].push(point);
 
       // Stop if enough were placed.
       numPlaced++;
@@ -332,9 +354,9 @@ export class TimelineCanvasComponent
       const group = this.buckets[start];
       this.buckets[start] = [];
 
-      for (const person of group) {
+      for (const point of group) {
         const index = start + Math.floor(Math.random() * groupSize);
-        this.buckets[index].push(person);
+        this.buckets[index].push(point);
       }
 
       // Next loop iteration, bucketIndex will be end, i.e. start of new group.
@@ -395,7 +417,7 @@ export class TimelineCanvasComponent
    * Get grid cell located at given pixel coordinates.
    * @returns The given point, or null if none.
    */
-  getPointFromPixel(pixelX: number, pixelY: number): Person | null {
+  getPointFromPixel(pixelX: number, pixelY: number): TimelinePoint | null {
     const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
     if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
 
@@ -481,7 +503,7 @@ export class TimelineCanvasComponent
     return { col: bucketIndex, row: row };
   }
 
-  getBestPointAroundPixel(pixelX: number, pixelY: number): Person | null {
+  getBestPointAroundPixel(pixelX: number, pixelY: number): TimelinePoint | null {
     const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
     const maxDist = Math.max(
       0,
@@ -492,7 +514,7 @@ export class TimelineCanvasComponent
     // );
 
     // Look at cells in diamond shape around center (square rotated 45 degrees).
-    let bestPoint: Person | null = null;
+    let bestPoint: TimelinePoint | null = null;
 
     for (let deltaCol = -maxDist; deltaCol <= maxDist; deltaCol++) {
       const col = center.col + deltaCol;
