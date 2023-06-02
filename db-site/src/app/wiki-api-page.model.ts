@@ -9,4 +9,5 @@ export interface WikiApiPage {
   };
   extract?: string;
   fullurl?: string;
+  wikidataCode?: number;
 }

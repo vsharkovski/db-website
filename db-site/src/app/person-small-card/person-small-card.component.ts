@@ -16,12 +16,10 @@ export class PersonSmallCardComponent implements OnChanges {
   isDisappearing = false;
 
   ngOnChanges(changes: SimpleChanges): void {
-    let anyNull = false;
-
     const changePerson = changes['personInjected'];
     if (changePerson) {
       if (changePerson.currentValue === null) {
-        anyNull = true;
+        this.isDisappearing = true;
       } else {
         this.person = changePerson.currentValue;
       }
@@ -29,14 +27,9 @@ export class PersonSmallCardComponent implements OnChanges {
 
     const changeWiki = changes['wikiPageInjected'];
     if (changeWiki) {
-      if (changeWiki.currentValue === null) {
-        anyNull = true;
-        this.wikiPage = changeWiki.previousValue;
-      } else {
+      if (changeWiki.currentValue !== null) {
         this.wikiPage = changeWiki.currentValue;
       }
     }
-
-    this.isDisappearing = anyNull;
   }
 }

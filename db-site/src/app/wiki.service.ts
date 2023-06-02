@@ -67,7 +67,12 @@ export class WikiService {
           if (!response || !this.doesPageExistInResponse(response)) {
             return null;
           }
-          return response!.query!.pages![0];
+          const page = response!.query!.pages![0];
+          page.wikidataCode = Number(
+            page.pageprops?.wikibase_item?.substring(1)
+          );
+          if (isNaN(page.wikidataCode)) page.wikidataCode = undefined;
+          return page;
         })
       );
   }

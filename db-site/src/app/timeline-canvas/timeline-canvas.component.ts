@@ -158,7 +158,7 @@ export class TimelineCanvasComponent
         if (code === person!.wikidataCode) {
           this.hoveredPointPerson = person;
         }
-        if (`Q${code}` === wikiPage?.pageprops?.wikibase_item) {
+        if (code === wikiPage?.wikidataCode) {
           this.hoveredPointWikiPage = wikiPage;
         }
       });
