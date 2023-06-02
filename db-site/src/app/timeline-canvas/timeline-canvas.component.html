@@ -13,10 +13,6 @@
     style.left="{{ hoverPointerPositionPixels.x }}px"
     style.top="{{ hoverPointerPositionPixels.y - hoverRadiusPixels }}px"
   >
-    <dbw-person-small-card
-      *ngIf="hoveredPointPerson"
-      [person]="hoveredPointPerson"
-      [wikiPage]="hoveredPointWikiPage"
-    ></dbw-person-small-card>
+    <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
   </div>
 </div>

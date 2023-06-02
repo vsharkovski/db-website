@@ -141,16 +141,19 @@ export class TimelineCanvasComponent
         switchMap((person) =>
           forkJoin([
             of(person),
-            this.wikiService.getDataFromEnglishWiki(person!),
+            this.wikiService.getDataFromEnglishWiki(person!, 300),
           ])
         )
       )
       .subscribe(([person, wikiPage]) => {
         if (!this.hoveredPoint) return;
         const code = this.hoveredPoint.wikidataCode;
-        if (code === person!.wikidataCode) this.hoveredPointPerson = person;
-        if (`Q${code}` === wikiPage?.pageprops?.wikibase_item)
+        if (code === person!.wikidataCode) {
+          this.hoveredPointPerson = person;
+        }
+        if (`Q${code}` === wikiPage?.pageprops?.wikibase_item) {
           this.hoveredPointWikiPage = wikiPage;
+        }
       });
   }
 
@@ -183,10 +186,14 @@ export class TimelineCanvasComponent
       // Request to remove the hovered point.
       this.removeHoveredPoint$.next(time);
     } else {
+      if (hovered != this.hoveredPoint) {
+        this.hoveredPointPerson = null;
+        this.hoveredPointWikiPage = null;
+        this.updateHoveredApiData$.next(hovered);
+      }
       this.hoveredPoint = hovered;
       this.hoveredPointLastTimeNotNullMs = time;
       // this.hoveredPointLastTimeValueChangedMs = time;
-      this.updateHoveredApiData$.next(hovered);
     }
   }
 

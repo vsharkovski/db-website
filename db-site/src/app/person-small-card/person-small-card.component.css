@@ -5,11 +5,13 @@
   border-style: solid;
   border-width: 2px;
   border-color: var(--bs-primary);
-
-  background-size: cover;
-  background-position: center 0%;
-
   overflow: clip;
+  transition: transform 200ms ease-in-out;
+  transform: scaleY(100%);
+}
+
+.card.disappearing {
+  transform: scaleY(0%);
 }
 
 .info {

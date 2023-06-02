@@ -41,5 +41,5 @@ canvas {
 }
 
 .hovered-card-wrapper.hidden {
-  transform: translate(-50%, -100%) scale(0%, 0%);
+  transform: translate(-50%, -50%) scale(0%, 0%);
 }

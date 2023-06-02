@@ -1,5 +1,5 @@
-<div class="card">
-  <div class="info">
+<div class="card" [style.hidden]="isDisappearing">
+  <div class="info" *ngIf="person !== null">
     <h6 class="name">{{ person.name | readableName }}</h6>
     <p *ngIf="person.birth !== null || person.death !== null" class="years">
       <span *ngIf="person.birth !== null || person.death !== null">{{
@@ -9,7 +9,7 @@
       <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
     </p>
   </div>
-  <div class="image-wrapper">
+  <div class="image-wrapper" *ngIf="person !== null">
     <img *ngIf="wikiPage?.thumbnail?.source" [src]="wikiPage?.thumbnail?.source" />
   </div>
 </div>

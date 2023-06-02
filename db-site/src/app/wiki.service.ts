@@ -30,9 +30,15 @@ const wikipediaUrl = 'https://en.wikipedia.org/w/api.php';
 export class WikiService {
   constructor(private http: HttpClient, private errorService: ErrorService) {}
 
-  getDataFromEnglishWiki(person: Person): Observable<WikiApiPage | null> {
+  getDataFromEnglishWiki(
+    person: Person,
+    thumbnailSize?: number
+  ): Observable<WikiApiPage | null> {
     if (!person.name) {
       return of(null);
+    }
+    if (thumbnailSize === undefined) {
+      thumbnailSize = 600;
     }
     return this.http
       .get<WikiApiResponse>(wikipediaUrl, {
@@ -45,7 +51,7 @@ export class WikiService {
             prop: 'pageprops|pageimages|pageterms|extracts|info',
             piprop: 'thumbnail',
             inprop: 'url',
-            pithumbsize: 600,
+            pithumbsize: thumbnailSize,
             explaintext: 1,
             exsectionformat: 'plain',
             exsentences: 4,
