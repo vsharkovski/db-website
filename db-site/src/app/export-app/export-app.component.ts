@@ -93,7 +93,7 @@ export class ExportAppComponent implements OnChanges, OnInit, OnDestroy {
     this.componentDestroyed$.complete();
   }
 
-  onExportRequestButtonClick() {
+  onExportRequestButtonClick(): void {
     this.status$.next('requested');
 
     this.exportService.requestExport(this.term).subscribe((response) => {

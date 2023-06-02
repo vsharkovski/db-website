@@ -13,13 +13,13 @@ export class SearchResultsPageButtonsComponent {
   @Output() previousPageButtonClicked = new EventEmitter<void>();
   @Output() nextPageButtonClicked = new EventEmitter<void>();
 
-  onPreviousPageButtonClick() {
+  onPreviousPageButtonClick(): void {
     if (this.results?.hasPreviousPage) {
       this.previousPageButtonClicked.emit();
     }
   }
 
-  onNextPageButtonClick() {
+  onNextPageButtonClick(): void {
     if (this.results?.hasNextPage) {
       this.nextPageButtonClicked.emit();
     }

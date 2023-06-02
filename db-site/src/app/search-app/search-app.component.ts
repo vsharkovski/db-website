@@ -157,7 +157,7 @@ export class SearchAppComponent implements OnInit {
     }
   }
 
-  onSearchOptionsSubmitted() {
+  onSearchOptionsSubmitted(): void {
     const params = this.route.snapshot.queryParams;
     if (!params['term']) {
       // Ensure that a term is present. In this case, match every result.
