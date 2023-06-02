@@ -36,8 +36,6 @@ import { ModalService } from '../modal.service';
 export class TimelineCanvasComponent
   implements OnInit, OnChanges, AfterViewInit
 {
-  readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
-
   @Input() selectedYears!: NumberRange;
   @Input() data: TimelinePoint[] = [];
 
@@ -56,6 +54,7 @@ export class TimelineCanvasComponent
   readonly minPointSizePixels = 4;
   readonly maxPointSizePixels = 36;
   readonly pointMarginFractionOfSize = 0.5;
+  readonly pointColor = 'rgb(100, 100, 100)';
   canvasBoundingBox!: DOMRect;
   canvasMiddleYPixels = 0;
   pointSizePixels = 4;
@@ -63,6 +62,7 @@ export class TimelineCanvasComponent
   pointMarginSizeCombined = 6;
 
   readonly hoverRadiusPixels = 16;
+  readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
   hoverPointerPositionPixels: { x: number; y: number } = { x: 0, y: 0 };
   hoveredPoint: TimelinePoint | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
@@ -418,7 +418,7 @@ export class TimelineCanvasComponent
 
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
-    ctx.fillStyle = 'rgb(100, 100, 100)';
+    ctx.fillStyle = this.pointColor;
 
     const pointSize = this.pointSizePixels;
     const pointSizePlusMargin = this.pointMarginSizeCombined;

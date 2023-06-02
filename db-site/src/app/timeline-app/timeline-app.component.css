@@ -1,3 +1,9 @@
 :host {
   overflow: hidden;
 }
+
+.canvas-and-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

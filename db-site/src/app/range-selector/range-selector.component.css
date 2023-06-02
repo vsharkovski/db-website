@@ -1,5 +1,4 @@
 .selector-wrapper {
-  padding-inline: 2rem;
 }
 
 .selector {
@@ -46,7 +45,7 @@
 }
 
 .bar {
-  background-color: var(--bs-gray-400);
+  background-color: rgb(160, 160, 160);
   height: 50%;
   position: absolute;
   top: 50%;
