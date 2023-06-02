@@ -168,8 +168,6 @@ export class RangeSelectorComponent implements OnInit {
       // }
     }
 
-    console.log(amount, mouseDistanceFromStart, amountLeft, amountRight);
-
     // Move left and right ticks by updating their values.
     let newMin = this.clampValue(this.minValueSelected - amountLeft);
     let newMax = this.clampValue(this.maxValueSelected + amountRight);
