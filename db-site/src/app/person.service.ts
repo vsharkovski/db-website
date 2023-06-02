@@ -1,17 +1,27 @@
 import { Injectable } from '@angular/core';
+import { Person } from './person.model';
+import { Observable, map } from 'rxjs';
+import { SearchService } from './search.service';
+import { SearchParameters } from './search-parameters.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersonService {
-  readonly LIFE_YEAR_MIN = -3500;
-  readonly LIFE_YEAR_MAX = 2020;
+  constructor(private searchService: SearchService) {}
 
-  clampLifeYear(year: number): number {
-    return Math.min(Math.max(year, this.LIFE_YEAR_MIN), this.LIFE_YEAR_MAX);
-  }
+  getPersonByWikidataCode(wikidataCode: number): Observable<Person | null> {
+    const searchParams = {
+      wikidataCode: wikidataCode,
+    } as SearchParameters;
+    const term = this.searchService.getTermFromSearchParameters(searchParams);
 
-  clampNotability(notability: number): number {
-    return Math.min(Math.max(notability, 0), 100);
+    return this.searchService
+      .getSearchResults(term, 0, 'notabilityIndex', 'descending')
+      .pipe(
+        map((response) =>
+          response.results.length > 0 ? response.results[0] : null
+        )
+      );
   }
 }

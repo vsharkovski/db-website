@@ -1,25 +1,22 @@
 import { Injectable } from '@angular/core';
 import { ErrorService } from './error.service';
 import { HttpClient } from '@angular/common/http';
-import {
-  BehaviorSubject,
-  Observable,
-  Subject,
-  catchError,
-  concat,
-  concatMap,
-  filter,
-  map,
-  of,
-  take,
-  tap,
-} from 'rxjs';
+import { Observable, Subject, catchError, of } from 'rxjs';
 import { TimelinePoint } from './timeline-point.model';
 import { TimelineResponse } from './timeline-response.model';
 
 const MAX_NUM_KEYS = 4;
 const TIMELINE_NUM_KEYS_KEY = 'timeline-keys';
 const TIMELINE_PART_KEY_BASE = 'timeline-data';
+
+// Standard Normal variate using Box-Muller transform.
+function gaussianRandom(mean = 0, stdev = 1) {
+  const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+  const v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  // Transform to the desired mean and standard deviation:
+  return z * stdev + mean;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +26,20 @@ export class TimelineService {
   timelineDataFromApi$ = new Subject<TimelinePoint[]>();
   requestedDataFromApi = false;
 
-  constructor(private http: HttpClient, private errorService: ErrorService) {}
+  constructor(private http: HttpClient, private errorService: ErrorService) {
+    // for (let i = 0; i < 100000; i++) {
+    //   const b = Math.round(gaussianRandom(1600, 100));
+    //   const ni = Math.round(30 + Math.random() * 10);
+    //   this.timelineData.push({
+    //     wikidataCode: i,
+    //     time: b,
+    //     notabilityIndex: ni,
+    //     genderId: 0,
+    //     level1MainOccId: 0,
+    //     citizenship1BId: 0,
+    //   });
+    // }
+  }
 
   getTimelineData(): Observable<TimelinePoint[]> {
     if (this.timelineData.length > 0) {

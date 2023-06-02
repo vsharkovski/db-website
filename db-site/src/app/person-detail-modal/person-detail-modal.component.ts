@@ -13,6 +13,7 @@ import { WikiService } from '../wiki.service';
 })
 export class PersonDetailModalComponent implements OnInit {
   @Input() person!: Person;
+  @Input() data: WikiApiPage | null = null;
 
   citizenshipsLabel: string = '';
   citizenshipsValue: string = '';
@@ -21,7 +22,6 @@ export class PersonDetailModalComponent implements OnInit {
   variablesLoaded = new ReplaySubject<void>();
 
   wikidataUrl!: string;
-  data: WikiApiPage | null = null;
 
   genders = {} as [number: string];
   occupations = {} as [number: string];
@@ -76,11 +76,13 @@ export class PersonDetailModalComponent implements OnInit {
     });
 
     // Get wiki data.
-    this.waitingForResponse = true;
-    this.wikidataUrl = `https://www.wikidata.org/wiki/Q${this.person.wikidataCode}`;
-    this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
-      this.waitingForResponse = false;
-      this.data = data;
-    });
+    if (this.data === null) {
+      this.waitingForResponse = true;
+      this.wikidataUrl = `https://www.wikidata.org/wiki/Q${this.person.wikidataCode}`;
+      this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
+        this.waitingForResponse = false;
+        this.data = data;
+      });
+    }
   }
 }

@@ -10,4 +10,5 @@ export interface SearchParameters {
   genderId: number | null;
   notabilityMin: number | null;
   notabilityMax: number | null;
+  wikidataCode: number | null;
 }

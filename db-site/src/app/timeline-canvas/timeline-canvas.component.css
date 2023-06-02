@@ -33,15 +33,13 @@ canvas {
   transform: translate(-50%, -50%) scale(0%, 0%);
 }
 
-.hovered-info {
-  height: 6rem;
-  width: 10rem;
+.hovered-card-wrapper {
   position: absolute;
-  border-radius: 1rem;
   z-index: 3;
   transform: translate(-50%, -100%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
 }
 
-.hovered-info.hidden {
+.hovered-card-wrapper.hidden {
   transform: translate(-50%, -100%) scale(0%, 0%);
 }

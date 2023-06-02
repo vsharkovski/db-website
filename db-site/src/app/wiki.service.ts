@@ -1,21 +1,28 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { ErrorService } from './error.service';
 import { Person } from './person.model';
 import { WikiApiPage } from './wiki-api-page.model';
 import { WikiApiResponse } from './wiki-api-response.model';
 
 /*
-https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=600&titles=Albert%20Einstein
+https://en.wikipedia.org/w/api.php
+?action=query
+&format=json
+&formatversion=2
+&prop=pageprops|pageimages|pageterms|extracts|info
+&piprop=thumbnail
+&inprop=url
+&pithumbsize=600
+&explaintext=1
+&exsectionformat=plain
+&exsentences=4
+&titles=Albert%20Einstein
 */
 
-/*
-Possible improvement:
-Check different wikipedia versions on fail
-*/
-
-const apiUrl = 'https://en.wikipedia.org/w/api.php';
+const wikipediaUrl = 'https://en.wikipedia.org/w/api.php';
+// const wikidataUrl = 'https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/';
 
 @Injectable({
   providedIn: 'root',
@@ -28,14 +35,14 @@ export class WikiService {
       return of(null);
     }
     return this.http
-      .get<WikiApiResponse>(apiUrl, {
+      .get<WikiApiResponse>(wikipediaUrl, {
         params: new HttpParams({
           fromObject: {
-            origin: '*', // necessary because CORS
+            origin: '*', // Necessary for CORS.
             format: 'json',
             formatversion: 2,
             action: 'query',
-            prop: 'pageimages|pageterms|extracts|info',
+            prop: 'pageprops|pageimages|pageterms|extracts|info',
             piprop: 'thumbnail',
             inprop: 'url',
             pithumbsize: 600,

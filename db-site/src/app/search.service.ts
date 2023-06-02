@@ -6,7 +6,7 @@ import { SearchCriterion } from './search-criterion.model';
 import { SearchResponse } from './search-response.model';
 import { SortState } from './sort-state.model';
 import { SearchParameters } from './search-parameters.model';
-import { PersonService } from './person.service';
+import { PersonParametersService } from './person-parameters.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +17,7 @@ export class SearchService {
   constructor(
     private http: HttpClient,
     private errorService: ErrorService,
-    private personService: PersonService
+    private personParametersService: PersonParametersService
   ) {
     // Create the regular expression for terms.
     const searchOperators = [':', '!', '>=', '>', '<=', '<', '~'];
@@ -78,6 +78,7 @@ export class SearchService {
   }
 
   getTermFromSearchParameters(params: SearchParameters): string {
+    const notNullOrNaN = (x: number | null): boolean => x !== null && !isNaN(x);
     let term = '';
 
     if (params.name) {
@@ -88,17 +89,25 @@ export class SearchService {
       }
       term += `name${operator}${params.name},`;
     }
-    if (params.birthMin !== null) {
-      term += `birth>=${this.personService.clampLifeYear(params.birthMin)},`;
+    if (notNullOrNaN(params.birthMin)) {
+      term += `birth>=${this.personParametersService.clampLifeYear(
+        params.birthMin!
+      )},`;
     }
-    if (params.birthMax !== null) {
-      term += `birth<=${this.personService.clampLifeYear(params.birthMax)},`;
+    if (notNullOrNaN(params.birthMax)) {
+      term += `birth<=${this.personParametersService.clampLifeYear(
+        params.birthMax!
+      )},`;
     }
-    if (params.deathMin !== null) {
-      term += `death>=${this.personService.clampLifeYear(params.deathMin)},`;
+    if (notNullOrNaN(params.deathMin)) {
+      term += `death>=${this.personParametersService.clampLifeYear(
+        params.deathMin!
+      )},`;
     }
-    if (params.deathMax !== null) {
-      term += `death<=${this.personService.clampLifeYear(params.deathMax)},`;
+    if (notNullOrNaN(params.deathMax)) {
+      term += `death<=${this.personParametersService.clampLifeYear(
+        params.deathMax!
+      )},`;
     }
     if (params.citizenshipId) {
       term += `citizenship1BId:${params.citizenshipId},`;
@@ -112,15 +121,18 @@ export class SearchService {
     if (params.genderId) {
       term += `genderId:${params.genderId},`;
     }
-    if (params.notabilityMin !== null) {
-      term += `notabilityIndex>=${this.personService.clampNotability(
-        params.notabilityMin
+    if (notNullOrNaN(params.notabilityMin)) {
+      term += `notabilityIndex>=${this.personParametersService.clampNotability(
+        params.notabilityMin!
       )},`;
     }
-    if (params.notabilityMax !== null) {
-      term += `notabilityIndex<=${this.personService.clampNotability(
-        params.notabilityMax
+    if (notNullOrNaN(params.notabilityMax)) {
+      term += `notabilityIndex<=${this.personParametersService.clampNotability(
+        params.notabilityMax!
       )},`;
+    }
+    if (notNullOrNaN(params.wikidataCode)) {
+      term += `wikidataCode:${params.wikidataCode},`;
     }
     if (term.endsWith(',')) {
       term = term.substring(0, term.length - 1);

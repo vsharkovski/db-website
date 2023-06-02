@@ -39,6 +39,7 @@ import { TimelineAppComponent } from './timeline-app/timeline-app.component';
 import { TimelineOptionsComponent } from './timeline-options/timeline-options.component';
 import { TimelineCanvasComponent } from './timeline-canvas/timeline-canvas.component';
 import { RangeSelectorComponent } from './range-selector/range-selector.component';
+import { PersonSmallCardComponent } from './person-small-card/person-small-card.component';
 
 @NgModule({
   declarations: [
@@ -74,6 +75,7 @@ import { RangeSelectorComponent } from './range-selector/range-selector.componen
     TimelineOptionsComponent,
     TimelineCanvasComponent,
     RangeSelectorComponent,
+    PersonSmallCardComponent,
   ],
   imports: [
     BrowserModule,

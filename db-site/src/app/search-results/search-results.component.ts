@@ -4,6 +4,7 @@ import { Person } from '../person.model';
 import { SearchResponse } from '../search-response.model';
 import { SortState } from '../sort-state.model';
 import { VariablesService } from '../variables.service';
+import { WikiApiPage } from '../wiki-api-page.model';
 
 @Component({
   selector: 'dbw-search-results',
@@ -37,8 +38,8 @@ export class SearchResultsComponent implements OnInit {
       .subscribe((citizenships) => (this.citizenships = citizenships));
   }
 
-  openPersonDetail(person: Person): void {
-    this.modalService.openPersonDetailModal(person);
+  openPersonDetail(person: Person, wikiData?: WikiApiPage): void {
+    this.modalService.openPersonDetailModal(person, wikiData);
   }
 
   onSortIndicatorClick(variable: SortState['variable']): void {

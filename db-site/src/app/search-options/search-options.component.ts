@@ -19,7 +19,7 @@ import { SearchService } from '../search.service';
 import { Variable } from '../variable.model';
 import { VariablesService } from '../variables.service';
 import { SearchParameters } from '../search-parameters.model';
-import { PersonService } from '../person.service';
+import { PersonParametersService } from '../person-parameters.service';
 
 @Component({
   selector: 'dbw-search-options',
@@ -52,7 +52,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     fb: NonNullableFormBuilder,
     private variablesService: VariablesService,
     private searchService: SearchService,
-    private personService: PersonService
+    private personParametersService: PersonParametersService
   ) {
     // Create the form.
     this.form = fb.group({
@@ -75,8 +75,8 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.lifeYearMin = this.personService.LIFE_YEAR_MIN;
-    this.lifeYearMax = this.personService.LIFE_YEAR_MAX;
+    this.lifeYearMin = this.personParametersService.LIFE_YEAR_MIN;
+    this.lifeYearMax = this.personParametersService.LIFE_YEAR_MAX;
 
     // Get the variable lists from the API, and sort them by name.
     this.variablesService.getGenders().subscribe((genders) => {
@@ -195,6 +195,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       genderId: null,
       notabilityMin: null,
       notabilityMax: null,
+      wikidataCode: null,
       advancedMode: false,
     };
     const criteria = this.searchService.getSearchCriteriaFromTerm(term);
@@ -226,7 +227,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'birth') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.personService.clampLifeYear(num);
+          num = this.personParametersService.clampLifeYear(num);
           if (c.operation == '>=') {
             values.birthMin = num;
           } else if (c.operation == '<=') {
@@ -236,7 +237,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'death') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.personService.clampLifeYear(num);
+          num = this.personParametersService.clampLifeYear(num);
           if (c.operation == '>=') {
             values.deathMin = num;
           } else if (c.operation == '<=') {
@@ -270,7 +271,7 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
       } else if (c.key == 'notabilityIndex') {
         let num = Number(c.value);
         if (Number.isInteger(num)) {
-          num = this.personService.clampNotability(num);
+          num = this.personParametersService.clampNotability(num);
           if (c.operation == '>=') {
             values.notabilityMin = num;
           } else if (c.operation == '<=') {

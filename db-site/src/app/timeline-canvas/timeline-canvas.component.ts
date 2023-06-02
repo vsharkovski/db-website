@@ -11,18 +11,21 @@ import {
 } from '@angular/core';
 import { Person } from '../person.model';
 import { NumberRange } from '../number-range.model';
-import { ReplaySubject, debounceTime, delay } from 'rxjs';
+import {
+  ReplaySubject,
+  Subject,
+  debounceTime,
+  delay,
+  distinctUntilChanged,
+  filter,
+  forkJoin,
+  of,
+  switchMap,
+} from 'rxjs';
 import { TimelinePoint } from '../timeline-point.model';
-import { TimelineService } from '../timeline.service';
-
-// Standard Normal variate using Box-Muller transform.
-function gaussianRandom(mean = 0, stdev = 1) {
-  const u = 1 - Math.random(); // Converting [0,1) to (0,1]
-  const v = Math.random();
-  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-  // Transform to the desired mean and standard deviation:
-  return z * stdev + mean;
-}
+import { PersonService } from '../person.service';
+import { WikiService } from '../wiki.service';
+import { WikiApiPage } from '../wiki-api-page.model';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -40,7 +43,6 @@ export class TimelineCanvasComponent
   @ViewChild('canvas') canvasRef!: ElementRef;
 
   initializeCanvas$ = new ReplaySubject<boolean>();
-  removeHoveredPoint$ = new ReplaySubject<number>();
 
   readonly maxPlaceable = 10000;
   numPointsAtTime: number[] = [];
@@ -60,41 +62,19 @@ export class TimelineCanvasComponent
   pointMarginSizeCombined = 6;
 
   readonly hoverRadiusPixels = 16;
-  hoverPointerPixels: { x: number; y: number } = { x: 0, y: 0 };
+  hoverPointerPositionPixels: { x: number; y: number } = { x: 0, y: 0 };
   hoveredPoint: TimelinePoint | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
-  hoveredPointLastTimeValueChangedMs: number = 0;
+  removeHoveredPoint$ = new Subject<number>();
 
-  constructor() {
-    // for (let i = 0; i < 100000; i++) {
-    //   const b = Math.round(gaussianRandom(1600, 100));
-    //   const ni = Math.round(30 + Math.random() * 10);
-    //   this.data.push({
-    //     time: b,
-    //     data: {
-    //       id: i,
-    //       wikidataCode: i,
-    //       birth: b,
-    //       death: b,
-    //       name: `Person ${i}`,
-    //       genderId: 0,
-    //       level1MainOccId: 0,
-    //       level3MainOccId: 0,
-    //       citizenship1BId: 0,
-    //       citizenship2BId: 0,
-    //       notabilityIndex: ni,
-    //     },
-    //   });
-    //   this.minTime = Math.min(this.minTime, b);
-    //   this.maxTime = Math.max(this.maxTime, b);
-    // }
-    // for (let i = 0; i < this.maxTime - this.minTime + 1; i++) {
-    //   this.numPointsAtTime.push(0);
-    // }
-    // for (const point of this.data) {
-    //   this.numPointsAtTime[point.time - this.minTime]++;
-    // }
-  }
+  hoveredPointPerson: Person | null = null;
+  hoveredPointWikiPage: WikiApiPage | null = null;
+  updateHoveredApiData$ = new Subject<TimelinePoint>();
+
+  constructor(
+    private personService: PersonService,
+    private wikiService: WikiService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYears']) {
@@ -125,13 +105,52 @@ export class TimelineCanvasComponent
       .pipe(debounceTime(100))
       .subscribe((isForced) => this.initializeCanvas(isForced));
 
+    /*
+    Every time no hover point is selected when the mouse is moved, we request
+    that the current hovered point is removed (see onMouseMove).
+    Delay these requests for the hover pointer visibility time.
+    Then, if the request was created after the last time the hovered point
+    was updated to something not null, process it (unhover).
+    */
     this.removeHoveredPoint$
-      .pipe(delay(this.hoverPointerVisibileTimeAfterUpdateMs))
-      .subscribe((timeRequested) => {
-        if (timeRequested > this.hoveredPointLastTimeNotNullMs) {
-          this.hoveredPoint = null;
-          this.hoveredPointLastTimeValueChangedMs = new Date().getTime();
-        }
+      .pipe(
+        delay(this.hoverPointerVisibileTimeAfterUpdateMs),
+        filter((time) => time > this.hoveredPointLastTimeNotNullMs)
+      )
+      .subscribe((_) => {
+        this.hoveredPoint = null;
+        this.hoveredPointPerson = null;
+        this.hoveredPointWikiPage = null;
+      });
+
+    this.updateHoveredApiData$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        filter(
+          (point) => point.wikidataCode == this.hoveredPoint?.wikidataCode
+        ),
+        switchMap((point) =>
+          this.personService.getPersonByWikidataCode(point.wikidataCode)
+        ),
+        filter(
+          (person) =>
+            person !== null &&
+            person.wikidataCode === this.hoveredPoint?.wikidataCode
+        ),
+        switchMap((person) =>
+          forkJoin([
+            of(person),
+            this.wikiService.getDataFromEnglishWiki(person!),
+          ])
+        )
+      )
+      .subscribe(([person, wikiPage]) => {
+        if (!this.hoveredPoint) return;
+        const code = this.hoveredPoint.wikidataCode;
+        if (code === person!.wikidataCode) this.hoveredPointPerson = person;
+        if (`Q${code}` === wikiPage?.pageprops?.wikibase_item)
+          this.hoveredPointWikiPage = wikiPage;
       });
   }
 
@@ -150,22 +169,24 @@ export class TimelineCanvasComponent
   onMouseMove(event: MouseEvent): void {
     if (!this.canvasBoundingBox) return;
 
-    this.hoverPointerPixels = {
+    this.hoverPointerPositionPixels = {
       x: Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
       y: Math.round(event.pageY - (this.canvasBoundingBox.y + window.scrollY)),
     };
     const hovered = this.getBestPointAroundPixel(
-      this.hoverPointerPixels.x,
-      this.hoverPointerPixels.y
+      this.hoverPointerPositionPixels.x,
+      this.hoverPointerPositionPixels.y
     );
     const time = new Date().getTime();
 
     if (hovered == null) {
+      // Request to remove the hovered point.
       this.removeHoveredPoint$.next(time);
     } else {
       this.hoveredPoint = hovered;
       this.hoveredPointLastTimeNotNullMs = time;
-      this.hoveredPointLastTimeValueChangedMs = time;
+      // this.hoveredPointLastTimeValueChangedMs = time;
+      this.updateHoveredApiData$.next(hovered);
     }
   }
 
