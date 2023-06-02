@@ -68,9 +68,10 @@ export class TimelineCanvasComponent
   marginSizePixels = 2;
   pointMarginSizeCombined = 6;
 
+  pointerPositionPixels: { x: number; y: number } = { x: 0, y: 0 };
+
   readonly hoverRadiusPixels = 16;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
-  hoverPointerPositionPixels: { x: number; y: number } = { x: 0, y: 0 };
   hoveredPoint: TimelinePoint | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
   removeHoveredPoint$ = new Subject<number>();
@@ -179,13 +180,24 @@ export class TimelineCanvasComponent
   onMouseMove(event: MouseEvent): void {
     if (!this.canvasBoundingBox) return;
 
-    this.hoverPointerPositionPixels = {
-      x: Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
-      y: Math.round(event.pageY - (this.canvasBoundingBox.y + window.scrollY)),
+    const clamp = (x: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, x));
+
+    this.pointerPositionPixels = {
+      x: clamp(
+        Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
+        0,
+        this.canvasBoundingBox.width - 1
+      ),
+      y: clamp(
+        Math.round(event.pageY - (this.canvasBoundingBox.y + window.scrollY)),
+        0,
+        this.canvasBoundingBox.height - 1
+      ),
     };
     const hovered = this.getBestPointAroundPixel(
-      this.hoverPointerPositionPixels.x,
-      this.hoverPointerPositionPixels.y
+      this.pointerPositionPixels.x,
+      this.pointerPositionPixels.y
     );
     const time = new Date().getTime();
 

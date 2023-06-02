@@ -6,16 +6,19 @@
     [class.clickable]="hoveredPoint && hoveredPointPerson"
     [class.loading]="!hoveredPoint || !hoveredPointPerson"
     style.width="{{ hoverRadiusPixels * 2 }}px"
-    style.left="{{ hoverPointerPositionPixels.x }}px"
-    style.top="{{ hoverPointerPositionPixels.y }}px"
+    style.left="{{ pointerPositionPixels.x }}px"
+    style.top="{{ pointerPositionPixels.y }}px"
     (click)="onPointerClick()"
   ></div>
   <div
     class="hovered-card-wrapper"
     [class.hidden]="!hoveredPointPerson"
-    style.left="{{ hoverPointerPositionPixels.x }}px"
-    style.top="{{ hoverPointerPositionPixels.y - hoverRadiusPixels }}px"
+    style.left="{{ pointerPositionPixels.x }}px"
+    style.top="{{ pointerPositionPixels.y - hoverRadiusPixels }}px"
   >
     <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
+  </div>
+  <div class="year-line" style.left="{{ pointerPositionPixels.x }}px">
+    <!-- <span class="year">{{ selectedYears }}</span> -->
   </div>
 </div>

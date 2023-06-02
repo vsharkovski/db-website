@@ -23,7 +23,7 @@ canvas {
   height: auto;
   aspect-ratio: 1 / 1;
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   border-radius: 50%;
   transform: translate(-50%, -50%) scale(100%, 100%);
   transition: transform 200ms ease-in-out;
@@ -58,11 +58,28 @@ canvas {
 
 .hovered-card-wrapper {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   transform: translate(-50%, -100%) scale(100%, 100%);
   transition: transform 200ms ease-in-out;
 }
 
 .hovered-card-wrapper.hidden {
   transform: translate(-50%, -50%) scale(0%, 0%);
+}
+
+.year-line {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  height: 100%;
+  width: 2px;
+  background-color: var(--bs-primary);
+  transform: translateX(-50%);
+}
+
+.year-line .year {
+  position: absolute;
+  top: 100%;
+  transform: translateX(-50%, -50%);
+  color: var(--bs-primary);
 }
