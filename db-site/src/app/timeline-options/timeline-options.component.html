@@ -5,7 +5,7 @@
       The year {{ selectedYears.min | dateYear }}
     </h4>
     <h4 *ngIf="selectedYears.min < selectedYears.max" class="fw-normal text-center fst-italic">
-      Years {{ selectedYears.min | dateYear }} - {{ selectedYears.max | dateYear }}
+      Years {{ selectedYears.min | dateYear }} – {{ selectedYears.max | dateYear }}
     </h4>
 
     <form [formGroup]="form" class="two-column-grid mt-5">
