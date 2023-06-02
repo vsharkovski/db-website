@@ -26,6 +26,7 @@ import { TimelinePoint } from '../timeline-point.model';
 import { PersonService } from '../person.service';
 import { WikiService } from '../wiki.service';
 import { WikiApiPage } from '../wiki-api-page.model';
+import { ModalService } from '../modal.service';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -73,7 +74,8 @@ export class TimelineCanvasComponent
 
   constructor(
     private personService: PersonService,
-    private wikiService: WikiService
+    private wikiService: WikiService,
+    private modalService: ModalService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -187,13 +189,18 @@ export class TimelineCanvasComponent
       this.removeHoveredPoint$.next(time);
     } else {
       if (hovered != this.hoveredPoint) {
+        this.hoveredPoint = hovered;
         this.hoveredPointPerson = null;
         this.hoveredPointWikiPage = null;
         this.updateHoveredApiData$.next(hovered);
       }
-      this.hoveredPoint = hovered;
       this.hoveredPointLastTimeNotNullMs = time;
-      // this.hoveredPointLastTimeValueChangedMs = time;
+    }
+  }
+
+  onPointerClick(): void {
+    if (this.hoveredPointPerson) {
+      this.modalService.openPersonDetailModal(this.hoveredPointPerson);
     }
   }
 
