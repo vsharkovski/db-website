@@ -15,6 +15,7 @@
       <span class="label" [class.hidden]="minValueSelected == maxValueSelected">{{ maxValueSelected | dateYear }}</span>
     </div>
     <div
+      #bar
       class="bar"
       [style.left]="getPositionPercentageFromValue(minValueSelected)"
       [style.width]="getSizePercentageFromValues(minValueSelected, maxValueSelected)"

@@ -34,7 +34,10 @@ export class RangeSelectorComponent implements OnInit {
 
   selectedElement: ElementName | null = null;
 
+  lastMousePagePosition: { x: number; y: number } = { x: 0, y: 0 };
+
   @ViewChild('selector') selectorElementRef?: ElementRef;
+  @ViewChild('bar') barElementRef?: ElementRef;
 
   ngOnInit(): void {
     // If selected values are not provided, set them to the boundaries.
@@ -59,6 +62,13 @@ export class RangeSelectorComponent implements OnInit {
 
   @HostListener('window:mousemove', ['$event'])
   onWindowMouseMove(event: MouseEvent): void {
+    // Update last mouse position.
+    this.lastMousePagePosition = {
+      x: event.pageX,
+      y: event.pageY,
+    };
+
+    // If something is selected, update values.
     if (!this.selectedElement || !this.selectorElementRef) return;
 
     const selectorBoundingBox =
@@ -132,14 +142,43 @@ export class RangeSelectorComponent implements OnInit {
   }
 
   doZoom(amount: number) {
-    const amountOne = Math.round(amount * 0.5);
+    // Determine how much to move the left and right ticks.
+    if (!this.selectorElementRef) return;
+    const selectorBoundingBox =
+      this.selectorElementRef.nativeElement.getBoundingClientRect();
+    const selectorPositionX = selectorBoundingBox.x + window.scrollX;
 
-    let newMin = this.clampValue(this.minValueSelected - amountOne);
-    let newMax = this.clampValue(this.maxValueSelected + amountOne);
+    let amountLeft = Math.round(amount * 0.5);
+    let amountRight = amount - amountLeft;
+
+    const mouseDistanceFromStart =
+      this.lastMousePagePosition.x - selectorPositionX;
+    if (
+      mouseDistanceFromStart >= 0 &&
+      mouseDistanceFromStart < selectorBoundingBox.width
+    ) {
+      // Between the left and right endpoints of the selector. Determine amount dynamically.
+      const fraction = mouseDistanceFromStart / selectorBoundingBox.width;
+      amountLeft = Math.round(amount * fraction);
+      amountRight = amount - amountLeft;
+
+      // If zooming out, swap them.
+      // if (amount >= 0) {
+      //   [amountLeft, amountRight] = [amountRight, amountLeft];
+      // }
+    }
+
+    console.log(amount, mouseDistanceFromStart, amountLeft, amountRight);
+
+    // Move left and right ticks by updating their values.
+    let newMin = this.clampValue(this.minValueSelected - amountLeft);
+    let newMax = this.clampValue(this.maxValueSelected + amountRight);
 
     // In case they pass each other, set them to the middle.
     if (newMin > newMax) {
-      const middle = Math.round((newMin + newMax) / 2);
+      const middle = Math.round(
+        (this.minValueSelected + this.maxValueSelected) / 2
+      );
       newMin = middle;
       newMax = middle;
     }
