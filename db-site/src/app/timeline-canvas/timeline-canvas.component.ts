@@ -268,6 +268,7 @@ export class TimelineCanvasComponent
       this.fillBuckets(this.selectedYears);
       this.normalizeBuckets();
       this.drawCanvas();
+      this.resetHoverData();
     }
   }
 
@@ -473,6 +474,12 @@ export class TimelineCanvasComponent
 
       x += pointSizePlusMargin;
     }
+  }
+
+  resetHoverData(): void {
+    this.hoveredPoint = null;
+    this.hoveredPointPerson = null;
+    this.hoveredPointWikiPage = null;
   }
 
   /**
