@@ -1,9 +1,16 @@
 <div class="row px-3">
   <div class="col-2">
-    <dbw-timeline-options [selectedYears]="selectedYears"></dbw-timeline-options>
+    <dbw-timeline-options
+      [selectedYears]="selectedYears"
+      (optionsChanged)="onOptionsChanged($event)"
+    ></dbw-timeline-options>
   </div>
   <div class="col canvas-and-selector" (wheel)="onWheel($event)">
-    <dbw-timeline-canvas [selectedYears]="selectedYears" [data]="timelineData"></dbw-timeline-canvas>
+    <dbw-timeline-canvas
+      [selectedYears]="selectedYears"
+      [data]="timelineData"
+      [filterOptions]="filterOptions"
+    ></dbw-timeline-canvas>
     <dbw-range-selector
       [minValue]="selectedYearsBoundary.min"
       [maxValue]="selectedYearsBoundary.max"

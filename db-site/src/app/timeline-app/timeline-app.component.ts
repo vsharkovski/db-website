@@ -3,6 +3,8 @@ import { RangeSelectorComponent } from '../range-selector/range-selector.compone
 import { NumberRange } from '../number-range.model';
 import { TimelineService } from '../timeline.service';
 import { TimelinePoint } from '../timeline-point.model';
+import { TimelineOptions } from '../timeline-options.model';
+import { PersonParametersService } from '../person-parameters.service';
 
 @Component({
   selector: 'dbw-timeline-app',
@@ -13,10 +15,23 @@ export class TimelineAppComponent implements OnInit {
   selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
   selectedYears: NumberRange = { min: -600, max: 2000 };
   timelineData: TimelinePoint[] = [];
+  filterOptions: TimelineOptions = {
+    citizenshipId: null,
+    occupationLevel1Id: null,
+    genderId: null,
+  };
 
   @ViewChild(RangeSelectorComponent) rangeSelector?: RangeSelectorComponent;
 
-  constructor(private timelineService: TimelineService) {}
+  constructor(
+    private timelineService: TimelineService,
+    personParametersService: PersonParametersService
+  ) {
+    this.selectedYearsBoundary = {
+      min: personParametersService.LIFE_YEAR_MIN,
+      max: personParametersService.LIFE_YEAR_MAX,
+    };
+  }
 
   ngOnInit(): void {
     this.timelineService
@@ -33,5 +48,9 @@ export class TimelineAppComponent implements OnInit {
 
   onYearSelectionChanged(selection: NumberRange): void {
     this.selectedYears = selection;
+  }
+
+  onOptionsChanged(options: TimelineOptions): void {
+    this.filterOptions = options;
   }
 }

@@ -27,6 +27,7 @@ import { PersonService } from '../person.service';
 import { WikiService } from '../wiki.service';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { ModalService } from '../modal.service';
+import { TimelineOptions } from '../timeline-options.model';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -38,6 +39,11 @@ export class TimelineCanvasComponent
 {
   @Input() selectedYears!: NumberRange;
   @Input() data: TimelinePoint[] = [];
+  @Input() filterOptions: TimelineOptions = {
+    citizenshipId: null,
+    occupationLevel1Id: null,
+    genderId: null,
+  };
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
@@ -48,6 +54,7 @@ export class TimelineCanvasComponent
   minTime = Number.MAX_SAFE_INTEGER;
   maxTime = Number.MIN_SAFE_INTEGER;
 
+  dataProcessed: TimelinePoint[] = [];
   buckets: TimelinePoint[][] = [];
 
   // Data for drawing. Point size is also used to determine number of buckets.
@@ -89,15 +96,13 @@ export class TimelineCanvasComponent
         range.min != prevRange.min ||
         range.max != prevRange.max
       ) {
-        // (Re)initialize canvas.
         this.initializeCanvas$.next(true);
       }
     }
 
-    if (changes['data']) {
-      this.sortDataAndUpdateTimeData();
-
-      // (Re)initialize canvas.
+    if (changes['data'] || changes['filterOptions']) {
+      this.processData();
+      this.updateTimeStatistics();
       this.initializeCanvas$.next(true);
     }
   }
@@ -205,15 +210,37 @@ export class TimelineCanvasComponent
   }
 
   /**
-   * Sort data and update time data.
+   * Filter and sort the data.
    */
-  sortDataAndUpdateTimeData(): void {
-    // Sort data by notability index descending, in order to
-    // be able to select the most notable points faster.
-    this.data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
+  processData(): void {
+    let data = this.data;
 
-    // Update time data.
-    const times = this.data.map((it) => it.time);
+    // Filter.
+    if (this.filterOptions.citizenshipId) {
+      data = data.filter(
+        (it) => it.citizenship1BId === this.filterOptions.citizenshipId
+      );
+    }
+    if (this.filterOptions.occupationLevel1Id) {
+      data = data.filter(
+        (it) => it.level1MainOccId === this.filterOptions.occupationLevel1Id
+      );
+    }
+    if (this.filterOptions.genderId) {
+      data = data.filter((it) => it.genderId === this.filterOptions.genderId);
+    }
+
+    // Sort by notability index descending, in order to speed up point selection.
+    data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
+
+    this.dataProcessed = data;
+  }
+
+  /**
+   * Update time statistics from the data.
+   */
+  updateTimeStatistics(): void {
+    const times = this.dataProcessed.map((it) => it.time);
     this.minTime = Math.min(...times);
     this.maxTime = Math.max(...times);
 
@@ -222,7 +249,7 @@ export class TimelineCanvasComponent
       this.numPointsAtTime.push(0);
     }
 
-    for (const point of this.data) {
+    for (const point of this.dataProcessed) {
       this.numPointsAtTime[point.time - this.minTime]++;
     }
   }
@@ -274,7 +301,7 @@ export class TimelineCanvasComponent
     let numValid = 0;
     let maxPointsAtMoment = 0; // Maximum points at one moment in the time dimension.
 
-    for (const point of this.data) {
+    for (const point of this.dataProcessed) {
       if (range.min <= point.time && point.time <= range.max) {
         numValid++;
         maxPointsAtMoment = Math.max(
@@ -340,7 +367,7 @@ export class TimelineCanvasComponent
 
     let numPlaced = 0;
 
-    for (const point of this.data) {
+    for (const point of this.dataProcessed) {
       // Ensure point time is in the range.
       if (range.max < point.time || point.time < range.min) continue;
 

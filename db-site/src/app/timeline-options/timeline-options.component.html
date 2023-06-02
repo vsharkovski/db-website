@@ -1,7 +1,29 @@
-<h2 class="text-center mt-3">Timeline</h2>
-<div class="py-3 text-center fst-italic">
-  <h4 *ngIf="selectedYears.min == selectedYears.max" class="fw-normal">The year {{ selectedYears.min | dateYear }}</h4>
-  <h4 *ngIf="selectedYears.min < selectedYears.max" class="fw-normal">
+<h2 class="text-center mt-3">Timeline of most notable people</h2>
+<div class="py-3">
+  <h4 *ngIf="selectedYears.min == selectedYears.max" class="fw-normal text-center fst-italic">
+    The year {{ selectedYears.min | dateYear }}
+  </h4>
+  <h4 *ngIf="selectedYears.min < selectedYears.max" class="fw-normal text-center fst-italic">
     Years {{ selectedYears.min | dateYear }} - {{ selectedYears.max | dateYear }}
   </h4>
+
+  <form [formGroup]="form" class="two-column-grid mt-5">
+    <label class="form-label">Occupation</label>
+    <select class="form-select" formControlName="occupationLevel1Id">
+      <option [ngValue]="null">Any</option>
+      <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
+    </select>
+
+    <label for="citizenshipId" class="form-label" title="The person's citizenship.">Citizenship</label>
+    <select class="form-select" formControlName="citizenshipId">
+      <option [ngValue]="null">Any</option>
+      <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
+    </select>
+
+    <label for="genderId" class="form-label" title="The person's gender.">Gender</label>
+    <select class="form-select" formControlName="genderId">
+      <option [ngValue]="null">Any</option>
+      <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
+    </select>
+  </form>
 </div>

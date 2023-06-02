@@ -7,3 +7,25 @@ app-root {
 a {
   text-decoration: none;
 }
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  /* align-items: center; */
+  max-width: 20rem;
+}
+
+.form-label {
+  margin-top: 0.25rem;
+}
+
+.number-range {
+  display: grid;
+  grid-template-columns: auto max-content auto;
+  column-gap: 1rem;
+}
+
+.full-row {
+  grid-column: 1 / 3;
+}
