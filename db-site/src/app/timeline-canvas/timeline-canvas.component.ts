@@ -28,6 +28,8 @@ import { WikiService } from '../wiki.service';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { ModalService } from '../modal.service';
 import { TimelineOptions } from '../timeline-options.model';
+import { TimelineService } from '../timeline.service';
+import { TimelineTimeStatistics } from '../timeline-statistics.model';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -50,15 +52,27 @@ export class TimelineCanvasComponent
   dataUpdated$ = new ReplaySubject<void>();
   initializeCanvas$ = new ReplaySubject<boolean>();
 
-  readonly maxPlaceable = 10000;
-  numPointsAtTime: number[] = [];
-  minTime = Number.MAX_SAFE_INTEGER;
-  maxTime = Number.MIN_SAFE_INTEGER;
+  readonly maxSelectable = 10000;
 
+  // Data is re-processed when a new filter is applied (not years).
   dataProcessed: TimelinePoint[] = [];
+  // Data selected to be split into buckets and later drawn.
+  // Data is re-selected when selectedYears changes.
+  dataSelected: TimelinePoint[] = [];
+
+  // Time statistics.
+  timeStatistics: TimelineTimeStatistics = {
+    numPointsAtMoment: [],
+    timeBoundaries: {
+      min: Number.MAX_SAFE_INTEGER,
+      max: Number.MIN_SAFE_INTEGER,
+    },
+  };
+
+  // The buckets into which the selected data is split.
   buckets: TimelinePoint[][] = [];
 
-  // Data for drawing. Point size is also used to determine number of buckets.
+  // Drawing parameters.
   readonly minPointSizePixels = 4;
   readonly maxPointSizePixels = 36;
   readonly pointMarginFractionOfSize = 0.5;
@@ -88,6 +102,7 @@ export class TimelineCanvasComponent
   updateHoverApiData$ = new Subject<TimelinePoint>();
 
   constructor(
+    private timelineService: TimelineService,
     private personService: PersonService,
     private wikiService: WikiService,
     private modalService: ModalService
@@ -115,8 +130,13 @@ export class TimelineCanvasComponent
 
   ngOnInit(): void {
     this.dataUpdated$.pipe(debounceTime(100)).subscribe(() => {
-      this.processData();
-      this.updateTimeStatistics();
+      this.dataProcessed = this.timelineService.processData(
+        this.data,
+        this.filterOptions
+      );
+      this.timeStatistics = this.timelineService.calculateTimeStatistics(
+        this.dataProcessed
+      );
       this.initializeCanvas$.next(true);
     });
 
@@ -227,48 +247,26 @@ export class TimelineCanvasComponent
   }
 
   /**
-   * Filter and sort the data.
+   * Select valid data points. The array is processed left-to-right,
+   * so data points earlier in the array have a higher priority.
+   * @param data The data to select from.
+   * @param validRange The time range in which data points are valid.
+   * @param maxSelectable The maximum number to select.
+   * @returns The selected data.
    */
-  processData(): void {
-    let data = this.data;
-
-    // Filter.
-    if (this.filterOptions.citizenshipId) {
-      data = data.filter(
-        (it) => it.citizenship1BId === this.filterOptions.citizenshipId
-      );
+  selectDataForDrawing(
+    data: TimelinePoint[],
+    validRange: NumberRange,
+    maxSelectable: number
+  ): TimelinePoint[] {
+    if (maxSelectable == 0) return [];
+    const result = [];
+    for (const point of data) {
+      if (point.time < validRange.min || validRange.max < point.time) continue;
+      result.push(point);
+      if (result.length === maxSelectable) break;
     }
-    if (this.filterOptions.occupationLevel1Id) {
-      data = data.filter(
-        (it) => it.level1MainOccId === this.filterOptions.occupationLevel1Id
-      );
-    }
-    if (this.filterOptions.genderId) {
-      data = data.filter((it) => it.genderId === this.filterOptions.genderId);
-    }
-
-    // Sort by notability index descending, in order to speed up point selection.
-    data.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
-
-    this.dataProcessed = data;
-  }
-
-  /**
-   * Update time statistics from the data.
-   */
-  updateTimeStatistics(): void {
-    const times = this.dataProcessed.map((it) => it.time);
-    this.minTime = Math.min(...times);
-    this.maxTime = Math.max(...times);
-
-    this.numPointsAtTime = [];
-    for (let i = 0; i < this.maxTime - this.minTime + 1; i++) {
-      this.numPointsAtTime.push(0);
-    }
-
-    for (const point of this.dataProcessed) {
-      this.numPointsAtTime[point.time - this.minTime]++;
-    }
+    return result;
   }
 
   /**
@@ -276,15 +274,41 @@ export class TimelineCanvasComponent
    * @param isForced Whether to force the initialization,.
    */
   initializeCanvas(isForced: boolean): void {
-    const didResize = this.updateCanvasSize();
+    const didResizeToNewSize = this.updateCanvasSize();
 
-    // Re-select data and draw canvas again only if the canvas was
-    // actually resized, or new (different) range was provided.
-    if (isForced || didResize) {
-      this.updateDrawData(this.selectedYears);
-      this.fillBuckets(this.selectedYears);
-      this.normalizeBuckets();
+    // Re-select data for drawing, and draw canvas again,
+    // but only if forced or the canvas was resized to a new size.
+    if (isForced || didResizeToNewSize) {
+      this.dataSelected = this.selectDataForDrawing(
+        this.dataProcessed,
+        this.selectedYears,
+        this.maxSelectable
+      );
+
+      const maxPointsAtAnyMoment =
+        this.timelineService.getMaxDataPointsAtAnyMoment(
+          this.dataSelected,
+          this.timeStatistics
+        );
+      this.updateDrawData(this.dataSelected.length, maxPointsAtAnyMoment);
+
+      const numBuckets = Math.max(
+        1,
+        Math.floor(this.canvasBoundingBox.width / this.pointMarginSizeCombined)
+      );
+      const selectedYearsRangeSize =
+        this.selectedYears.max + 1 - this.selectedYears.min;
+      const mappingFn = (point: TimelinePoint): number =>
+        (point.time - this.selectedYears.min) / selectedYearsRangeSize;
+      this.buckets = this.timelineService.splitDataIntoBuckets(
+        this.dataSelected,
+        numBuckets,
+        mappingFn,
+        true
+      );
+
       this.drawCanvas();
+
       this.resetMouseData();
       this.updateMouseData();
     }
@@ -313,24 +337,15 @@ export class TimelineCanvasComponent
   /**
    * Update data used for drawing on the canvas and related tasks:
    * canvasMiddleYPixels, pointSize, marginSize.
+   * @param numSelectedDataPoints The number of data points selected.
+   * @param maxDataPointsAtAnyMoment The maximum number of data points
+   * at some point in time.
    */
-  updateDrawData(range: NumberRange): void {
+  updateDrawData(
+    numSelectedDataPoints: number,
+    maxDataPointsAtAnyMoment: number
+  ): void {
     this.canvasMiddleYPixels = Math.round(this.canvasBoundingBox.height / 2);
-
-    let numValid = 0;
-    let maxPointsAtMoment = 0; // Maximum points at one moment in the time dimension.
-
-    for (const point of this.dataProcessed) {
-      if (range.min <= point.time && point.time <= range.max) {
-        numValid++;
-        maxPointsAtMoment = Math.max(
-          maxPointsAtMoment,
-          this.numPointsAtTime[point.time - this.minTime]
-        );
-
-        if (numValid >= this.maxPlaceable) break;
-      }
-    }
 
     // Determine biggest point pixel size that would not make any bucket (column)
     // exceed the height of the canvas if drawn later.
@@ -338,8 +353,8 @@ export class TimelineCanvasComponent
     // simplify calculations and approximate a good number with math.
     const pointSizeRaw = Math.sqrt(
       (this.canvasBoundingBox.height * this.canvasBoundingBox.width) /
-        numValid /
-        maxPointsAtMoment /
+        numSelectedDataPoints /
+        maxDataPointsAtAnyMoment /
         (1 + this.pointMarginFractionOfSize) ** 2
     );
 
@@ -361,92 +376,7 @@ export class TimelineCanvasComponent
   }
 
   /**
-   * Fill the buckets with valid points.
-   * @param range The time range, endpoints inclusive, in which a data point's time
-   * would be valid.
-   */
-  fillBuckets(range: NumberRange): void {
-    const numBuckets = Math.max(
-      1,
-      Math.floor(this.canvasBoundingBox.width / this.pointMarginSizeCombined)
-    );
-
-    // Initialize empty buckets.
-    this.buckets = [];
-    for (let i = 0; i < numBuckets; i++) {
-      this.buckets.push([]);
-    }
-
-    // Place points into buckets.
-    // Range size. The range is inclusive at both ends. [min, max].
-    const rangeSize = range.max + 1 - range.min;
-    // Scale factor. Used to *linearly* map a year in the range
-    // [range.min, range.max] to [0, numBuckets-1].
-    const scaleFactor = numBuckets / rangeSize;
-
-    let numPlaced = 0;
-
-    for (const point of this.dataProcessed) {
-      // Ensure point time is in the range.
-      if (range.max < point.time || point.time < range.min) continue;
-
-      // Place into bucket.
-      const index = Math.floor((point.time - range.min) * scaleFactor);
-      this.buckets[index].push(point);
-
-      // Stop if enough were placed.
-      numPlaced++;
-      if (numPlaced == this.maxPlaceable) break;
-    }
-  }
-
-  /**
-   * 'Spread out' full buckets into neighboring empty buckets to give things
-   * a more normalized look.
-   */
-  normalizeBuckets(): void {
-    /*
-    Due to the linear mapping, there are probably gaps of successive empty buckets.
-    For example, by looking at the sizes of the buckets:
-    2 0 0 0 5 0 0 4 0 0 0 2 0 0
-    Due to the Math.floor in the linear map, the pattern looks like this:
-    2 0 0 0 | 5 0 0 | 4 0 0 0 | 2 0 0
-    Now we try to fill those empty buckets in each 'group' with points
-    from the bucket at the start of the group, so things look more
-    evenly distributed. For example:
-    0 1 0 1 | 2 1 1 | 1 1 0 2 | 1 1 0
-    */
-    for (
-      let bucketIndex = 0;
-      bucketIndex < this.buckets.length;
-      bucketIndex++
-    ) {
-      // Find ending index of the group. The group will be [start, end).
-      // (start is included, end is excluded)
-      let start = bucketIndex;
-      let end = start + 1;
-      while (end < this.buckets.length && this.buckets[end].length == 0) {
-        end++;
-      }
-
-      // For each point in this group (all of which are currently in the
-      // bucket at the start), move it to its new position.
-      const groupSize = end - start;
-      const group = this.buckets[start];
-      this.buckets[start] = [];
-
-      for (const point of group) {
-        const index = start + Math.floor(Math.random() * groupSize);
-        this.buckets[index].push(point);
-      }
-
-      // Next loop iteration, bucketIndex will be end, i.e. start of new group.
-      bucketIndex = end - 1;
-    }
-  }
-
-  /**
-   * Draw all points onto the canvas.
+   * Draw the points in the buckets onto the canvas.
    */
   drawCanvas(): void {
     const ctx = this.canvasRef.nativeElement.getContext('2d', {
@@ -540,10 +470,116 @@ export class TimelineCanvasComponent
     }
   }
 
+  getApproxGridPositionFromPixel(
+    pixelX: number,
+    pixelY: number
+  ): { row: number; col: number } | null {
+    // Bucket index is column.
+    // Row is counted ..., -2, -1, 0, 1, 2, ...
+    // with 0 being first point below middle line.
+    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
+
+    const yDistToMiddle = pixelY - this.canvasMiddleYPixels;
+    const row =
+      yDistToMiddle >= 0
+        ? Math.floor(
+            (yDistToMiddle + this.marginSizePixels) /
+              this.pointMarginSizeCombined
+          )
+        : Math.floor(yDistToMiddle / this.pointMarginSizeCombined);
+
+    return { col: bucketIndex, row: row };
+  }
+
+  getBestPointAroundPixel(
+    pixelX: number,
+    pixelY: number
+  ): TimelinePoint | null {
+    const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
+    if (center === null) return null;
+
+    const maxDist = Math.max(
+      0,
+      Math.ceil(this.hoverRadiusPixels / this.pointMarginSizeCombined) - 1
+    );
+
+    // Look at cells in diamond shape around center (square rotated 45 degrees).
+    let bestPoint: TimelinePoint | null = null;
+
+    for (let deltaCol = -maxDist; deltaCol <= maxDist; deltaCol++) {
+      const col = center.col + deltaCol;
+      if (col < 0 || col >= this.buckets.length) continue;
+
+      const bucket = this.buckets[col];
+      const maxRowDist = maxDist - Math.abs(deltaCol);
+
+      for (let deltaRow = -maxRowDist; deltaRow <= maxRowDist; deltaRow++) {
+        const row = center.row + deltaRow;
+        const index = row >= 0 ? 2 * row : 2 * -row - 1;
+
+        if (
+          index >= 0 &&
+          index < bucket.length &&
+          (bestPoint == null ||
+            bestPoint!.notabilityIndex! < bucket[index].notabilityIndex!)
+        ) {
+          bestPoint = bucket[index];
+        }
+      }
+    }
+
+    return bestPoint;
+  }
+
+  /**
+   * Returns the index of the bucket which, when drawn on the canvas,
+   * contains the given X pixel coordinate.
+   */
+  getBucketIndexFromPixel(pixelX: number): number | null {
+    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
+    if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
+    return bucketIndex;
+  }
+
+  /**
+   * Returns the time range which the bucket index corresponds to.
+   */
+  getTimeRangeFromBucketIndex(index: number): NumberRange | null {
+    // If buckets have not been filled.
+    if (this.buckets.length === 0) return null;
+
+    const rangeSize = this.selectedYears.max + 1 - this.selectedYears.min;
+
+    const start =
+      this.selectedYears.min +
+      Math.floor((index / this.buckets.length) * rangeSize);
+
+    const end = Math.min(
+      this.selectedYears.min +
+        Math.floor(((index + 1) / this.buckets.length) * rangeSize),
+      this.selectedYears.max
+    );
+
+    return { min: start, max: end };
+  }
+
+  /**
+   * Returns the time range corresponding to the bucket
+   * which, when drawn on the canvas, contains the given
+   * X pixel coordinate.
+   */
+  getTimeRangeFromPixel(pixelX: number): NumberRange | null {
+    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
+    return this.getTimeRangeFromBucketIndex(bucketIndex);
+  }
+
   /**
    * Get grid cell located at given pixel coordinates.
    * @returns The given point, or null if none.
    */
+  /*
   getPointFromPixel(pixelX: number, pixelY: number): TimelinePoint | null {
     const bucketIndex = this.getBucketIndexFromPixel(pixelX);
     if (bucketIndex === null) return null;
@@ -608,91 +644,5 @@ export class TimelineCanvasComponent
 
     return this.buckets[bucketIndex][pointIndex];
   }
-
-  getApproxGridPositionFromPixel(
-    pixelX: number,
-    pixelY: number
-  ): { row: number; col: number } | null {
-    // Bucket index is column.
-    // Row is counted ..., -2, -1, 0, 1, 2, ...
-    // with 0 being first point below middle line.
-    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
-    if (bucketIndex === null) return null;
-
-    const yDistToMiddle = pixelY - this.canvasMiddleYPixels;
-    const row =
-      yDistToMiddle >= 0
-        ? Math.floor(
-            (yDistToMiddle + this.marginSizePixels) /
-              this.pointMarginSizeCombined
-          )
-        : Math.floor(yDistToMiddle / this.pointMarginSizeCombined);
-
-    return { col: bucketIndex, row: row };
-  }
-
-  getBestPointAroundPixel(
-    pixelX: number,
-    pixelY: number
-  ): TimelinePoint | null {
-    const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
-    if (center === null) return null;
-
-    const maxDist = Math.max(
-      0,
-      Math.ceil(this.hoverRadiusPixels / this.pointMarginSizeCombined) - 1
-    );
-
-    // Look at cells in diamond shape around center (square rotated 45 degrees).
-    let bestPoint: TimelinePoint | null = null;
-
-    for (let deltaCol = -maxDist; deltaCol <= maxDist; deltaCol++) {
-      const col = center.col + deltaCol;
-      if (col < 0 || col >= this.buckets.length) continue;
-
-      const bucket = this.buckets[col];
-      const maxRowDist = maxDist - Math.abs(deltaCol);
-
-      for (let deltaRow = -maxRowDist; deltaRow <= maxRowDist; deltaRow++) {
-        const row = center.row + deltaRow;
-        const index = row >= 0 ? 2 * row : 2 * -row - 1;
-
-        if (
-          index >= 0 &&
-          index < bucket.length &&
-          (bestPoint == null ||
-            bestPoint!.notabilityIndex! < bucket[index].notabilityIndex!)
-        ) {
-          bestPoint = bucket[index];
-        }
-      }
-    }
-
-    return bestPoint;
-  }
-
-  getTimeRangeFromBucketIndex(bucketIndex: number): NumberRange | null {
-    if (this.buckets.length === 0) return null;
-    const rangeSize = this.selectedYears.max + 1 - this.selectedYears.min;
-    const start =
-      this.selectedYears.min +
-      Math.floor((bucketIndex / this.buckets.length) * rangeSize);
-    let end =
-      this.selectedYears.min +
-      Math.floor(((bucketIndex + 1) / this.buckets.length) * rangeSize);
-    end = Math.max(start, Math.min(end, this.selectedYears.max));
-    return { min: start, max: end };
-  }
-
-  getBucketIndexFromPixel(pixelX: number): number | null {
-    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
-    if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
-    return bucketIndex;
-  }
-
-  getTimeRangeFromPixel(pixelX: number): NumberRange | null {
-    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
-    if (bucketIndex === null) return null;
-    return this.getTimeRangeFromBucketIndex(bucketIndex);
-  }
+  */
 }
