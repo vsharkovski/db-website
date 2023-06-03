@@ -138,6 +138,10 @@ export class RangeSelectorComponent implements OnInit {
     if (this.enableZoomOnWheel) {
       const amount = 0.5 * (event.deltaX + event.deltaY + event.deltaZ);
       this.doZoom(amount);
+
+      // Prevent default scrolling behavior to keep the screen in place.
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
 
