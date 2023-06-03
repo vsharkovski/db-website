@@ -68,7 +68,9 @@ export class TimelineCanvasComponent
   marginSizePixels = 2;
   pointMarginSizeCombined = 6;
 
-  pointerPositionPixels: { x: number; y: number } = { x: 0, y: 0 };
+  mousePositionPixels: { x: number; y: number } | null = null;
+  lastValidMousePositionPixels: { x: number; y: number } | null = null;
+  mouseYears: NumberRange | null = null;
 
   readonly hoverRadiusPixels = 16;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
@@ -78,7 +80,7 @@ export class TimelineCanvasComponent
 
   hoveredPointPerson: Person | null = null;
   hoveredPointWikiPage: WikiApiPage | null = null;
-  updateHoveredApiData$ = new Subject<TimelinePoint>();
+  updateHoverApiData$ = new Subject<TimelinePoint>();
 
   constructor(
     private personService: PersonService,
@@ -115,7 +117,7 @@ export class TimelineCanvasComponent
 
     /*
     Every time no hover point is selected when the mouse is moved, we request
-    that the current hovered point is removed (see onMouseMove).
+    that the current hovered point is removed.
     Delay these requests for the hover pointer visibility time.
     Then, if the request was created after the last time the hovered point
     was updated to something not null, process it (unhover).
@@ -131,7 +133,7 @@ export class TimelineCanvasComponent
         this.hoveredPointWikiPage = null;
       });
 
-    this.updateHoveredApiData$
+    this.updateHoverApiData$
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
@@ -180,10 +182,11 @@ export class TimelineCanvasComponent
   onMouseMove(event: MouseEvent): void {
     if (!this.canvasBoundingBox) return;
 
+    // Update most recent mouse position.
     const clamp = (x: number, min: number, max: number) =>
       Math.max(min, Math.min(max, x));
 
-    this.pointerPositionPixels = {
+    this.mousePositionPixels = {
       x: clamp(
         Math.round(event.pageX - (this.canvasBoundingBox.x + window.scrollX)),
         0,
@@ -195,24 +198,17 @@ export class TimelineCanvasComponent
         this.canvasBoundingBox.height - 1
       ),
     };
-    const hovered = this.getBestPointAroundPixel(
-      this.pointerPositionPixels.x,
-      this.pointerPositionPixels.y
-    );
-    const time = new Date().getTime();
 
-    if (hovered == null) {
-      // Request to remove the hovered point.
-      this.removeHoveredPoint$.next(time);
-    } else {
-      if (hovered != this.hoveredPoint) {
-        this.hoveredPoint = hovered;
-        this.hoveredPointPerson = null;
-        this.hoveredPointWikiPage = null;
-        this.updateHoveredApiData$.next(hovered);
-      }
-      this.hoveredPointLastTimeNotNullMs = time;
-    }
+    this.lastValidMousePositionPixels = this.mousePositionPixels;
+
+    // Update mouse data.
+    this.updateMouseData();
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.mousePositionPixels = null;
+    this.updateMouseData();
   }
 
   onPointerClick(): void {
@@ -280,7 +276,8 @@ export class TimelineCanvasComponent
       this.fillBuckets(this.selectedYears);
       this.normalizeBuckets();
       this.drawCanvas();
-      this.resetHoverData();
+      this.resetMouseData();
+      this.updateMouseData();
     }
   }
 
@@ -357,7 +354,7 @@ export class TimelineCanvasComponent
   /**
    * Fill the buckets with valid points.
    * @param range The time range, endpoints inclusive, in which a data point's time
-   * would be valid
+   * would be valid.
    */
   fillBuckets(range: NumberRange): void {
     const numBuckets = Math.max(
@@ -488,10 +485,47 @@ export class TimelineCanvasComponent
     }
   }
 
-  resetHoverData(): void {
+  resetMouseData(): void {
+    this.mousePositionPixels = null;
+    this.lastValidMousePositionPixels = null;
+    this.mouseYears = null;
     this.hoveredPoint = null;
     this.hoveredPointPerson = null;
     this.hoveredPointWikiPage = null;
+  }
+
+  /**
+   * Update hover data from the most recent mouse position.
+   */
+  updateMouseData(): void {
+    // If mouse is not on canvas, can't do anything.
+    if (!this.lastValidMousePositionPixels) return;
+
+    // Update year range where mouse is.
+    const newMouseYears = this.getTimeRangeFromPixel(
+      this.lastValidMousePositionPixels.x
+    );
+    if (newMouseYears) this.mouseYears = newMouseYears;
+
+    // Update hovered point and related properties.
+    const hovered = this.getBestPointAroundPixel(
+      this.lastValidMousePositionPixels.x,
+      this.lastValidMousePositionPixels.y
+    );
+    const time = new Date().getTime();
+
+    if (hovered == null) {
+      // Request to remove the hovered point.
+      this.removeHoveredPoint$.next(time);
+    } else {
+      if (hovered != this.hoveredPoint) {
+        this.hoveredPoint = hovered;
+        this.hoveredPointPerson = null;
+        this.hoveredPointWikiPage = null;
+        this.updateHoverApiData$.next(hovered);
+      }
+      this.hoveredPointLastTimeNotNullMs = time;
+    }
   }
 
   /**
@@ -499,8 +533,8 @@ export class TimelineCanvasComponent
    * @returns The given point, or null if none.
    */
   getPointFromPixel(pixelX: number, pixelY: number): TimelinePoint | null {
-    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
-    if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
+    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
 
     // A 'slot' is margin + point.
     const slotStartX = bucketIndex * this.pointMarginSizeCombined;
@@ -566,11 +600,12 @@ export class TimelineCanvasComponent
   getApproxGridPositionFromPixel(
     pixelX: number,
     pixelY: number
-  ): { row: number; col: number } {
+  ): { row: number; col: number } | null {
     // Bucket index is column.
     // Row is counted ..., -2, -1, 0, 1, 2, ...
     // with 0 being first point below middle line.
-    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
+    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
 
     const yDistToMiddle = pixelY - this.canvasMiddleYPixels;
     const row =
@@ -589,6 +624,8 @@ export class TimelineCanvasComponent
     pixelY: number
   ): TimelinePoint | null {
     const center = this.getApproxGridPositionFromPixel(pixelX, pixelY);
+    if (center === null) return null;
+
     const maxDist = Math.max(
       0,
       Math.ceil(this.hoverRadiusPixels / this.pointMarginSizeCombined) - 1
@@ -620,5 +657,30 @@ export class TimelineCanvasComponent
     }
 
     return bestPoint;
+  }
+
+  getTimeRangeFromBucketIndex(bucketIndex: number): NumberRange | null {
+    if (this.buckets.length === 0) return null;
+    const rangeSize = this.selectedYears.max + 1 - this.selectedYears.min;
+    const start =
+      this.selectedYears.min +
+      Math.floor((bucketIndex / this.buckets.length) * rangeSize);
+    let end =
+      this.selectedYears.min +
+      Math.floor(((bucketIndex + 1) / this.buckets.length) * rangeSize);
+    end = Math.max(start, Math.min(end, this.selectedYears.max));
+    return { min: start, max: end };
+  }
+
+  getBucketIndexFromPixel(pixelX: number): number | null {
+    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
+    if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
+    return bucketIndex;
+  }
+
+  getTimeRangeFromPixel(pixelX: number): NumberRange | null {
+    const bucketIndex = this.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
+    return this.getTimeRangeFromBucketIndex(bucketIndex);
   }
 }
