@@ -9,10 +9,16 @@ export class ErrorService {
   handleError<T>(operation = 'operation', fallbackValue: T | undefined) {
     return (error: HttpErrorResponse): Observable<T> => {
       console.error(operation, error);
+
+      if (fallbackValue !== undefined) {
+        return of(fallbackValue);
+      }
+
       const castAttempt = error.error as T;
       if (castAttempt) {
         return of(castAttempt);
       }
+
       return of(fallbackValue as T);
     };
   }
