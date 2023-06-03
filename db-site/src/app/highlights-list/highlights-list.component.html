@@ -2,14 +2,14 @@
   <div class="d-0 d-lg-block col-lg-1"></div>
   <div class="col-lg-10">
     <div class="row search-section">
-      <div class="col-md g-md-0 search-info">
+      <div class="col-md search-info">
         <div class="bg-white py-2 search-description">
           <h5>
             <a [routerLink]="['/search']" class="text-reset">Explore the database online</a>
           </h5>
           <p>
-            You can now <a [routerLink]="['/search']" class="fw-semibold">search for people in the database</a> by
-            filtering by name, birth and death year, gender, occupation, or citizenship.
+            <a [routerLink]="['/search']" class="fw-semibold">Search for people in the database</a> by filtering by
+            name, birth and death year, gender, occupation, or citizenship.
           </p>
         </div>
         <div class="sunburst"></div>
@@ -18,7 +18,21 @@
         <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
       </div>
     </div>
-    <div class="mt-5 topi-section rounded shadow position-relative">
+
+    <div class="mt-5 row timeline-section">
+      <div class="col-md-4">
+        <h5><a [routerLink]="['/search']" class="text-reset">Interactive timeline</a></h5>
+        <p>
+          Discover people in history through
+          <a [routerLink]="['/search']" class="fw-semibold">this interactive visualization of people through time.</a>
+        </p>
+      </div>
+      <div class="col-md">
+        <img src="/assets/highlights/timeline.png" class="img-fluid rounded" />
+      </div>
+    </div>
+
+    <div class="mt-5 topi-section rounded position-relative">
       <a [href]="topiProjectLink" class="stretched-link"></a>
       <div class="bg-white rounded p-3 topi-section-text">
         <!-- <h5><a [href]="topiProjectLink" class="text-reset">Earth Visualization</a></h5> -->
@@ -42,7 +56,7 @@
         </p>
       </div>
       <div class="col-md">
-        <video autoplay controls muted loop class="rounded shadow">
+        <video autoplay controls muted loop class="rounded">
           <source src="assets/highlights/europe-vis-1000ad-onwards.mp4" />
           Download the <a href="assets/highlights/europe-vis-1000ad-onwards.mp4">video.</a>
         </video>
