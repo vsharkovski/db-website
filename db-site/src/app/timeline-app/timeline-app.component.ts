@@ -59,4 +59,10 @@ export class TimelineAppComponent implements OnInit {
   onOptionsChanged(options: TimelineOptions): void {
     this.filterOptions = options;
   }
+
+  onExactYearChanged(year: number | null): void {
+    if (year !== null) {
+      this.selectedYears = { min: year, max: year };
+    }
+  }
 }

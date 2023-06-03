@@ -4,7 +4,7 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  OnInit,
+  OnChanges,
   Output,
   ViewChild,
 } from '@angular/core';
@@ -17,7 +17,7 @@ type ElementName = 'left' | 'right' | 'bar';
   templateUrl: './range-selector.component.html',
   styleUrls: ['./range-selector.component.css'],
 })
-export class RangeSelectorComponent implements OnInit {
+export class RangeSelectorComponent implements OnChanges {
   @Input() minValue!: number;
   @Input() maxValue!: number;
 
@@ -39,7 +39,7 @@ export class RangeSelectorComponent implements OnInit {
   @ViewChild('selector') selectorElementRef?: ElementRef;
   @ViewChild('bar') barElementRef?: ElementRef;
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     // If selected values are not provided, set them to the boundaries.
     if (this.minValueSelected === undefined) {
       this.minValueSelected = this.minValue;

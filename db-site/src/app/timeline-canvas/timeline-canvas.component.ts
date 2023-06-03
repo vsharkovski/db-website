@@ -47,6 +47,7 @@ export class TimelineCanvasComponent
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
+  dataUpdated$ = new ReplaySubject<void>();
   initializeCanvas$ = new ReplaySubject<boolean>();
 
   readonly maxPlaceable = 10000;
@@ -61,7 +62,11 @@ export class TimelineCanvasComponent
   readonly minPointSizePixels = 4;
   readonly maxPointSizePixels = 36;
   readonly pointMarginFractionOfSize = 0.5;
-  readonly pointColor = 'rgb(100, 100, 100)';
+  readonly pointColors = [
+    'rgb(100, 100, 100)',
+    'rgb(120, 120, 120)',
+    'rgb(80, 80, 80)',
+  ];
   canvasBoundingBox!: DOMRect;
   canvasMiddleYPixels = 0;
   pointSizePixels = 4;
@@ -104,13 +109,17 @@ export class TimelineCanvasComponent
     }
 
     if (changes['data'] || changes['filterOptions']) {
-      this.processData();
-      this.updateTimeStatistics();
-      this.initializeCanvas$.next(true);
+      this.dataUpdated$.next();
     }
   }
 
   ngOnInit(): void {
+    this.dataUpdated$.pipe(debounceTime(100)).subscribe(() => {
+      this.processData();
+      this.updateTimeStatistics();
+      this.initializeCanvas$.next(true);
+    });
+
     this.initializeCanvas$
       .pipe(debounceTime(100))
       .subscribe((isForced) => this.initializeCanvas(isForced));
@@ -455,11 +464,10 @@ export class TimelineCanvasComponent
 
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
-    ctx.fillStyle = this.pointColor;
-
     const pointSize = this.pointSizePixels;
     const pointSizePlusMargin = this.pointMarginSizeCombined;
     const yMiddle = this.canvasMiddleYPixels;
+    const pointColors = this.pointColors;
     let x = this.marginSizePixels;
 
     for (const bucket of this.buckets) {
@@ -472,6 +480,10 @@ export class TimelineCanvasComponent
       // Alternately place points at bottom/top positions and move
       // down/up, starting with the bottom position.
       for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
+        // Pick random color for this point.
+        ctx.fillStyle =
+          pointColors[Math.floor(Math.random() * pointColors.length)];
+
         if (pointIndex % 2 == 0) {
           ctx.fillRect(x, yBottom, pointSize, pointSize);
           yBottom += pointSizePlusMargin;

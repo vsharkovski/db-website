@@ -9,6 +9,18 @@
     </h4>
 
     <form [formGroup]="form" class="two-column-grid mt-5">
+      <label class="form-label">Exact year</label>
+      <input
+        type="number"
+        class="form-control text-center"
+        formControlName="yearExact"
+        [class.is-invalid]="yearExactField.invalid"
+        [placeholder]="0"
+      />
+      <div *ngIf="yearExactField.errors?.['isIntegerOrNull']" class="invalid-feedback">
+        Year must be a whole number.
+      </div>
+
       <label class="form-label">Occupation</label>
       <select class="form-select" formControlName="occupationLevel1Id">
         <option [ngValue]="null">Any</option>
