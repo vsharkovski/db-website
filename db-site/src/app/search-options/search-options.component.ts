@@ -54,6 +54,9 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
     private searchService: SearchService,
     private personParametersService: PersonParametersService
   ) {
+    this.lifeYearMin = this.personParametersService.LIFE_YEAR_MIN;
+    this.lifeYearMax = this.personParametersService.LIFE_YEAR_MAX;
+
     // Create the form.
     this.form = fb.group({
       name: fb.control('', [
@@ -75,9 +78,6 @@ export class SearchOptionsComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    this.lifeYearMin = this.personParametersService.LIFE_YEAR_MIN;
-    this.lifeYearMax = this.personParametersService.LIFE_YEAR_MAX;
-
     // Get the variable lists from the API, and sort them by name.
     this.variablesService.getGenders().subscribe((genders) => {
       this.genders = genders;
