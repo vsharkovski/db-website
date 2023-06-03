@@ -51,7 +51,9 @@ export class TimelineAppComponent implements OnInit {
 
   onWheel(event: WheelEvent): void {
     if (this.rangeSelector) {
-      const amount = 0.5 * (event.deltaX + event.deltaY + event.deltaZ);
+      const amount = Math.round(
+        0.5 * (event.deltaX + event.deltaY + event.deltaZ)
+      );
       this.rangeSelector.doZoom(amount);
 
       // Prevent default scrolling behavior to keep the screen in place.
