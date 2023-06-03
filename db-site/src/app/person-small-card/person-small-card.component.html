@@ -10,6 +10,11 @@
     </p>
   </div>
   <div class="image-wrapper" *ngIf="person && wikiPage && person.wikidataCode === wikiPage.wikidataCode">
-    <img *ngIf="wikiPage.thumbnail?.source" [src]="wikiPage.thumbnail?.source" />
+    <img
+      *ngIf="wikiPage.thumbnail?.source"
+      [src]="wikiPage.thumbnail?.source"
+      (load)="onImageLoad()"
+      [class.hidden]="!isImageLoaded"
+    />
   </div>
 </div>

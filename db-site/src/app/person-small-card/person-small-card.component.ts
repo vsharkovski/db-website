@@ -14,6 +14,7 @@ export class PersonSmallCardComponent implements OnChanges {
   person: Person | null = null;
   wikiPage: WikiApiPage | null = null;
   isDisappearing = false;
+  isImageLoaded = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     const changePerson = changes['personInjected'];
@@ -27,9 +28,14 @@ export class PersonSmallCardComponent implements OnChanges {
 
     const changeWiki = changes['wikiPageInjected'];
     if (changeWiki) {
+      this.isImageLoaded = false;
       if (changeWiki.currentValue !== null) {
         this.wikiPage = changeWiki.currentValue;
       }
     }
+  }
+
+  onImageLoad(): void {
+    this.isImageLoaded = true;
   }
 }
