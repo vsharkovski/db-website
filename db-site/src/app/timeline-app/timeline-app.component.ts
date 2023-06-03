@@ -12,6 +12,7 @@ import { PersonParametersService } from '../person-parameters.service';
   styleUrls: ['./timeline-app.component.css'],
 })
 export class TimelineAppComponent implements OnInit {
+  hasMousePointer = true;
   selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
   selectedYears: NumberRange = { min: -600, max: 2000 };
   timelineData: TimelinePoint[] = [];
@@ -28,6 +29,11 @@ export class TimelineAppComponent implements OnInit {
     private timelineService: TimelineService,
     personParametersService: PersonParametersService
   ) {
+    // Check if there is a mouse pointer. One is needed for the app to work.
+    if (window.matchMedia('(any-hover: none)').matches) {
+      this.hasMousePointer = false;
+    }
+
     this.selectedYearsBoundary = {
       min: personParametersService.LIFE_YEAR_MIN,
       max: personParametersService.LIFE_YEAR_MAX,
@@ -35,6 +41,8 @@ export class TimelineAppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.hasMousePointer) return;
+
     this.timelineService.getTimelineData().subscribe((data) => {
       this.timelineData = data;
       this.loadedData = true;

@@ -1,4 +1,8 @@
-<div class="row px-3">
+<div *ngIf="!hasMousePointer" class="my-5 text-center">
+  <h4>Your device is not supported :(</h4>
+  <p>A mouse pointer is required for this app. Please try another device, such as a computer.</p>
+</div>
+<div class="row px-3" *ngIf="hasMousePointer">
   <div class="col-2 options">
     <dbw-timeline-options
       [selectedYears]="selectedYears"
