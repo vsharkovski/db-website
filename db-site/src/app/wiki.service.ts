@@ -1,21 +1,28 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of, switchMap } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { ErrorService } from './error.service';
 import { Person } from './person.model';
 import { WikiApiPage } from './wiki-api-page.model';
 import { WikiApiResponse } from './wiki-api-response.model';
 
 /*
-https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages|pageterms&piprop=thumbnail&pithumbsize=600&titles=Albert%20Einstein
+https://en.wikipedia.org/w/api.php
+?action=query
+&format=json
+&formatversion=2
+&prop=pageprops|pageimages|pageterms|extracts|info
+&piprop=thumbnail
+&inprop=url
+&pithumbsize=600
+&explaintext=1
+&exsectionformat=plain
+&exsentences=4
+&titles=Albert%20Einstein
 */
 
-/*
-Possible improvement:
-Check different wikipedia versions on fail
-*/
-
-const apiUrl = 'https://en.wikipedia.org/w/api.php';
+const wikipediaUrl = 'https://en.wikipedia.org/w/api.php';
+// const wikidataUrl = 'https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/';
 
 @Injectable({
   providedIn: 'root',
@@ -23,22 +30,28 @@ const apiUrl = 'https://en.wikipedia.org/w/api.php';
 export class WikiService {
   constructor(private http: HttpClient, private errorService: ErrorService) {}
 
-  getDataFromEnglishWiki(person: Person): Observable<WikiApiPage | null> {
+  getDataFromEnglishWiki(
+    person: Person,
+    thumbnailSize?: number
+  ): Observable<WikiApiPage | null> {
     if (!person.name) {
       return of(null);
     }
+    if (thumbnailSize === undefined) {
+      thumbnailSize = 600;
+    }
     return this.http
-      .get<WikiApiResponse>(apiUrl, {
+      .get<WikiApiResponse>(wikipediaUrl, {
         params: new HttpParams({
           fromObject: {
-            origin: '*', // necessary because CORS
+            origin: '*', // Necessary for CORS.
             format: 'json',
             formatversion: 2,
             action: 'query',
-            prop: 'pageimages|pageterms|extracts|info',
+            prop: 'pageprops|pageimages|pageterms|extracts|info',
             piprop: 'thumbnail',
             inprop: 'url',
-            pithumbsize: 600,
+            pithumbsize: thumbnailSize,
             explaintext: 1,
             exsectionformat: 'plain',
             exsentences: 4,
@@ -54,7 +67,12 @@ export class WikiService {
           if (!response || !this.doesPageExistInResponse(response)) {
             return null;
           }
-          return response!.query!.pages![0];
+          const page = response!.query!.pages![0];
+          page.wikidataCode = Number(
+            page.pageprops?.wikibase_item?.substring(1)
+          );
+          if (isNaN(page.wikidataCode)) page.wikidataCode = undefined;
+          return page;
         })
       );
   }

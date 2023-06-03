@@ -2,6 +2,7 @@ package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
+import com.vsharkovski.dbpaperapi.model.PersonTimelineData
 import com.vsharkovski.dbpaperapi.repository.custom.JpaSpecificationStreamExecutorWithProjection
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
@@ -18,8 +19,13 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
     JpaSpecificationStreamExecutorWithProjection<Person, Long> {
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
 
-    @Query("select p.id from Person p where p.wikidataCode = :wikidataCode")
-    fun findIdByWikidataCode(wikidataCode: Int): Long?
+    @Query("""
+        select new com.vsharkovski.dbpaperapi.model.PersonTimelineData(p.wikidataCode,
+            p.birth, p.notabilityIndex, p.genderId, p.level1MainOccId, p.citizenship1BId)
+        from Person p
+        where p.notabilityIndex >= :minimumNotability and p.birth is not null
+    """)
+    fun findTimelineData(minimumNotability: Float): List<PersonTimelineData>
 
     @Transactional
     @Modifying

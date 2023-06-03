@@ -1,0 +1,25 @@
+<div class="selector-wrapper">
+  <div class="selector" #selector>
+    <div
+      class="tick left-tick"
+      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      (mousedown)="onMouseDown('left')"
+    >
+      <span class="label">{{ minValueSelected | dateYear }}</span>
+    </div>
+    <div
+      class="tick right-tick"
+      [style.left]="getPositionPercentageFromValue(maxValueSelected)"
+      (mousedown)="onMouseDown('right')"
+    >
+      <span class="label" [class.hidden]="minValueSelected == maxValueSelected">{{ maxValueSelected | dateYear }}</span>
+    </div>
+    <div
+      #bar
+      class="bar"
+      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      [style.width]="getSizePercentageFromValues(minValueSelected, maxValueSelected)"
+      (mousedown)="onMouseDown('bar')"
+    ></div>
+  </div>
+</div>

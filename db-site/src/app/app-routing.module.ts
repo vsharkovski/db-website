@@ -6,6 +6,7 @@ import { MainPageComponent } from './main-page/main-page.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { SearchAppComponent } from './search-app/search-app.component';
 import { AboutPageComponent } from './about-page/about-page.component';
+import { TimelineAppComponent } from './timeline-app/timeline-app.component';
 
 const routes: Routes = [
   {
@@ -18,6 +19,11 @@ const routes: Routes = [
     path: 'search',
     component: SearchAppComponent,
     title: 'Search - Notable people database',
+  },
+  {
+    path: 'timeline',
+    component: TimelineAppComponent,
+    title: 'Timeline - Notable people database',
   },
   {
     path: 'highlights',

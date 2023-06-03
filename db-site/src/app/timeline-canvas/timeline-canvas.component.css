@@ -1,0 +1,94 @@
+.canvas-wrapper {
+  height: calc(100vh - 11rem);
+  position: relative;
+}
+
+canvas {
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: var(--bs-gray-400);
+}
+
+.border-primary {
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--bs-primary);
+}
+
+.pointer {
+  /* width: 1rem; */
+  height: auto;
+  aspect-ratio: 1 / 1;
+  position: absolute;
+  z-index: 4;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
+  cursor: none;
+}
+
+.pointer.hidden {
+  transform: translate(-50%, -50%) scale(0%, 0%);
+}
+
+.pointer.clickable {
+  /* cursor: pointer; */
+  background-color: white;
+}
+
+.pointer.loading {
+  animation-name: loading;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes loading {
+  0% {
+    background-color: rgba(100, 100, 100, 0);
+  }
+  100% {
+    background-color: rgba(100, 100, 100, 1);
+  }
+}
+
+.hovered-card-wrapper {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -100%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
+}
+
+.hovered-card-wrapper.hidden {
+  transform: translate(-50%, -50%) scale(0%, 0%);
+}
+
+.year-line {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  height: 100%;
+  width: 2px;
+  background-color: var(--bs-primary);
+  transform: translateX(-50%);
+}
+
+.year-line .year-wrapper {
+  position: absolute;
+  top: 100%;
+  transform: translate(-50%, 0%) scaleY(100%);
+  transition: transform 200ms ease-in-out;
+}
+
+.year-line .year-wrapper.hidden {
+  transform: translate(-50%, -20%) scaleY(0%);
+}
+
+.year-line .year {
+  color: var(--bs-primary);
+  white-space: nowrap;
+  user-select: none;
+}

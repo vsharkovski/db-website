@@ -34,14 +34,14 @@
     <span title="The person's citizenship.">Citizenship</span>
     <span title="The person's second citizenship, if present.">(2nd)</span>
   </div>
-  <div *ngIf="results.persons.length === 0" class="my-3 px-3">
+  <div *ngIf="results.results.length === 0" class="my-3 px-3">
     <h5 class="text-muted">No results.</h5>
     <p class="">
       If searching by name, try putting <code>*</code> at the start and end. For example, instead of <code>john</code>,
       search for <code>*john*</code>.
     </p>
   </div>
-  <div *ngFor="let person of results.persons" class="search-result" (click)="openPersonDetail(person)">
+  <div *ngFor="let person of results.results" class="search-result" (click)="openPersonDetail(person)">
     <span>{{ person.notabilityIndex | number : "1.1-1" }}</span>
     <span>{{ person.name | readableName }}</span>
     <span>{{ person.birth | dateYear }}</span>

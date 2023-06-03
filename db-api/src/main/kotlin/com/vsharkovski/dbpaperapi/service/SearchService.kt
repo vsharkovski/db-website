@@ -16,7 +16,7 @@ class SearchService(
     val personSpecificationService: PersonSpecificationService
 ) {
     @Value("\${search.results-per-page}")
-    val resultsPerPage: Int = 1000
+    val resultsPerPage: Int = 100
 
     private final val criteriaPattern: Pattern
 
@@ -41,9 +41,9 @@ class SearchService(
         return personSpecificationService.isAnyCriterionValid(criteria)
     }
 
-    fun findPeopleBySearchTerm(term: String, pageNumber: Int, sortState: SortState): SearchResult<PersonNoRawData> {
+    fun findPeopleBySearchTerm(term: String, page: Int, sortState: SortState): SearchResult<PersonNoRawData> {
         // It is impossible to look for a page below 0.
-        if (pageNumber < 0) {
+        if (page < 0) {
             return SearchResult()
         }
 
@@ -51,7 +51,7 @@ class SearchService(
 
         // Create a paging object for the specified page and sort state.
         val paging = PageRequest.of(
-            pageNumber, resultsPerPage,
+            page, resultsPerPage,
             Sort.by(sortState.direction, sortState.variable)
         )
 
@@ -61,7 +61,7 @@ class SearchService(
             results = resultsPage.content,
             hasPreviousPage = resultsPage.hasPrevious(),
             hasNextPage = resultsPage.hasNext(),
-            pageNumber = pageNumber,
+            pageNumber = page,
             totalPages = resultsPage.totalPages,
             totalResults = resultsPage.totalElements.toInt(),
             resultsPerPage = resultsPerPage,

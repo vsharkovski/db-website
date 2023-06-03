@@ -1,0 +1,49 @@
+<div class="d-flex flex-column h-100">
+  <h2 class="text-center mt-3">Timeline of most notable people</h2>
+  <div class="py-3">
+    <div class="my-3">
+      <h4 *ngIf="selectedYears.min == selectedYears.max" class="fw-normal text-center fst-italic">
+        The year {{ selectedYears.min | dateYear }}
+      </h4>
+      <h4 *ngIf="selectedYears.min < selectedYears.max" class="fw-normal text-center fst-italic">
+        Years {{ selectedYears.min | dateYear }} – {{ selectedYears.max | dateYear }}
+      </h4>
+    </div>
+    <hr class="mb-3" />
+    <form [formGroup]="form" class="two-column-grid">
+      <label class="form-label">Exact year</label>
+      <input
+        type="number"
+        class="form-control text-center"
+        formControlName="yearExact"
+        [class.is-invalid]="yearExactField.invalid"
+        [placeholder]="0"
+      />
+      <div *ngIf="yearExactField.errors?.['isIntegerOrNull']" class="invalid-feedback">
+        Year must be a whole number.
+      </div>
+
+      <label class="form-label">Occupation</label>
+      <select class="form-select" formControlName="occupationLevel1Id">
+        <option [ngValue]="null">Any</option>
+        <option *ngFor="let occupation of occupationsLevel1" [ngValue]="occupation.id">{{ occupation.name }}</option>
+      </select>
+
+      <label for="citizenshipId" class="form-label" title="The person's citizenship.">Citizenship</label>
+      <select class="form-select" formControlName="citizenshipId">
+        <option [ngValue]="null">Any</option>
+        <option *ngFor="let country of citizenships" [ngValue]="country.id">{{ country.name }}</option>
+      </select>
+
+      <label for="genderId" class="form-label" title="The person's gender.">Gender</label>
+      <select class="form-select" formControlName="genderId">
+        <option [ngValue]="null">Any</option>
+        <option *ngFor="let gender of genders" [ngValue]="gender.id">{{ gender.name }}</option>
+      </select>
+    </form>
+  </div>
+  <div class="mt-4 fst-italic d-flex flex-column">
+    <p>Hold mouse in place to see the person. Then, click to see their details.</p>
+    <p>Use mouse wheel or the bar at the bottom to zoom.</p>
+  </div>
+</div>

@@ -28,7 +28,7 @@
         step="1"
         class="form-control"
         formControlName="birthMin"
-        [placeholder]="LIFE_YEAR_MIN"
+        [placeholder]="lifeYearMin"
         [class.is-invalid]="birthMinField.invalid"
       />
       <span>to</span>
@@ -37,7 +37,7 @@
         step="1"
         class="form-control"
         formControlName="birthMax"
-        [placeholder]="LIFE_YEAR_MAX"
+        [placeholder]="lifeYearMax"
         [class.is-invalid]="birthMaxField.invalid"
       />
     </div>
@@ -57,7 +57,7 @@
         class="form-control"
         formControlName="deathMin"
         [class.is-invalid]="deathMinField.invalid"
-        [placeholder]="LIFE_YEAR_MIN"
+        [placeholder]="lifeYearMin"
       />
       <span>to</span>
       <input
@@ -65,7 +65,7 @@
         class="form-control"
         formControlName="deathMax"
         [class.is-invalid]="deathMaxField.invalid"
-        [placeholder]="LIFE_YEAR_MAX"
+        [placeholder]="lifeYearMax"
       />
     </div>
     <div

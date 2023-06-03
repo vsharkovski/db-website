@@ -35,6 +35,11 @@ import { filter, pairwise } from 'rxjs';
 import { VariableSearchComponent } from './variable-search/variable-search.component';
 import { PagePickerComponent } from './page-picker/page-picker.component';
 import { ExportAppComponent } from './export-app/export-app.component';
+import { TimelineAppComponent } from './timeline-app/timeline-app.component';
+import { TimelineOptionsComponent } from './timeline-options/timeline-options.component';
+import { TimelineCanvasComponent } from './timeline-canvas/timeline-canvas.component';
+import { RangeSelectorComponent } from './range-selector/range-selector.component';
+import { PersonSmallCardComponent } from './person-small-card/person-small-card.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +71,11 @@ import { ExportAppComponent } from './export-app/export-app.component';
     VariableSearchComponent,
     PagePickerComponent,
     ExportAppComponent,
+    TimelineAppComponent,
+    TimelineOptionsComponent,
+    TimelineCanvasComponent,
+    RangeSelectorComponent,
+    PersonSmallCardComponent,
   ],
   imports: [
     BrowserModule,

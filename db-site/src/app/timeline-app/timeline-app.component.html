@@ -1,0 +1,32 @@
+<div *ngIf="!hasMousePointer" class="my-5 text-center">
+  <h4>Your device is not supported :(</h4>
+  <p>A mouse pointer is required for this app. Please try another device, such as a computer.</p>
+</div>
+<div class="row px-3" *ngIf="hasMousePointer">
+  <div class="col-2 options">
+    <dbw-timeline-options
+      [selectedYears]="selectedYears"
+      (optionsChanged)="onOptionsChanged($event)"
+      (exactYearChanged)="onExactYearChanged($event)"
+    ></dbw-timeline-options>
+  </div>
+  <div class="col">
+    <h5 *ngIf="!loadedData" class="text-center mt-5">Loading. Please wait...</h5>
+    <div class="canvas-and-selector" (wheel)="onWheel($event)" *ngIf="loadedData">
+      <dbw-timeline-canvas
+        [selectedYears]="selectedYears"
+        [data]="timelineData"
+        [filterOptions]="filterOptions"
+        class="mb-3"
+      ></dbw-timeline-canvas>
+      <dbw-range-selector
+        [minValue]="selectedYearsBoundary.min"
+        [maxValue]="selectedYearsBoundary.max"
+        [minValueSelected]="selectedYears.min"
+        [maxValueSelected]="selectedYears.max"
+        [enableZoomOnWheel]="false"
+        (selectionChanged)="onYearSelectionChanged($event)"
+      ></dbw-range-selector>
+    </div>
+  </div>
+</div>

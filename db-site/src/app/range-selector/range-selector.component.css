@@ -1,0 +1,65 @@
+.selector-wrapper {
+}
+
+.selector {
+  background-color: var(--bs-light);
+  height: 2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  user-select: none;
+}
+
+.tick {
+  background-color: var(--bs-primary);
+  height: 100%;
+  width: 0.5rem;
+  cursor: ew-resize;
+  user-select: none;
+  position: absolute;
+  transform: translate(-50%);
+  z-index: 2;
+  border-radius: 0.25rem;
+}
+
+.tick .label {
+  position: absolute;
+  bottom: 100%;
+  white-space: nowrap;
+  user-select: none;
+  transition: transform 100ms ease-in-out;
+}
+
+.left-tick .label {
+  right: 0%;
+  transform: translateY(20%) scaleY(0%);
+}
+
+.right-tick .label {
+  left: 0%;
+  transform: translateY(20%) scaleY(0%);
+}
+
+.selector:hover .tick .label:not(.hidden) {
+  transform: translateY(0%) scaleY(100%);
+}
+
+.bar {
+  background-color: rgb(150, 150, 150);
+  height: 40%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  user-select: none;
+  z-index: 1;
+  border-style: solid;
+  border-radius: 1px;
+  border-color: rgb(230, 230, 230);
+  border-left: none;
+  border-right: none;
+}
+
+.hidden {
+  transform: translateY(20%) scaleY(0%);
+}

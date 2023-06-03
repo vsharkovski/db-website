@@ -26,15 +26,15 @@
         <ng-template ngbNavContent>
           <div class="results-header mb-2">
             <!-- <h3 *ngIf="results">Results</h3> -->
-            <span *ngIf="results && (results?.persons?.length ?? 0) > 0 && !waitingForResults"
+            <span *ngIf="results && (results?.results?.length ?? 0) > 0 && !waitingForResults"
               >Showing results {{ results.pageNumber * results.resultsPerPage + 1 }}-{{
-                results.pageNumber * results.resultsPerPage + results.persons.length
+                results.pageNumber * results.resultsPerPage + results.results.length
               }}
               (total: {{ results.totalResults }}), sorted by {{ results.sort.variable | sortVariable }},
               {{ results.sort.direction }}
             </span>
             <span *ngIf="waitingForResults" class="loading-label text-primary me-auto">Please wait...</span>
-            <div *ngIf="(results?.persons?.length ?? 0) > 0" class="d-flex px-md-3 mx-auto mx-sm-0 ms-sm-auto py-1">
+            <div *ngIf="(results?.results?.length ?? 0) > 0" class="d-flex px-md-3 mx-auto mx-sm-0 ms-sm-auto py-1">
               <span class="me-2 fw-semibold">Page:</span>
               <dbw-page-picker
                 [currentPage]="results?.pageNumber ?? 0"
@@ -52,7 +52,7 @@
           ></dbw-search-results>
           <div class="d-flex">
             <button
-              *ngIf="(results?.persons?.length ?? 0) > 0"
+              *ngIf="(results?.results?.length ?? 0) > 0"
               type="button"
               class="btn btn-secondary ms-auto"
               (click)="onExportButtonClicked()"
@@ -67,7 +67,7 @@
       <!-- Export tab -->
       <li
         ngbNavItem="export"
-        [disabled]="!results || !results.persons || results.persons.length == 0 || waitingForResults"
+        [disabled]="!results || !results.results || results.results.length == 0 || waitingForResults"
       >
         <a ngbNavLink>Download</a>
         <ng-template ngbNavContent>

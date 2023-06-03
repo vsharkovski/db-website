@@ -1,0 +1,43 @@
+.card {
+  width: 10rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--bs-primary);
+  overflow: clip;
+  transition: transform 200ms ease-in-out;
+  transform: scaleY(100%);
+}
+
+.card.disappearing {
+  transform: scaleY(0%);
+}
+
+.info {
+  padding: 0.5rem;
+}
+
+.name {
+  text-align: center;
+}
+
+.years {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.image-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+img {
+  width: 100%;
+  height: auto;
+}
+
+img.hidden {
+  transition: opacity 100ms ease-in-out;
+  opacity: 0;
+}
