@@ -22,7 +22,10 @@
   </div>
   <div *ngIf="lastValidMousePositionPixels" class="year-line" style.left="{{ lastValidMousePositionPixels.x }}px">
     <div class="year-wrapper" [class.hidden]="!mousePositionPixels">
-      <span *ngIf="mouseYears" class="year">{{ mouseYears.min | dateYear }} – {{ mouseYears.max | dateYear }}</span>
+      <span *ngIf="mouseYears && mouseYears.min == mouseYears.max" class="year">{{ mouseYears.min | dateYear }}</span>
+      <span *ngIf="mouseYears && mouseYears.min < mouseYears.max" class="year"
+        >{{ mouseYears.min | dateYear }} – {{ mouseYears.max | dateYear }}</span
+      >
     </div>
   </div>
 </div>
