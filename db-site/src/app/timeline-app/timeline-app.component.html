@@ -6,7 +6,8 @@
     ></dbw-timeline-options>
   </div>
   <div class="col">
-    <div class="canvas-and-selector" (wheel)="onWheel($event)">
+    <h5 *ngIf="!loadedData" class="text-center mt-5">Loading. Please wait...</h5>
+    <div class="canvas-and-selector" (wheel)="onWheel($event)" *ngIf="loadedData">
       <dbw-timeline-canvas
         [selectedYears]="selectedYears"
         [data]="timelineData"

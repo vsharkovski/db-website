@@ -20,6 +20,7 @@ export class TimelineAppComponent implements OnInit {
     occupationLevel1Id: null,
     genderId: null,
   };
+  loadedData = false;
 
   @ViewChild(RangeSelectorComponent) rangeSelector?: RangeSelectorComponent;
 
@@ -34,9 +35,10 @@ export class TimelineAppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.timelineService
-      .getTimelineData()
-      .subscribe((data) => (this.timelineData = data));
+    this.timelineService.getTimelineData().subscribe((data) => {
+      this.timelineData = data;
+      this.loadedData = true;
+    });
   }
 
   onWheel(event: WheelEvent): void {
