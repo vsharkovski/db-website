@@ -12,38 +12,39 @@
             name, birth and death year, gender, occupation, or citizenship.
           </p>
         </div>
-        <div class="sunburst"></div>
+        <div class="sunburst"><div class="image"></div></div>
       </div>
       <div class="col-md-auto p-md-3 d-flex justify-content-center bg-white search-app">
         <dbw-search-options (submitted)="onSearchOptionsSubmit($event)"></dbw-search-options>
       </div>
     </div>
 
-    <div class="mt-5 row timeline-section">
+    <div class="mt-5 row info-image-section timeline-section">
       <div class="col-md-4">
-        <h5><a [routerLink]="['/search']" class="text-reset">Interactive timeline</a></h5>
+        <h5><a [routerLink]="['/timeline']" class="text-reset">Interactive timeline</a></h5>
         <p>
           Discover people in history through
-          <a [routerLink]="['/search']" class="fw-semibold">this interactive visualization of people through time.</a>
+          <a [routerLink]="['/timeline']" class="fw-semibold">this interactive visualization of people through time.</a>
         </p>
       </div>
-      <div class="col-md">
-        <img src="/assets/highlights/timeline.png" class="img-fluid rounded" />
+      <div class="col-md position-relative">
+        <div class="image"></div>
+        <a [routerLink]="['/timeline']" class="stretched-link"></a>
       </div>
     </div>
 
-    <div class="mt-5 topi-section rounded position-relative">
-      <a [href]="topiProjectLink" class="stretched-link"></a>
-      <div class="bg-white rounded p-3 topi-section-text">
-        <!-- <h5><a [href]="topiProjectLink" class="text-reset">Earth Visualization</a></h5> -->
+    <div class="mt-5 row info-image-section topi-section">
+      <div class="col-md-4">
         <h5>Earth Visualization</h5>
-        <p class="mb-0">
+        <p>
           Click to can see an <a [href]="topiProjectLink" class="fw-semibold">interactive visualization</a> of the most
           notable people in the world.
         </p>
-        <p class="mb-0 text-muted text-end">
-          credits to <a [href]="topiPersonalLink" class="text-reset">Topi Tjukanov</a>
-        </p>
+        <p class="text-muted">credits to <a [href]="topiPersonalLink" class="text-reset">Topi Tjukanov</a></p>
+      </div>
+      <div class="col-md position-relative">
+        <div class="image"></div>
+        <a [href]="topiProjectLink" class="stretched-link"></a>
       </div>
     </div>
 
@@ -55,8 +56,8 @@
           credits to <a [href]="inquisitiveBirdTwitterLink" class="text-reset">@Scientific_Bird</a>
         </p>
       </div>
-      <div class="col-md">
-        <video autoplay controls muted loop class="rounded">
+      <div class="col-md d-flex">
+        <video autoplay controls muted loop class="ms-auto">
           <source src="assets/highlights/europe-vis-1000ad-onwards.mp4" />
           Download the <a href="assets/highlights/europe-vis-1000ad-onwards.mp4">video.</a>
         </video>
