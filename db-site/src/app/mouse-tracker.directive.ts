@@ -1,4 +1,9 @@
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostListener,
+} from '@angular/core';
 import { PixelCoordinate } from './pixel-coordinate.model';
 import { ReplaySubject } from 'rxjs';
 
@@ -6,11 +11,16 @@ import { ReplaySubject } from 'rxjs';
   standalone: true,
   selector: '[dbwMouseTracker]',
 })
-export class MouseTrackerDirective {
+export class MouseTrackerDirective implements AfterViewInit {
   current$ = new ReplaySubject<PixelCoordinate | null>();
   lastValid$ = new ReplaySubject<PixelCoordinate | null>();
 
   constructor(private elementRef: ElementRef) {}
+
+  ngAfterViewInit(): void {
+    this.current$.next(null);
+    this.lastValid$.next(null);
+  }
 
   @HostListener('window:resize')
   onWindowResize(): void {

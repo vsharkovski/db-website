@@ -1,3 +1,15 @@
+/*
+The component should take up all the space of its parent.
+Its parent should be positioned, for example 'position: relative'
+*/
+:host {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
 .year-line {
   position: absolute;
   top: 0;

@@ -29,18 +29,18 @@ export class TimelineService {
   requestedDataFromApi = false;
 
   constructor(private http: HttpClient, private errorService: ErrorService) {
-    for (let i = 0; i < 100000; i++) {
-      const b = Math.round(gaussianRandom(1600, 100));
-      const ni = Math.round(30 + Math.random() * 10);
-      this.timelineData.push({
-        wikidataCode: i,
-        time: b,
-        notabilityIndex: ni,
-        genderId: 0,
-        level1MainOccId: 0,
-        citizenship1BId: 0,
-      });
-    }
+    // for (let i = 0; i < 100000; i++) {
+    //   const b = Math.round(gaussianRandom(1600, 100));
+    //   const ni = Math.round(30 + Math.random() * 10);
+    //   this.timelineData.push({
+    //     wikidataCode: i,
+    //     time: b,
+    //     notabilityIndex: ni,
+    //     genderId: 0,
+    //     level1MainOccId: 0,
+    //     citizenship1BId: 0,
+    //   });
+    // }
   }
 
   getTimelineData(): Observable<TimelinePoint[]> {

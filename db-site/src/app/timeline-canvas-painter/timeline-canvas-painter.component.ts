@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
 import { ReplaySubject, debounceTime } from 'rxjs';
+import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
 
 @Component({
   selector: 'dbw-timeline-canvas-painter',
@@ -48,6 +49,8 @@ export class TimelineCanvasPainterComponent
   marginSizePixels = 2;
   pointMarginSizeCombined = 6;
 
+  constructor(private service: TimelineCanvasPainterService) {}
+
   ngOnInit(): void {
     this.initialize$.pipe(debounceTime(200)).subscribe(() => {
       this.updateCanvasSize();
@@ -68,6 +71,7 @@ export class TimelineCanvasPainterComponent
       this.initialize$.next();
     }
     if (changes['buckets']) {
+      this.service.numBuckets = this.buckets.length;
       this.updateCanvasSize();
       this.updateDrawData();
       this.drawCanvas();
@@ -115,6 +119,7 @@ export class TimelineCanvasPainterComponent
     if (!this.canvasBoundingBox) return false;
 
     this.canvasMiddleYPixels = Math.round(this.canvasBoundingBox.height / 2);
+    this.service.canvasMiddleYPixels = this.canvasMiddleYPixels;
 
     // Determine biggest point pixel size that would not make any bucket (column)
     // exceed the height of the canvas if drawn later.
@@ -144,7 +149,10 @@ export class TimelineCanvasPainterComponent
     this.marginSizePixels = Math.floor(
       this.pointSizePixels * this.pointMarginFractionOfSize
     );
+    this.service.marginSizePixels = this.marginSizePixels;
+
     this.pointMarginSizeCombined = this.pointSizePixels + this.marginSizePixels;
+    this.service.pointMarginSizeCombined = this.pointMarginSizeCombined;
 
     return true;
   }
@@ -215,15 +223,5 @@ export class TimelineCanvasPainterComponent
 
       x += pointMarginSizeCombined;
     }
-  }
-
-  /**
-   * Returns the index of the bucket which, when drawn on the canvas,
-   * contains the given X pixel coordinate.
-   */
-  getBucketIndexFromPixel(pixelX: number): number | null {
-    const bucketIndex = Math.floor(pixelX / this.pointMarginSizeCombined);
-    if (bucketIndex < 0 || bucketIndex >= this.buckets.length) return null;
-    return bucketIndex;
   }
 }

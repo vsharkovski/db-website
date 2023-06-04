@@ -5,13 +5,15 @@
     [buckets]="buckets"
     (numBucketsUpdated)="onNumBucketsReceived($event)"
   ></dbw-timeline-canvas-painter>
-  <dbw-timeline-canvas-mouse-area></dbw-timeline-canvas-mouse-area>
-  <!-- <div *ngIf="lastValidMousePositionPixels" class="year-line" style.left="{{ lastValidMousePositionPixels.x }}px">
-    <div class="year-wrapper" [class.hidden]="!mousePositionPixels">
-      <span *ngIf="mouseYears && mouseYears.min == mouseYears.max" class="year">{{ mouseYears.min | dateYear }}</span>
-      <span *ngIf="mouseYears && mouseYears.min < mouseYears.max" class="year"
-        >{{ mouseYears.min | dateYear }} – {{ mouseYears.max | dateYear }}</span
-      >
-    </div>
-  </div> -->
+  <dbw-timeline-canvas-mouse-area
+    [buckets]="buckets"
+    [mousePosition]="mousePosition"
+    [lastValidMousePosition]="lastValidMousePosition"
+  ></dbw-timeline-canvas-mouse-area>
+  <dbw-timeline-canvas-year-line-area
+    [selectedYears]="selectedYears"
+    [numBuckets]="buckets.length"
+    [mousePosition]="mousePosition"
+    [lastValidMousePosition]="lastValidMousePosition"
+  ></dbw-timeline-canvas-year-line-area>
 </div>

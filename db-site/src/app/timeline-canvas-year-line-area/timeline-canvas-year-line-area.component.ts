@@ -1,67 +1,62 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { NumberRange } from '../number-range.model';
+import { PixelCoordinate } from '../pixel-coordinate.model';
+import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
 
 @Component({
   selector: 'dbw-timeline-canvas-year-line-area',
   templateUrl: './timeline-canvas-year-line-area.component.html',
   styleUrls: ['./timeline-canvas-year-line-area.component.css'],
 })
-export class TimelineCanvasYearLineAreaComponent implements OnInit {
-  mouseYears: NumberRange | null = null;
-  constructor() {}
+export class TimelineCanvasYearLineAreaComponent implements OnChanges {
+  @Input() selectedYears!: NumberRange;
+  @Input() numBuckets!: number;
+  @Input() mousePosition!: PixelCoordinate | null;
+  @Input() lastValidMousePosition!: PixelCoordinate | null;
 
-  ngOnInit(): void {}
+  mouseYears: NumberRange | null = null;
+
+  constructor(private painterService: TimelineCanvasPainterService) {}
+
+  ngOnChanges(): void {
+    if (this.lastValidMousePosition) {
+      const newMouseYears = this.getTimeRangeFromPixel(
+        this.lastValidMousePosition.x
+      );
+      if (newMouseYears) this.mouseYears = newMouseYears;
+    }
+  }
 
   /**
-   * Update hover data from the most recent mouse position.
+   * Returns the time range which the bucket index corresponds to.
    */
-  // updateMouseData(): void {
-  //   // If mouse is not on canvas, can't do anything.
-  //   if (!this.lastValidMousePositionPixels) return;
+  getTimeRangeFromBucketIndex(index: number): NumberRange | null {
+    // If buckets have not been filled.
+    if (this.numBuckets === 0) return null;
 
-  //   // Update year range where mouse is.
-  //   const newMouseYears = this.getTimeRangeFromPixel(
-  //     this.lastValidMousePositionPixels.x
-  //   );
-  //   if (newMouseYears) this.mouseYears = newMouseYears;
-  // }
+    const rangeSize = this.selectedYears.max + 1 - this.selectedYears.min;
 
-  // resetMouseData() {
-  //   this.mousePositionPixels = null;
-  //   this.lastValidMousePositionPixels = null;
-  //   this.mouseYears = null;
-  // }
+    const start =
+      this.selectedYears.min +
+      Math.floor((index / this.numBuckets) * rangeSize);
 
-  // /**
-  //  * Returns the time range which the bucket index corresponds to.
-  //  */
-  // getTimeRangeFromBucketIndex(index: number): NumberRange | null {
-  //   // If buckets have not been filled.
-  //   if (this.buckets.length === 0) return null;
+    const end = Math.min(
+      this.selectedYears.min +
+        Math.floor(((index + 1) / this.numBuckets) * rangeSize),
+      this.selectedYears.max
+    );
 
-  //   const rangeSize = this.selectedYears.max + 1 - this.selectedYears.min;
+    return { min: start, max: end };
+  }
 
-  //   const start =
-  //     this.selectedYears.min +
-  //     Math.floor((index / this.buckets.length) * rangeSize);
-
-  //   const end = Math.min(
-  //     this.selectedYears.min +
-  //       Math.floor(((index + 1) / this.buckets.length) * rangeSize),
-  //     this.selectedYears.max
-  //   );
-
-  //   return { min: start, max: end };
-  // }
-
-  // /**
-  //  * Returns the time range corresponding to the bucket
-  //  * which, when drawn on the canvas, contains the given
-  //  * X pixel coordinate.
-  //  */
-  // getTimeRangeFromPixel(pixelX: number): NumberRange | null {
-  //   const bucketIndex = this.getBucketIndexFromPixel(pixelX);
-  //   if (bucketIndex === null) return null;
-  //   return this.getTimeRangeFromBucketIndex(bucketIndex);
-  // }
+  /**
+   * Returns the time range corresponding to the bucket
+   * which, when drawn on the canvas, contains the given
+   * X pixel coordinate.
+   */
+  getTimeRangeFromPixel(pixelX: number): NumberRange | null {
+    const bucketIndex = this.painterService.getBucketIndexFromPixel(pixelX);
+    if (bucketIndex === null) return null;
+    return this.getTimeRangeFromBucketIndex(bucketIndex);
+  }
 }
