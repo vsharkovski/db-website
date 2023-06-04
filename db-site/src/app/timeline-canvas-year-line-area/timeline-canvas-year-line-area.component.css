@@ -1,0 +1,26 @@
+.year-line {
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  height: 100%;
+  width: 2px;
+  background-color: var(--bs-primary);
+  transform: translateX(-50%);
+}
+
+.year-line .year-wrapper {
+  position: absolute;
+  top: 100%;
+  transform: translate(-50%, 0%) scaleY(100%);
+  transition: transform 200ms ease-in-out;
+}
+
+.year-line .year-wrapper.hidden {
+  transform: translate(-50%, -20%) scaleY(0%);
+}
+
+.year-line .year {
+  color: var(--bs-primary);
+  white-space: nowrap;
+  user-select: none;
+}

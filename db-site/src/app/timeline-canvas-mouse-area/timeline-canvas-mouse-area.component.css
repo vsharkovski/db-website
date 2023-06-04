@@ -1,0 +1,65 @@
+/*
+The component should take up all the space of its parent.
+Its parent should be positioned, for example 'position: relative'
+*/
+:host {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.pointer {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  position: absolute;
+  z-index: 4;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
+  cursor: none;
+}
+
+.border-primary {
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--bs-primary);
+}
+
+.pointer.hidden {
+  transform: translate(-50%, -50%) scale(0%, 0%);
+}
+
+.pointer.clickable {
+  /* cursor: pointer; */
+  background-color: white;
+}
+
+.pointer.loading {
+  animation-name: loading;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes loading {
+  0% {
+    background-color: rgba(100, 100, 100, 0);
+  }
+  100% {
+    background-color: rgba(100, 100, 100, 1);
+  }
+}
+
+.hovered-card-wrapper {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -100%) scale(100%, 100%);
+  transition: transform 200ms ease-in-out;
+}
+
+.hovered-card-wrapper.hidden {
+  transform: translate(-50%, -50%) scale(0%, 0%);
+}

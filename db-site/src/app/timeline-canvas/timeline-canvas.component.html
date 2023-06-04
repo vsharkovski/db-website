@@ -1,31 +1,17 @@
 <div class="canvas-wrapper">
-  <canvas #canvas></canvas>
-  <div
-    *ngIf="lastValidMousePositionPixels"
-    class="pointer border-primary"
-    [class.hidden]="!hoveredPoint"
-    [class.clickable]="hoveredPoint && hoveredPointPerson"
-    [class.loading]="!hoveredPoint || !hoveredPointPerson"
-    style.width="{{ hoverRadiusPixels * 2 }}px"
-    style.left="{{ lastValidMousePositionPixels.x }}px"
-    style.top="{{ lastValidMousePositionPixels.y }}px"
-    (click)="onPointerClick()"
-  ></div>
-  <div
-    *ngIf="lastValidMousePositionPixels"
-    class="hovered-card-wrapper"
-    [class.hidden]="!hoveredPointPerson"
-    style.left="{{ lastValidMousePositionPixels.x }}px"
-    style.top="{{ lastValidMousePositionPixels.y - hoverRadiusPixels }}px"
-  >
-    <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
-  </div>
-  <div *ngIf="lastValidMousePositionPixels" class="year-line" style.left="{{ lastValidMousePositionPixels.x }}px">
+  <dbw-timeline-canvas-painter
+    [dataSelected]="dataSelected"
+    [maxSelectedDataPointsAtAnyMoment]="maxSelectedDataPointsAtAnyMoment"
+    [buckets]="buckets"
+    (numBucketsUpdated)="onNumBucketsReceived($event)"
+  ></dbw-timeline-canvas-painter>
+  <dbw-timeline-canvas-mouse-area></dbw-timeline-canvas-mouse-area>
+  <!-- <div *ngIf="lastValidMousePositionPixels" class="year-line" style.left="{{ lastValidMousePositionPixels.x }}px">
     <div class="year-wrapper" [class.hidden]="!mousePositionPixels">
       <span *ngIf="mouseYears && mouseYears.min == mouseYears.max" class="year">{{ mouseYears.min | dateYear }}</span>
       <span *ngIf="mouseYears && mouseYears.min < mouseYears.max" class="year"
         >{{ mouseYears.min | dateYear }} – {{ mouseYears.max | dateYear }}</span
       >
     </div>
-  </div>
+  </div> -->
 </div>

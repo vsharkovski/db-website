@@ -40,6 +40,9 @@ import { TimelineOptionsComponent } from './timeline-options/timeline-options.co
 import { TimelineCanvasComponent } from './timeline-canvas/timeline-canvas.component';
 import { RangeSelectorComponent } from './range-selector/range-selector.component';
 import { PersonSmallCardComponent } from './person-small-card/person-small-card.component';
+import { TimelineCanvasMouseAreaComponent } from './timeline-canvas-mouse-area/timeline-canvas-mouse-area.component';
+import { TimelineCanvasYearLineAreaComponent } from './timeline-canvas-year-line-area/timeline-canvas-year-line-area.component';
+import { TimelineCanvasPainterComponent } from './timeline-canvas-painter/timeline-canvas-painter.component';
 
 @NgModule({
   declarations: [
@@ -76,6 +79,9 @@ import { PersonSmallCardComponent } from './person-small-card/person-small-card.
     TimelineCanvasComponent,
     RangeSelectorComponent,
     PersonSmallCardComponent,
+    TimelineCanvasMouseAreaComponent,
+    TimelineCanvasYearLineAreaComponent,
+    TimelineCanvasPainterComponent,
   ],
   imports: [
     BrowserModule,

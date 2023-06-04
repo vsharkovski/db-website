@@ -288,8 +288,24 @@ export class TimelineService {
     }
 
     for (const point of data) {
-      // Place into bucket. Map the point time position to [0, numBuckets).
+      // Place into bucket. Map the point time position to [0, numBuckets),
+      // then round down to get [0, numBuckets-1].
       const index = Math.floor(pointMappingFn(point) * numBuckets);
+      if (index < 0 || index >= buckets.length) {
+        console.log(
+          'BAD INDEX',
+          'numBuckets',
+          numBuckets,
+          'buckets.len',
+          buckets.length,
+          'point.time',
+          point.time,
+          'f(...)',
+          pointMappingFn(point),
+          'index',
+          index
+        );
+      }
       buckets[index].push(point);
     }
 
