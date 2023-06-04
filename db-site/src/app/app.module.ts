@@ -29,7 +29,7 @@ import { SearchResultsPageButtonsComponent } from './search-results-page-buttons
 import { SortDirectionPipe } from './sort-direction.pipe';
 import { SortVariablePipe } from './sort-variable.pipe';
 import { FooterComponent } from './footer/footer.component';
-import { Event, Router, Scroll } from '@angular/router';
+import { Event, NavigationEnd, Router, Scroll } from '@angular/router';
 import { ViewportScroller } from '@angular/common';
 import { filter, pairwise } from 'rxjs';
 import { VariableSearchComponent } from './variable-search/variable-search.component';
@@ -98,6 +98,7 @@ export class AppModule {
     router.events
       .pipe(
         filter((e: Event): e is Scroll => e instanceof Scroll),
+        filter((e): boolean => e.routerEvent instanceof NavigationEnd),
         pairwise()
       )
       .subscribe(([previousEvent, currentEvent]) => {
@@ -127,8 +128,10 @@ export class AppModule {
     event1: Scroll,
     event2: Scroll
   ): boolean {
-    const [route1, query1] = event1.routerEvent.urlAfterRedirects.split('?');
-    const [route2, query2] = event2.routerEvent.urlAfterRedirects.split('?');
+    const routerEvent1 = event1.routerEvent as NavigationEnd;
+    const [route1, query1] = routerEvent1.urlAfterRedirects.split('?');
+    const routerEvent2 = event2.routerEvent as NavigationEnd;
+    const [route2, query2] = routerEvent2.urlAfterRedirects.split('?');
     return route1 === route2 && query1 != query2;
   }
 }
