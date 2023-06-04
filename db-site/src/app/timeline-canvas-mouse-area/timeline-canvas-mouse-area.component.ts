@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
 import {
   Subject,
@@ -15,20 +15,19 @@ import { WikiService } from '../wiki.service';
 import { ModalService } from '../modal.service';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { Person } from '../person.model';
+import { MouseTrackerDirective } from '../mouse-tracker.directive';
 
 @Component({
   selector: 'dbw-timeline-canvas-mouse-area',
   templateUrl: './timeline-canvas-mouse-area.component.html',
   styleUrls: ['./timeline-canvas-mouse-area.component.css'],
+  // hostDirectives
 })
 export class TimelineCanvasMouseAreaComponent implements OnInit {
   readonly hoverRadiusPixels = 16;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
 
   @Input() buckets!: TimelinePoint[][];
-
-  mousePositionPixels: { x: number; y: number } | null = null;
-  lastValidMousePositionPixels: { x: number; y: number } | null = null;
 
   hoveredPoint: TimelinePoint | null = null;
   hoveredPointLastTimeNotNullMs: number = 0;
