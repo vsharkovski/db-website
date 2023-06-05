@@ -46,7 +46,9 @@ interface PointAndIndex {
 export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   readonly hoverRadiusPixels = 16;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
+
   readonly maxNumHighlightedPoints = 4;
+  readonly maxCardSizeFraction = 1 / (this.maxNumHighlightedPoints + 1);
 
   @Input() buckets!: TimelinePoint[][];
   @Input() mousePosition!: PixelCoordinate | null;
@@ -82,7 +84,8 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       // New bucket data. Update highlighted points.
       const highlightedPointsAndIndices = this.pickHighlightedPoints(
         this.buckets,
-        this.maxNumHighlightedPoints
+        this.maxNumHighlightedPoints,
+        this.maxCardSizeFraction
       );
       this.highlighted = highlightedPointsAndIndices.map((it) => ({
         point: it.point,
@@ -263,7 +266,8 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
   pickHighlightedPoints(
     buckets: TimelinePoint[][],
-    maxCount: number
+    maxCount: number,
+    maxCardSizeFraction: number
   ): PointAndIndex[] {
     if (maxCount == 0) return [];
 
@@ -274,13 +278,21 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       )
       .sort((a, b) => b.point.notabilityIndex - a.point.notabilityIndex);
 
-    const minAllowedDistance = Math.floor(buckets.length / maxCount);
+    const minAllowedDistance = Math.floor(buckets.length * maxCardSizeFraction);
+    const minAllowedDistanceEnds = Math.floor(minAllowedDistance / 2);
 
     // Keep adding points to result, up to maxCount.
-    // Only add a point if it is far enough away from any other.
     const result: PointAndIndex[] = [];
 
     for (const point of data) {
+      // Only add a point if it is far enough away from any other point,
+      // and also far enough from the start/end.
+      if (
+        point.index < minAllowedDistanceEnds ||
+        buckets.length - point.index < minAllowedDistanceEnds
+      )
+        continue;
+
       let isFarEnough = true;
       for (const added of result) {
         if (Math.abs(added.index - point.index) < minAllowedDistance) {

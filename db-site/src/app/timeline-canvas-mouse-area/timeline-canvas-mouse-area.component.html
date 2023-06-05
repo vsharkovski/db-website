@@ -10,7 +10,7 @@
 ></div>
 <div
   *ngIf="lastValidMousePosition"
-  class="hovered-card-wrapper"
+  class="card-wrapper"
   [class.hidden]="!hovered.person"
   style.left="{{ lastValidMousePosition.x }}px"
   style.top="{{ lastValidMousePosition.y }}px"
@@ -23,9 +23,10 @@
 </div>
 <div
   *ngFor="let highlight of highlighted"
-  class="hovered-card-wrapper highlight"
+  class="card-wrapper highlight"
   [class.d-none]="!highlight.position"
   [class.hidden]="!highlight.person"
+  style.--size-percentage="{{ maxCardSizeFraction * 100 }}%"
   style.left="{{ highlight.position?.x }}px"
   style.top="{{ highlight.position?.y }}px"
 >

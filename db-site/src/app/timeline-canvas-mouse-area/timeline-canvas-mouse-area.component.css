@@ -53,20 +53,22 @@ Its parent should be positioned, for example 'position: relative'
   }
 }
 
-.hovered-card-wrapper {
+.card-wrapper {
+  --size-percentage: 20%;
   position: absolute;
   z-index: 4;
   cursor: none;
   transform: translate(-50%, -50%) scale(100%, 100%);
   transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
   opacity: 1;
+  width: min(10rem, var(--size-percentage));
 }
 
-.hovered-card-wrapper.hidden {
+.card-wrapper.hidden {
   transform: translate(-50%, -50%) scale(0%, 0%);
 }
 
-.hovered-card-wrapper.d-none {
+.card-wrapper.d-none {
   display: none;
 }
 
