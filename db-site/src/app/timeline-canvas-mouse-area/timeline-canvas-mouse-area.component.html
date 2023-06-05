@@ -15,5 +15,9 @@
   style.left="{{ lastValidMousePosition.x }}px"
   style.top="{{ lastValidMousePosition.y }}px"
 >
-  <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
+  <dbw-person-small-card
+    [person]="hoveredPointPerson"
+    [wikiPage]="hoveredPointWikiPage"
+    [showPicture]="true"
+  ></dbw-person-small-card>
 </div>

@@ -10,6 +10,7 @@ import { WikiApiPage } from '../wiki-api-page.model';
 export class PersonSmallCardComponent implements OnChanges {
   @Input('person') personInjected: Person | null = null;
   @Input('wikiPage') wikiPageInjected: WikiApiPage | null = null;
+  @Input() showPicture: boolean = false;
 
   person: Person | null = null;
   wikiPage: WikiApiPage | null = null;
