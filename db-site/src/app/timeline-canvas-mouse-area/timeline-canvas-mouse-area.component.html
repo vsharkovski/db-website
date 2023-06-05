@@ -1,0 +1,19 @@
+<div
+  *ngIf="lastValidMousePosition"
+  class="pointer border-primary"
+  [class.hidden]="!hoveredPoint"
+  [class.clickable]="hoveredPoint && hoveredPointPerson"
+  [class.loading]="!hoveredPoint || !hoveredPointPerson"
+  style.width="{{ hoverRadiusPixels * 2 }}px"
+  style.left="{{ lastValidMousePosition.x }}px"
+  style.top="{{ lastValidMousePosition.y }}px"
+></div>
+<div
+  *ngIf="lastValidMousePosition"
+  class="hovered-card-wrapper"
+  [class.hidden]="!hoveredPointPerson"
+  style.left="{{ lastValidMousePosition.x }}px"
+  style.top="{{ lastValidMousePosition.y - hoverRadiusPixels }}px"
+>
+  <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
+</div>

@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 class TimelineController(val personService: PersonService) {
     @GetMapping
     fun getTimelineData(): ResponseEntity<TimelineResponse> {
-        // TODO: Extract constant, clarify best constant
-        val result = personService.getTimelineData(26.0f)
+        val result = personService.getTimelineData()
         return ResponseEntity.ok(TimelineResponse(results = result))
     }
 }

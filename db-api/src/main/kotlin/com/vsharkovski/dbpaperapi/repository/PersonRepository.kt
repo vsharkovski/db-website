@@ -20,12 +20,14 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
     fun findBy(pageable: Pageable): Slice<PersonIdAndNames>
 
     @Query("""
-        select new com.vsharkovski.dbpaperapi.model.PersonTimelineData(p.wikidataCode,
-            p.birth, p.notabilityIndex, p.genderId, p.level1MainOccId, p.citizenship1BId)
+        select new com.vsharkovski.dbpaperapi.model.PersonTimelineData(
+            p.wikidataCode, p.birth, p.notabilityIndex,
+            p.genderId, p.level1MainOccId, p.citizenship1BId)
         from Person p
-        where p.notabilityIndex >= :minimumNotability and p.birth is not null
+        where p.birth is not null
+        order by p.notabilityIndex desc
     """)
-    fun findTimelineData(minimumNotability: Float): List<PersonTimelineData>
+    fun findTimelineData(page: Pageable): Slice<PersonTimelineData>
 
     @Transactional
     @Modifying

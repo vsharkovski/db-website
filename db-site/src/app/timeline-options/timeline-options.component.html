@@ -12,15 +12,17 @@
     <hr class="mb-3" />
     <form [formGroup]="form" class="two-column-grid">
       <label class="form-label">Exact year</label>
-      <input
-        type="number"
-        class="form-control text-center"
-        formControlName="yearExact"
-        [class.is-invalid]="yearExactField.invalid"
-        [placeholder]="0"
-      />
-      <div *ngIf="yearExactField.errors?.['isIntegerOrNull']" class="invalid-feedback">
-        Year must be a whole number.
+      <div>
+        <input
+          type="number"
+          class="form-control text-center"
+          formControlName="yearExact"
+          [class.is-invalid]="yearExactField.invalid"
+          [placeholder]="0"
+        />
+        <div *ngIf="yearExactField.errors?.['isIntegerOrNull']" class="invalid-feedback">
+          Year must be a whole number.
+        </div>
       </div>
 
       <label class="form-label">Occupation</label>

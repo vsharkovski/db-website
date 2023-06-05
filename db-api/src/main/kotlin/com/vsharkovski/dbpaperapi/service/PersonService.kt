@@ -11,46 +11,26 @@ import org.springframework.stereotype.Service
 
 @Service
 class PersonService(
-    val personRepository: PersonRepository,
-    val nameService: NameService
+    val personRepository: PersonRepository, val nameService: NameService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Value("\${search.results-per-page}")
-    val batchSize: Int = 1000
+    @Value("\${timeline.result-limit}")
+    val resultLimit: Int = 50000
 
-    fun getTimelineData(minimumNotability: Float): List<TimelinePoint> =
-        personRepository.findTimelineData(minimumNotability)
-            .map {
-                TimelinePoint(
-                    wikidataCode = it.wikidataCode!!,
-                    time = it.birth!!,
-                    notabilityIndex = it.notabilityIndex!!,
-                    genderId = it.genderId,
-                    level1MainOccId = it.level1MainOccId,
-                    citizenship1BId = it.citizenship1BId
-                )
-            }
-
-    fun processAllPersonNamesForSearch() {
-        logger.info("Person names processing for search: starting")
-        var slice = personRepository.findBy(PageRequest.of(0, batchSize))
-        slice.content.forEach { processSinglePersonNameForSearch(it) }
-        var processedEntries = slice.content.size
-        while (slice.hasNext()) {
-            slice = personRepository.findBy(slice.nextPageable())
-            slice.content.forEach { processSinglePersonNameForSearch(it) }
-            processedEntries += slice.content.size
-            if (processedEntries % 100000 == 0) {
-                logger.info("Person names processing for search: {} entries processed so far", processedEntries)
-            }
-        }
-        logger.info("Person names processing for search: finished, total {} entries processed", processedEntries)
-    }
-
-    fun processSinglePersonNameForSearch(person: PersonIdAndNames) =
-        person.name?.let {
-            personRepository.setNameProcessed(person.id, nameService.processForSearch(it))
+    /**
+     * The result limit is intended to keep response sizes low (below 5 MB).
+     */
+    fun getTimelineData(): List<TimelinePoint> =
+        personRepository.findTimelineData(PageRequest.of(0, resultLimit)).content.map {
+            TimelinePoint(
+                wikidataCode = it.wikidataCode!!,
+                time = it.birth!!,
+                notabilityIndex = it.notabilityIndex!!,
+                genderId = it.genderId,
+                level1MainOccId = it.level1MainOccId,
+                citizenship1BId = it.citizenship1BId
+            )
         }
 
 }

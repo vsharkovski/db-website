@@ -1,49 +1,33 @@
-video {
-  width: 100%;
-}
-
-.search-img {
-  width: 100%;
-}
-
-.topi-img {
-  width: 100%;
-}
-
-.altmetric-img {
-  width: 100%;
-}
-
-.topi-section {
-  background-image: url("/assets/highlights/topi.jpg");
-  background-size: cover;
-  background-position: center 0%;
-  height: 20rem;
-  padding: 1.5rem;
-}
-
-.topi-section-text {
-  z-index: 2;
-  position: relative;
-}
-
 @media (min-width: 768px) {
-  .search-section {
-  }
-
   .search-info {
     display: flex;
     flex-direction: column;
   }
 
   .search-info .sunburst {
+    position: relative;
     height: 100%;
-    background-image: url("/assets/highlights/sunburst-2.png");
+    width: 100%;
+  }
+
+  .search-info .sunburst .image {
+    position: absolute;
+    bottom: 0;
+    height: 70%;
+    width: 100%;
+
+    background-image: linear-gradient(
+        to bottom left,
+        rgba(255, 255, 255, 1),
+        rgba(255, 255, 255, 0)
+      ),
+      url("/assets/highlights/sunburst-2.png");
+
     background-size: cover;
-    /* background-size: contain; */
     background-repeat: no-repeat;
-    background-position: left bottom;
+    background-position: left top;
     border-radius: 1rem;
+    filter: opacity(90%);
   }
 
   .search-info .search-description {
@@ -53,4 +37,32 @@ video {
   .search-section .search-app {
     border-left: 1px solid lightgray;
   }
+}
+
+.info-image-section {
+}
+
+.info-image-section .image {
+  height: 18rem;
+  width: 100%;
+  background-origin: content-box;
+  background-size: cover;
+  background-position: center 0%;
+  background-repeat: no-repeat;
+  border-radius: 1rem;
+  mask-image: linear-gradient(to right, transparent, black 40%);
+}
+
+.timeline-section .image {
+  background-image: url("/assets/highlights/timeline.png");
+}
+
+.topi-section .image {
+  background-image: url("/assets/highlights/topi.jpg");
+  filter: contrast(80%);
+}
+
+video {
+  border-radius: 1rem;
+  height: 18rem;
 }
