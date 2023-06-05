@@ -1,9 +1,9 @@
 <div
   *ngIf="lastValidMousePosition"
   class="pointer border-primary"
-  [class.hidden]="!hoveredPoint || hoveredPointPerson"
-  [class.clickable]="hoveredPoint && hoveredPointPerson"
-  [class.loading]="!hoveredPoint || !hoveredPointPerson"
+  [class.hidden]="!hovered.point || hovered.person"
+  [class.clickable]="hovered.point && hovered.person"
+  [class.loading]="!hovered.point || !hovered.person"
   style.width="{{ hoverRadiusPixels * 2 }}px"
   style.left="{{ lastValidMousePosition.x }}px"
   style.top="{{ lastValidMousePosition.y }}px"
@@ -11,13 +11,23 @@
 <div
   *ngIf="lastValidMousePosition"
   class="hovered-card-wrapper"
-  [class.hidden]="!hoveredPointPerson"
+  [class.hidden]="!hovered.person"
   style.left="{{ lastValidMousePosition.x }}px"
   style.top="{{ lastValidMousePosition.y }}px"
 >
   <dbw-person-small-card
-    [person]="hoveredPointPerson"
-    [wikiPage]="hoveredPointWikiPage"
+    [person]="hovered.person"
+    [wikiPage]="hovered.wikiPage"
     [showPicture]="true"
   ></dbw-person-small-card>
+</div>
+<div
+  *ngFor="let highlight of highlighted"
+  class="hovered-card-wrapper highlight"
+  [class.d-none]="!highlight.position"
+  [class.hidden]="!highlight.person"
+  style.left="{{ highlight.position?.x }}px"
+  style.top="{{ highlight.position?.y }}px"
+>
+  <dbw-person-small-card [person]="highlight.person" [showPicture]="false"></dbw-person-small-card>
 </div>

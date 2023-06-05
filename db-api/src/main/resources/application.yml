@@ -41,3 +41,5 @@ search:
   results-per-page: 200
 timeline:
   result-limit: 80000
+wikidata-codes:
+  max-persons: 100

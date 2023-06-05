@@ -4,6 +4,7 @@ import {
   Input,
   OnChanges,
   OnInit,
+  SimpleChanges,
 } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
 import {
@@ -13,6 +14,7 @@ import {
   distinctUntilChanged,
   filter,
   forkJoin,
+  map,
   of,
   switchMap,
 } from 'rxjs';
@@ -24,6 +26,18 @@ import { Person } from '../person.model';
 import { PixelCoordinate } from '../pixel-coordinate.model';
 import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
 
+interface PointData {
+  point: TimelinePoint | null;
+  person: Person | null;
+  wikiPage: WikiApiPage | null;
+  position: PixelCoordinate | null;
+}
+
+interface PointAndIndex {
+  point: TimelinePoint;
+  index: number;
+}
+
 @Component({
   selector: 'dbw-timeline-canvas-mouse-area',
   templateUrl: './timeline-canvas-mouse-area.component.html',
@@ -32,18 +46,24 @@ import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service
 export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   readonly hoverRadiusPixels = 16;
   readonly hoverPointerVisibileTimeAfterUpdateMs = 500;
+  readonly maxNumHighlightedPoints = 4;
 
   @Input() buckets!: TimelinePoint[][];
   @Input() mousePosition!: PixelCoordinate | null;
   @Input() lastValidMousePosition!: PixelCoordinate | null;
 
-  hoveredPoint: TimelinePoint | null = null;
+  hovered: PointData = {
+    point: null,
+    person: null,
+    wikiPage: null,
+    position: null,
+  };
   hoveredPointLastTimeNotNullMs: number = 0;
   removeHoveredPoint$ = new Subject<number>();
-
-  hoveredPointPerson: Person | null = null;
-  hoveredPointWikiPage: WikiApiPage | null = null;
   updateHoverApiData$ = new Subject<TimelinePoint>();
+
+  highlighted: PointData[] = [];
+  highlightedPoints$ = new Subject<TimelinePoint[]>();
 
   constructor(
     private painterService: TimelineCanvasPainterService,
@@ -52,9 +72,33 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     private modalService: ModalService
   ) {}
 
-  ngOnChanges(): void {
+  ngOnChanges(changes: SimpleChanges): void {
     if (this.mousePosition) {
+      // For all changes, we should update hover data.
       this.updateHoverData(this.mousePosition);
+    }
+
+    if (changes['buckets']) {
+      // New bucket data. Update highlighted points.
+      const highlightedPointsAndIndices = this.pickHighlightedPoints(
+        this.buckets,
+        this.maxNumHighlightedPoints
+      );
+      this.highlighted = highlightedPointsAndIndices.map((it) => ({
+        point: it.point,
+        person: null,
+        wikiPage: null,
+        position: this.painterService.getPixelFromGridPosition({
+          // We're assuming the points with highest notability will be at
+          // row 0 (the vertical middle).
+          row: 0,
+          col: it.index,
+        }),
+      }));
+      // Send signal that highlighted points were changed.
+      this.highlightedPoints$.next(
+        highlightedPointsAndIndices.map((it) => it.point)
+      );
     }
   }
 
@@ -71,10 +115,13 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         delay(this.hoverPointerVisibileTimeAfterUpdateMs),
         filter((time) => time > this.hoveredPointLastTimeNotNullMs)
       )
-      .subscribe((_) => {
-        this.hoveredPoint = null;
-        this.hoveredPointPerson = null;
-        this.hoveredPointWikiPage = null;
+      .subscribe(() => {
+        this.hovered = {
+          point: null,
+          person: null,
+          wikiPage: null,
+          position: null,
+        };
       });
 
     this.updateHoverApiData$
@@ -82,7 +129,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         debounceTime(300),
         distinctUntilChanged(),
         filter(
-          (point) => point.wikidataCode == this.hoveredPoint?.wikidataCode
+          (point) => point.wikidataCode == this.hovered.point?.wikidataCode
         ),
         switchMap((point) =>
           this.personService.getPersonByWikidataCode(point.wikidataCode)
@@ -90,7 +137,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         filter(
           (person) =>
             person !== null &&
-            person.wikidataCode === this.hoveredPoint?.wikidataCode
+            person.wikidataCode === this.hovered.point?.wikidataCode
         ),
         switchMap((person) =>
           forkJoin([
@@ -100,24 +147,50 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         )
       )
       .subscribe(([person, wikiPage]) => {
-        if (!this.hoveredPoint) return;
-        const code = this.hoveredPoint.wikidataCode;
+        if (!this.hovered.point) return;
+        const code = this.hovered.point.wikidataCode;
         if (code === person!.wikidataCode) {
-          this.hoveredPointPerson = person;
+          this.hovered.person = person;
         }
         if (code === wikiPage?.wikidataCode) {
-          this.hoveredPointWikiPage = wikiPage;
+          this.hovered.wikiPage = wikiPage;
+        }
+      });
+
+    // When highlighted points are changed, get their People from
+    // the API. We use switchMap to cancel any ongoing request,
+    // as its value will be useless.
+    this.highlightedPoints$
+      .pipe(
+        debounceTime(100),
+        switchMap((points) =>
+          this.personService.getPeopleByWikidataCodes(
+            points.map((point) => point.wikidataCode)
+          )
+        ),
+        filter((persons) => persons !== null)
+      )
+      .subscribe((persons) => {
+        // Add each person to their highlight.
+        for (const highlight of this.highlighted) {
+          const person = persons!.find(
+            (it) => it.wikidataCode == highlight.point!.wikidataCode
+          );
+          if (person) highlight.person = person;
         }
       });
   }
 
   @HostListener('window:click')
   onPointerClick(): void {
-    if (this.hoveredPointPerson) {
-      this.modalService.openPersonDetailModal(this.hoveredPointPerson);
-      this.hoveredPoint = null;
-      this.hoveredPointPerson = null;
-      this.hoveredPointWikiPage = null;
+    if (this.hovered.person) {
+      this.modalService.openPersonDetailModal(this.hovered.person);
+      this.hovered = {
+        point: null,
+        person: null,
+        wikiPage: null,
+        position: null,
+      };
     }
   }
 
@@ -133,10 +206,13 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       // Request to remove the hovered point.
       this.removeHoveredPoint$.next(time);
     } else {
-      if (hovered != this.hoveredPoint) {
-        this.hoveredPoint = hovered;
-        this.hoveredPointPerson = null;
-        this.hoveredPointWikiPage = null;
+      if (hovered != this.hovered.point) {
+        this.hovered = {
+          point: hovered,
+          person: null,
+          wikiPage: null,
+          position: null,
+        };
         this.updateHoverApiData$.next(hovered);
       }
       this.hoveredPointLastTimeNotNullMs = time;
@@ -183,5 +259,42 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     }
 
     return bestPoint;
+  }
+
+  pickHighlightedPoints(
+    buckets: TimelinePoint[][],
+    maxCount: number
+  ): PointAndIndex[] {
+    if (maxCount == 0) return [];
+
+    // Sort data by notabilityIndex descending.
+    const data: PointAndIndex[] = buckets
+      .flatMap((bucket, index) =>
+        bucket.map((point) => ({ point: point, index: index }))
+      )
+      .sort((a, b) => b.point.notabilityIndex - a.point.notabilityIndex);
+
+    const minAllowedDistance = Math.floor(buckets.length / maxCount);
+
+    // Keep adding points to result, up to maxCount.
+    // Only add a point if it is far enough away from any other.
+    const result: PointAndIndex[] = [];
+
+    for (const point of data) {
+      let isFarEnough = true;
+      for (const added of result) {
+        if (Math.abs(added.index - point.index) < minAllowedDistance) {
+          isFarEnough = false;
+          break;
+        }
+      }
+
+      if (isFarEnough) {
+        result.push(point);
+        if (result.length === maxCount) break;
+      }
+    }
+
+    return result;
   }
 }

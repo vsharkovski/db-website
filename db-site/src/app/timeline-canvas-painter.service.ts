@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PixelCoordinate } from './pixel-coordinate.model';
+import { GridPosition } from './grid-position.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,9 +37,7 @@ export class TimelineCanvasPainterService {
     return bucketIndex;
   }
 
-  getApproxGridPositionFromPixel(
-    pixel: PixelCoordinate
-  ): { row: number; col: number } | null {
+  getApproxGridPositionFromPixel(pixel: PixelCoordinate): GridPosition | null {
     // Bucket index is column.
     // Row is counted ..., -2, -1, 0, 1, 2, ...
     // with 0 being first point below middle line.
@@ -55,6 +54,16 @@ export class TimelineCanvasPainterService {
         : Math.floor(yDistToMiddle / this._pointMarginSizeCombined);
 
     return { col: bucketIndex, row: row };
+  }
+
+  getPixelFromGridPosition(position: GridPosition): PixelCoordinate {
+    // Row and column considered in the same way as in getApproxGridPositionFromPixel.
+    return {
+      x: this._marginSizePixels + position.col * this._pointMarginSizeCombined,
+      y:
+        this._canvasMiddleYPixels +
+        position.row * this._pointMarginSizeCombined,
+    };
   }
 
   getApproxGridDistanceFromPixelDistance(distancePixels: number): number {
