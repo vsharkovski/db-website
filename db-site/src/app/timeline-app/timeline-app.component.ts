@@ -71,7 +71,11 @@ export class TimelineAppComponent implements OnInit {
   }
 
   onExactYearChanged(year: number | null): void {
-    if (year !== null) {
+    if (
+      year !== null &&
+      this.selectedYearsBoundary.min <= year &&
+      year <= this.selectedYearsBoundary.max
+    ) {
       this.selectedYears = { min: year, max: year };
     }
   }

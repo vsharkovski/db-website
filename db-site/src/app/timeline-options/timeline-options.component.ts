@@ -17,7 +17,7 @@ import { VariablesService } from '../variables.service';
 import { Variable } from '../variable.model';
 import { TimelineOptions } from '../timeline-options.model';
 import { isIntegerOrNullValidator } from '../is-integer-or-null.validator';
-import { PersonParametersService } from '../person-parameters.service';
+import { pairwise, startWith } from 'rxjs';
 
 @Component({
   selector: 'dbw-timeline-options',
@@ -25,9 +25,6 @@ import { PersonParametersService } from '../person-parameters.service';
   styleUrls: ['./timeline-options.component.css'],
 })
 export class TimelineOptionsComponent implements OnInit, OnChanges {
-  lifeYearMin = -3500;
-  lifeYearMax = 2020;
-
   form: FormGroup;
 
   genders: Variable[] = [];
@@ -35,17 +32,14 @@ export class TimelineOptionsComponent implements OnInit, OnChanges {
   citizenships: Variable[] = [];
 
   @Input() selectedYears!: NumberRange;
+  @Input() selectedYearsBoundary!: NumberRange;
   @Output() optionsChanged = new EventEmitter<TimelineOptions>();
   @Output() exactYearChanged = new EventEmitter<number | null>();
 
   constructor(
     fb: NonNullableFormBuilder,
-    private variablesService: VariablesService,
-    private personParametersService: PersonParametersService
+    private variablesService: VariablesService
   ) {
-    this.lifeYearMin = this.personParametersService.LIFE_YEAR_MIN;
-    this.lifeYearMax = this.personParametersService.LIFE_YEAR_MAX;
-
     // Create the form.
     this.form = fb.group({
       yearExact: fb.control<number | null>(null, [isIntegerOrNullValidator]),
@@ -84,9 +78,28 @@ export class TimelineOptionsComponent implements OnInit, OnChanges {
       if (!this.form.valid) return;
       this.optionsChanged.emit(values as TimelineOptions);
     });
-    this.yearExactField.valueChanges.subscribe((value) =>
-      this.exactYearChanged.next(value)
-    );
+    this.yearExactField.valueChanges
+      .pipe(startWith(this.yearExactField.value), pairwise())
+      .subscribe(([previous, current]) => {
+        if (current === null) return;
+
+        // Constrain to minimum and maximum.
+        const currentConstrained = Math.max(
+          this.selectedYearsBoundary.min,
+          Math.min(this.selectedYearsBoundary.max, current)
+        );
+
+        if (currentConstrained != current) {
+          // Current was outside ranges. Update form value.
+          // This will mean that the valueChanges observable will
+          // emit immediately again with values [current, currentConstrained].
+          this.yearExactField.setValue(currentConstrained);
+        } else if (currentConstrained != previous) {
+          // Value was inside ranges and is different from previous.
+          // Emit event.
+          this.exactYearChanged.next(currentConstrained);
+        }
+      });
   }
 
   get yearExactField(): AbstractControl {
