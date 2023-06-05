@@ -56,7 +56,8 @@ Its parent should be positioned, for example 'position: relative'
 .hovered-card-wrapper {
   position: absolute;
   z-index: 4;
-  transform: translate(-50%, -100%) scale(100%, 100%);
+  cursor: none;
+  transform: translate(-50%, -50%) scale(100%, 100%);
   transition: transform 200ms ease-in-out;
 }
 

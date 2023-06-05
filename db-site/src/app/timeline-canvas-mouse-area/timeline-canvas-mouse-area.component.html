@@ -1,7 +1,7 @@
 <div
   *ngIf="lastValidMousePosition"
   class="pointer border-primary"
-  [class.hidden]="!hoveredPoint"
+  [class.hidden]="!hoveredPoint || hoveredPointPerson"
   [class.clickable]="hoveredPoint && hoveredPointPerson"
   [class.loading]="!hoveredPoint || !hoveredPointPerson"
   style.width="{{ hoverRadiusPixels * 2 }}px"
@@ -13,7 +13,7 @@
   class="hovered-card-wrapper"
   [class.hidden]="!hoveredPointPerson"
   style.left="{{ lastValidMousePosition.x }}px"
-  style.top="{{ lastValidMousePosition.y - hoverRadiusPixels }}px"
+  style.top="{{ lastValidMousePosition.y }}px"
 >
   <dbw-person-small-card [person]="hoveredPointPerson" [wikiPage]="hoveredPointWikiPage"></dbw-person-small-card>
 </div>
