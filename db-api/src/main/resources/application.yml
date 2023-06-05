@@ -35,7 +35,9 @@ exporting:
     header: classpath:static/header.csv
   job:
     lifetime: 10
-search:
-  results-per-page: 200
 temp:
   path: bin/temp
+search:
+  results-per-page: 200
+timeline:
+  result-limit: 80000

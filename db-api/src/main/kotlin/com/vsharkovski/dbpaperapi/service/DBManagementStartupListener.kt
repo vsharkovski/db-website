@@ -50,9 +50,12 @@ class DBManagementStartupListener(
         if (shouldProcessCitizenshipNamesReadability) {
             citizenshipService.processAllCitizenshipNamesForReadability()
         }
+        // Disabled for now.
+        /*
         if (shouldProcessPersonNamesSearch) {
             personService.processAllPersonNamesForSearch()
         }
+         */
     }
 
     @EventListener
