@@ -1,6 +1,8 @@
 package com.vsharkovski.dbpaperapi.service
 
+import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
+import com.vsharkovski.dbpaperapi.model.PersonNoRawData
 import com.vsharkovski.dbpaperapi.model.TimelinePoint
 import com.vsharkovski.dbpaperapi.repository.PersonRepository
 import org.slf4j.Logger
@@ -10,9 +12,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
-class PersonService(
-    val personRepository: PersonRepository, val nameService: NameService
-) {
+class PersonService(val personRepository: PersonRepository) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @Value("\${timeline.result-limit}")
@@ -33,4 +33,6 @@ class PersonService(
             )
         }
 
+    fun findPeopleByWikidataCodes(codes: List<Int>): List<PersonNoRawData> =
+        codes.mapNotNull { this.personRepository.findByWikidataCode(it) }
 }

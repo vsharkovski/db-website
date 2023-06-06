@@ -1,13 +1,13 @@
 .card {
-  width: 10rem;
+  max-width: 10rem;
   background-color: white;
   border-radius: 0.5rem;
   border-style: solid;
   border-width: 2px;
   border-color: var(--bs-primary);
-  overflow: clip;
   transition: transform 200ms ease-in-out;
   transform: scaleY(100%);
+  overflow: clip;
 }
 
 .card.disappearing {
@@ -15,7 +15,7 @@
 }
 
 .info {
-  padding: 0.5rem;
+  padding: 0.25rem;
 }
 
 .name {
@@ -34,7 +34,11 @@
 
 img {
   width: 100%;
-  height: auto;
+  height: 10rem;
+  /* height: auto; */
+  /* max-height: 10rem; */
+  object-fit: cover;
+  object-position: center center;
 }
 
 img.hidden {

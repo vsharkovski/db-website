@@ -1,20 +1,20 @@
 <div class="card" [style.hidden]="isDisappearing">
-  <div class="info" *ngIf="person">
-    <h6 class="name">{{ person.name | readableName }}</h6>
-    <p *ngIf="person.birth !== null || person.death !== null" class="years">
-      <span *ngIf="person.birth !== null || person.death !== null">{{
-        person.birth | dateYear | unknownYear : true : false
-      }}</span>
-      <span> – </span>
-      <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
-    </p>
-  </div>
-  <div class="image-wrapper" *ngIf="person && wikiPage && person.wikidataCode === wikiPage.wikidataCode">
+  <div class="image-wrapper" *ngIf="showPicture && person && wikiPage && person.wikidataCode === wikiPage.wikidataCode">
     <img
       *ngIf="wikiPage.thumbnail?.source"
       [src]="wikiPage.thumbnail?.source"
       (load)="onImageLoad()"
       [class.hidden]="!isImageLoaded"
     />
+  </div>
+  <div class="info" *ngIf="person">
+    <h6 class="name mb-1">{{ person.name | readableName }}</h6>
+    <p *ngIf="person.birth !== null || person.death !== null" class="years mb-0">
+      <span *ngIf="person.birth !== null || person.death !== null">{{
+        person.birth | dateYear | unknownYear : true : false
+      }}</span>
+      <span> – </span>
+      <span *ngIf="person.death !== null">{{ person.death | dateYear }}</span>
+    </p>
   </div>
 </div>

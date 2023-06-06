@@ -2,6 +2,7 @@ package com.vsharkovski.dbpaperapi.repository
 
 import com.vsharkovski.dbpaperapi.model.Person
 import com.vsharkovski.dbpaperapi.model.PersonIdAndNames
+import com.vsharkovski.dbpaperapi.model.PersonNoRawData
 import com.vsharkovski.dbpaperapi.model.PersonTimelineData
 import com.vsharkovski.dbpaperapi.repository.custom.JpaSpecificationStreamExecutorWithProjection
 import org.springframework.data.domain.Pageable
@@ -28,6 +29,8 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
         order by p.notabilityIndex desc
     """)
     fun findTimelineData(page: Pageable): Slice<PersonTimelineData>
+
+    fun findByWikidataCode(wikidataCode: Int): PersonNoRawData?
 
     @Transactional
     @Modifying

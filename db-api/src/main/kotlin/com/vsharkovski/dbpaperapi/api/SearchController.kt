@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/search")
-class SearchController(
-    val searchService: SearchService,
-) {
+class SearchController(val searchService: SearchService) {
     private final val sortDirectionStringToEnum: Map<String, Sort.Direction> =
         mapOf("ascending" to Sort.Direction.ASC, "descending" to Sort.Direction.DESC)
 

@@ -169,7 +169,7 @@ export class TimelineService {
     }
 
     // Sort by notability index descending, in order to speed up point selection.
-    result.sort((a, b) => b.notabilityIndex! - a.notabilityIndex!);
+    result.sort((a, b) => b.notabilityIndex - a.notabilityIndex);
 
     return result;
   }
