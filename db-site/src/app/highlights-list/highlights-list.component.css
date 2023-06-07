@@ -50,7 +50,12 @@
   background-position: center 0%;
   background-repeat: no-repeat;
   border-radius: 1rem;
-  mask-image: linear-gradient(to right, transparent, black 40%);
+}
+
+@media (min-width: 768px) {
+  .info-image-section .image {
+    mask-image: linear-gradient(to right, transparent, black 40%);
+  }
 }
 
 .timeline-section .image {
