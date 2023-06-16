@@ -61,7 +61,11 @@ export class TimelineService {
           )
         )
         .subscribe((response) => {
-          this.cacheResponse(response);
+          // Cache response if it was valid (assuming there will always be a
+          // nonzero number of results).
+          if (response.results.length > 0) {
+            this.cacheResponse(response);
+          }
 
           const data = this.processResponse(response);
           this.timelineData = data;
