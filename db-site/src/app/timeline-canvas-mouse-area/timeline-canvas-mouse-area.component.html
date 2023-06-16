@@ -9,16 +9,17 @@
   style.top="{{ lastValidMousePosition.y }}px"
 ></div>
 <div
-  *ngIf="lastValidMousePosition"
+  *ngIf="hoveredCardPosition"
   class="card-wrapper"
   [class.hidden]="!hovered.person"
-  style.left="{{ lastValidMousePosition.x }}px"
-  style.top="{{ lastValidMousePosition.y }}px"
+  style.left="{{ hoveredCardPosition.x }}px"
+  style.top="{{ hoveredCardPosition.y }}px"
 >
   <dbw-person-small-card
     [person]="hovered.person"
     [wikiPage]="hovered.wikiPage"
     [showPicture]="true"
+    (dimensionsChanged)="onHoveredCardDimensionsChanged($event)"
   ></dbw-person-small-card>
 </div>
 <div

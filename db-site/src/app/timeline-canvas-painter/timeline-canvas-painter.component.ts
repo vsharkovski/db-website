@@ -98,6 +98,7 @@ export class TimelineCanvasPainterComponent
 
     const canvasElement = this.canvasRef.nativeElement;
     this.canvasBoundingBox = canvasElement.getBoundingClientRect();
+    this.service.canvasBoundingBox = this.canvasBoundingBox;
 
     const didResize =
       canvasElement.height != this.canvasBoundingBox!.height ||
