@@ -2,4 +2,4 @@
 /bin/
 
 # Ignore deployment scripts.
-*.ps1
+deployment/
