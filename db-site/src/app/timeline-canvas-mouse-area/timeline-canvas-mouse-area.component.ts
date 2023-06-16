@@ -14,7 +14,6 @@ import {
   distinctUntilChanged,
   filter,
   forkJoin,
-  map,
   of,
   switchMap,
 } from 'rxjs';
@@ -64,6 +63,10 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   removeHoveredPoint$ = new Subject<number>();
   updateHoverApiData$ = new Subject<TimelinePoint>();
 
+  hoveredCardDimensions: PixelCoordinate = { x: 0, y: 0 };
+  hoveredCardPosition: PixelCoordinate | null = null;
+  updateHoveredCardPosition$ = new Subject<void>();
+
   highlighted: PointData[] = [];
   highlightedPoints$ = new Subject<TimelinePoint[]>();
 
@@ -78,6 +81,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     if (this.mousePosition) {
       // For all changes, we should update hover data.
       this.updateHoverData(this.mousePosition);
+      this.updateHoveredCardPosition$.next();
     }
 
     if (changes['buckets']) {
@@ -182,6 +186,25 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
           if (person) highlight.person = person;
         }
       });
+
+    this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
+      if (
+        !this.lastValidMousePosition ||
+        !this.painterService.canvasBoundingBox
+      ) {
+        this.hoveredCardPosition = null;
+        return;
+      }
+
+      this.hoveredCardPosition = this.fitRectWithinBounds(
+        this.lastValidMousePosition,
+        this.hoveredCardDimensions,
+        {
+          x: this.painterService.canvasBoundingBox.width,
+          y: this.painterService.canvasBoundingBox.height,
+        }
+      );
+    });
   }
 
   @HostListener('window:click')
@@ -308,5 +331,32 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     }
 
     return result;
+  }
+
+  onHoveredCardDimensionsChanged(dimensions: PixelCoordinate): void {
+    this.hoveredCardDimensions = dimensions;
+    this.updateHoveredCardPosition$.next();
+  }
+
+  private fitRectWithinBounds(
+    center: PixelCoordinate,
+    sizeRect: PixelCoordinate,
+    boundsRect: PixelCoordinate
+  ): PixelCoordinate {
+    const fitCoordWithinBounds = (
+      coord: number,
+      size: number,
+      bounds: number
+    ): number => {
+      return (
+        coord +
+        Math.max(0, Math.ceil(size / 2 - coord)) -
+        Math.max(0, Math.floor(coord + size / 2 - bounds))
+      );
+    };
+    return {
+      x: fitCoordWithinBounds(center.x, sizeRect.x, boundsRect.x),
+      y: fitCoordWithinBounds(center.y, sizeRect.y, boundsRect.y),
+    };
   }
 }

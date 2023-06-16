@@ -11,6 +11,8 @@ export class TimelineCanvasPainterService {
   private _marginSizePixels = 2;
   private _pointMarginSizeCombined = 6;
 
+  canvasBoundingBox?: DOMRect;
+
   public set numBuckets(numBuckets: number) {
     this._numBuckets = numBuckets;
   }
