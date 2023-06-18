@@ -142,10 +142,9 @@ export class TimelineCanvasPainterComponent
     const pointSizeRaw = Math.sqrt(
       (this.canvasBoundingBox.height * this.canvasBoundingBox.width) /
         numSelected /
-        maxAtAny /
+        maxAtAny ** (1 / 8) /
         (1 + this.pointMarginFractionOfSize) ** 2
     );
-
     const pointSizePixelsUnrestricted = Math.floor(pointSizeRaw);
     this.pointSizePixels = Math.max(
       this.minPointSizePixels,
