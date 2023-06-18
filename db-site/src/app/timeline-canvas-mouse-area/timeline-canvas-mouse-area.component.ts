@@ -209,7 +209,8 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
   @HostListener('window:click')
   onPointerClick(): void {
-    if (this.hovered.person) {
+    // If a person is hovered and mouse is inside the canvas, open a modal.
+    if (this.hovered.person && this.mousePosition) {
       this.modalService.openPersonDetailModal(this.hovered.person);
       this.hovered = {
         point: null,

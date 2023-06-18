@@ -53,6 +53,27 @@ export class RangeSelectorComponent implements OnChanges {
     this.selectedElement = element;
   }
 
+  onClick(side: 'left' | 'right'): void {
+    let didUpdate = false;
+    if (side === 'left') {
+      if (this.minValueSelected - 1 >= this.minValue) {
+        this.minValueSelected -= 1;
+        didUpdate = true;
+      }
+    } else {
+      if (this.maxValueSelected + 1 <= this.maxValue) {
+        this.maxValueSelected += 1;
+        didUpdate = true;
+      }
+    }
+    if (didUpdate) {
+      this.selectionChanged.next({
+        min: this.minValueSelected,
+        max: this.maxValueSelected,
+      });
+    }
+  }
+
   @HostListener('window:mouseup')
   onWindowMouseUp(): void {
     if (this.selectedElement) {
@@ -188,7 +209,7 @@ export class RangeSelectorComponent implements OnChanges {
     // Update selected values.
     this.minValueSelected = newMin;
     this.maxValueSelected = newMax;
-    this.selectionChanged.next({ min: newMin, max: newMax });
+    this.selectionChanged.emit({ min: newMin, max: newMax });
   }
 
   getPercentageFromFraction(fraction: number): string {

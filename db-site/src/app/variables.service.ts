@@ -10,10 +10,22 @@ import { VariablesAllResponse } from './variables-all-response.model';
 })
 export class VariablesService {
   variables$ = new ReplaySubject<VariablesAllResponse>();
+  occupationIdToColorMap$!: Observable<string[]>;
+
+  readonly occupationNameToColorObject = {
+    Culture: 'rgb(103, 174, 59)',
+    'Sports/Games': 'rgb(156, 132, 197)',
+    Leadership: 'rgb(212, 85, 96)',
+    'Discovery/Science': 'rgb(91, 135, 198)',
+    Other: 'rgb(255, 211, 23)',
+  };
 
   constructor(private http: HttpClient, private errorService: ErrorService) {
     this.getAllVariablesFromApi().subscribe((variables) =>
       this.variables$.next(variables)
+    );
+    this.occupationIdToColorMap$ = this.getOccupations().pipe(
+      map((occupations) => this.createOccupationIdToColorMap(occupations))
     );
   }
 
@@ -47,6 +59,10 @@ export class VariablesService {
     );
   }
 
+  getOccupationIdToColorMap(): Observable<string[]> {
+    return this.occupationIdToColorMap$;
+  }
+
   private getAllVariablesFromApi(): Observable<VariablesAllResponse> {
     return this.http.get<VariablesAllResponse>('api/variables').pipe(
       catchError(
@@ -66,5 +82,26 @@ export class VariablesService {
     }, Object.create(null));
     mp[-1] = '~';
     return mp;
+  }
+
+  private createOccupationIdToColorMap(occupations: Variable[]): string[] {
+    const result: string[] = [];
+    const maxId = occupations.reduce((max, curr) => Math.max(max, curr.id), 0);
+
+    // Fill results with a backup color.
+    for (let i = 0; i < maxId + 1; i++) result.push('rgb(100, 100, 100)');
+
+    const occupationNameToColorMap = new Map(
+      Object.entries(this.occupationNameToColorObject)
+    );
+
+    for (const occ of occupations) {
+      const color = occupationNameToColorMap.get(occ.name);
+      if (color) {
+        result[occ.id] = color;
+      }
+    }
+
+    return result;
   }
 }
