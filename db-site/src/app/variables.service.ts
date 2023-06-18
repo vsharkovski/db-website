@@ -89,7 +89,7 @@ export class VariablesService {
     const maxId = occupations.reduce((max, curr) => Math.max(max, curr.id), 0);
 
     // Fill results with a backup color.
-    for (let i = 0; i < maxId + 1; i++) result.push('#000000');
+    for (let i = 0; i < maxId + 1; i++) result.push('rgb(100, 100, 100)');
 
     const occupationNameToColorMap = new Map(
       Object.entries(this.occupationNameToColorObject)
