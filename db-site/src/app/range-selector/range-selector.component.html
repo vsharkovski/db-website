@@ -21,5 +21,19 @@
       [style.width]="getSizePercentageFromValues(minValueSelected, maxValueSelected)"
       (mousedown)="onMouseDown('bar')"
     ></div>
+    <div
+      class="arrow left-arrow"
+      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      (click)="onClick('left')"
+    >
+      <span><</span>
+    </div>
+    <div
+      class="arrow right-arrow"
+      [style.left]="getPositionPercentageFromValue(maxValueSelected)"
+      (click)="onClick('right')"
+    >
+      <span>></span>
+    </div>
   </div>
 </div>

@@ -63,3 +63,23 @@
 .hidden {
   transform: translateY(20%) scaleY(0%);
 }
+
+.arrow {
+  height: 100%;
+  position: absolute;
+  cursor: pointer;
+}
+
+.arrow span {
+  font-size: 1.5rem;
+  transform: translateY(-15%);
+  position: absolute;
+}
+
+.left-arrow span {
+  right: calc(100% + 0.25rem);
+}
+
+.right-arrow span {
+  left: calc(100% + 0.25rem);
+}
