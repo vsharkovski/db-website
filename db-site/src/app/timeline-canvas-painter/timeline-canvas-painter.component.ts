@@ -58,9 +58,14 @@ export class TimelineCanvasPainterComponent
   ) {}
 
   ngOnInit(): void {
-    this.variablesService
-      .getOccupationIdToColorMap()
-      .subscribe((map) => (this.occupationIdToColor = map));
+    this.variablesService.getOccupationIdToColorMap().subscribe((map) => {
+      this.occupationIdToColor = map;
+
+      // Re-draw canvas immediately with colors.
+      this.updateCanvasSize();
+      this.updateDrawData();
+      this.drawCanvas();
+    });
 
     this.initialize$.pipe(debounceTime(100)).subscribe(() => {
       this.updateCanvasSize();
