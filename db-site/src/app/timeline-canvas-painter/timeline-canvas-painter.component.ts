@@ -14,6 +14,7 @@ import {
 import { TimelinePoint } from '../timeline-point.model';
 import { ReplaySubject, debounceTime } from 'rxjs';
 import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
+import { VariablesService } from '../variables.service';
 
 @Component({
   selector: 'dbw-timeline-canvas-painter',
@@ -36,8 +37,8 @@ export class TimelineCanvasPainterComponent
   // Drawing parameters.
   readonly minPointSizePixels = 4;
   readonly maxPointSizePixels = 36;
-  readonly pointMarginFractionOfSize = 0.5;
-  readonly pointColors = [
+  readonly pointMarginFractionOfSize = 0.25;
+  readonly backupPointColors = [
     'rgb(100, 100, 100)',
     'rgb(120, 120, 120)',
     'rgb(80, 80, 80)',
@@ -49,10 +50,19 @@ export class TimelineCanvasPainterComponent
   marginSizePixels = 2;
   pointMarginSizeCombined = 6;
 
-  constructor(private service: TimelineCanvasPainterService) {}
+  occupationIdToColor: string[] | null = null;
+
+  constructor(
+    private service: TimelineCanvasPainterService,
+    private variablesService: VariablesService
+  ) {}
 
   ngOnInit(): void {
-    this.initialize$.pipe(debounceTime(200)).subscribe(() => {
+    this.variablesService
+      .getOccupationIdToColorMap()
+      .subscribe((map) => (this.occupationIdToColor = map));
+
+    this.initialize$.pipe(debounceTime(100)).subscribe(() => {
       this.updateCanvasSize();
       this.updateDrawData();
       this.updateNumBuckets();
@@ -178,25 +188,25 @@ export class TimelineCanvasPainterComponent
   drawCanvas(): void {
     if (!this.canvasRef || !this.canvasBoundingBox) return;
 
-    const ctx = this.canvasRef.nativeElement.getContext('2d', {
-      alpha: false,
-    });
+    const ctx = this.canvasRef.nativeElement.getContext('2d');
 
     // Draw white background.
-    ctx.fillStyle = 'white';
-    ctx.fillRect(
-      0,
-      0,
-      this.canvasBoundingBox.width,
-      this.canvasBoundingBox.height
-    );
+    // ctx.fillStyle = 'white';
+    // ctx.fillRect(
+    //   0,
+    //   0,
+    //   this.canvasBoundingBox.width,
+    //   this.canvasBoundingBox.height
+    // );
 
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
     const pointSize = this.pointSizePixels;
     const pointMarginSizeCombined = this.pointMarginSizeCombined;
     const yMiddle = this.canvasMiddleYPixels;
-    const pointColors = this.pointColors;
+    const occupationIdToColor = this.occupationIdToColor;
+    const backupPointColors = this.backupPointColors;
+
     let x = this.marginSizePixels;
 
     for (const bucket of this.buckets) {
@@ -210,8 +220,15 @@ export class TimelineCanvasPainterComponent
       // down/up, starting with the bottom position.
       for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
         // Pick random color for this point.
-        ctx.fillStyle =
-          pointColors[Math.floor(Math.random() * pointColors.length)];
+        if (occupationIdToColor) {
+          ctx.fillStyle =
+            occupationIdToColor[bucket[pointIndex].level1MainOccId ?? 0];
+        } else {
+          ctx.fillStyle =
+            backupPointColors[
+              Math.floor(Math.random() * backupPointColors.length)
+            ];
+        }
 
         if (pointIndex % 2 == 0) {
           ctx.fillRect(x, yBottom, pointSize, pointSize);

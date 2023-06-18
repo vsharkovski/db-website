@@ -4,7 +4,7 @@
   border-radius: 0.5rem;
   border-style: solid;
   border-width: 2px;
-  border-color: var(--bs-primary);
+  border-color: var(--bs-secondary);
   transition: transform 200ms ease-in-out;
   transform: scaleY(100%);
   overflow: clip;

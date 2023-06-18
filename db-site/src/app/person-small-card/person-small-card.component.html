@@ -1,4 +1,4 @@
-<div class="card" [style.hidden]="isDisappearing">
+<div class="card" [style.hidden]="isDisappearing" [style.border-color]="borderColor">
   <div class="image-wrapper" *ngIf="showPicture && person && wikiPage && person.wikidataCode === wikiPage.wikidataCode">
     <img
       *ngIf="wikiPage.thumbnail?.source"
