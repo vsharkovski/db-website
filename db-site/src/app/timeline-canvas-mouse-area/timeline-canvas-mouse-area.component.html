@@ -26,7 +26,7 @@
   *ngFor="let highlight of highlighted"
   class="card-wrapper highlight"
   [class.d-none]="!highlight.position"
-  [class.hidden]="!highlight.person"
+  [class.hidden]="!highlight.person || hovered.person"
   style.--size-percentage="{{ maxCardSizeFraction * 100 }}%"
   style.left="{{ highlight.position?.x }}px"
   style.top="{{ highlight.position?.y }}px"
