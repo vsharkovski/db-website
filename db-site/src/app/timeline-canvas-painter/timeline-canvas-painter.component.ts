@@ -35,8 +35,8 @@ export class TimelineCanvasPainterComponent
   initialize$ = new ReplaySubject<void>();
 
   // Drawing parameters.
-  readonly minPointSizePixels = 4;
-  readonly maxPointSizePixels = 36;
+  readonly minPointSizePixels = 5;
+  readonly maxPointSizePixels = 44;
   readonly pointMarginFractionOfSize = 0.25;
   readonly backupPointColors = [
     'rgb(100, 100, 100)',
@@ -146,14 +146,10 @@ export class TimelineCanvasPainterComponent
         (1 + this.pointMarginFractionOfSize) ** 2
     );
 
-    this.pointSizePixels = Math.floor(pointSizeRaw);
+    const pointSizePixelsUnrestricted = Math.floor(pointSizeRaw);
     this.pointSizePixels = Math.max(
       this.minPointSizePixels,
-      this.pointSizePixels
-    );
-    this.pointSizePixels = Math.min(
-      this.maxPointSizePixels,
-      this.pointSizePixels
+      Math.min(this.maxPointSizePixels, pointSizePixelsUnrestricted)
     );
 
     // Make the margin be a fraction of the size of the point.
