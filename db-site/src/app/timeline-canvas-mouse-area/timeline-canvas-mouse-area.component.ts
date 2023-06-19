@@ -78,9 +78,12 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.mousePosition) {
-      // For all changes, we should update hover data.
-      this.updateHoverData(this.mousePosition);
+    if (
+      this.mousePosition &&
+      this.mousePosition === this.lastInsideMousePosition
+    ) {
+      // Since mouse is inside, for any change, we should update hover data.
+      this.updateHoverData(this.lastInsideMousePosition);
       this.updateHoveredCardPosition$.next();
     }
 
@@ -210,7 +213,11 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   @HostListener('window:click')
   onPointerClick(): void {
     // If a person is hovered and mouse is inside the canvas, open a modal.
-    if (this.hovered.person && this.mousePosition) {
+    if (
+      this.hovered.person &&
+      this.mousePosition &&
+      this.mousePosition === this.lastInsideMousePosition
+    ) {
       this.modalService.openPersonDetailModal(this.hovered.person);
       this.hovered = {
         point: null,

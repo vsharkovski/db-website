@@ -54,12 +54,12 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
       .subscribe(([fraction, prevFraction]) => {
         this.mousePositionFraction = fraction;
         if (fraction !== null && fraction.x >= 0 && fraction.x < 1) {
-          this.isMouseInsideX = true;
           this.updateSelection(fraction, prevFraction);
-        } else {
-          this.isMouseInsideX = false;
         }
       });
+    this.mouseTracker.isInside$.subscribe(
+      (isInside) => (this.isMouseInsideX = isInside.x)
+    );
   }
 
   onMouseDown(element: ElementName): void {
