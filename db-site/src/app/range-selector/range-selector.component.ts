@@ -165,34 +165,56 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
   /**
    * Zoom in/out the selected range.
-   * @param fraction Number in [0, 1], the fraction of the total value range
+   * @param changeFraction Number in [0, 1], the fraction of the total value range
    * to change the selected value range by.
    */
-  private doZoom(fraction: number) {
+  private doZoom(changeFraction: number) {
     if (!this.selectorElementRef) return;
 
-    // Determine how much to move the left and right ticks.
-    let fractionLeft = fraction * 0.5;
-    let fractionRight = fraction - fractionLeft;
+    let changeFractionLeft = changeFraction * 0.5;
+    let changeFractionRight = changeFraction - changeFractionLeft;
 
     if (this.isMouseInsideX) {
-      // Between the left and right endpoints of the selector. Determine amount dynamically.
-      fractionLeft = fraction * this.mousePositionFraction!.x;
-      fractionRight = fraction - fractionLeft;
+      // Between the left and right endpoints of the selector.
+      // Determine based on mouse position fraction.
+      changeFractionLeft = changeFraction * this.mousePositionFraction!.x;
+      changeFractionRight = changeFraction - changeFractionLeft;
     }
 
-    // Move left and right ticks by updating their values.
-    const func = (x: number): number =>
-      100 * Math.exp((-x - this.valueBoundary.min) / 2000);
+    // const getFractionMultiplier = (fraction: number): number => {
+    //   return (20 - 1) * Math.exp(-fraction * 4) + 1;
+    // };
+    // const leftFraction = this.getPositionFractionFromValue(
+    //   this.selectedValues.min
+    // );
+    // const rightFraction = this.getPositionFractionFromValue(
+    //   this.selectedValues.max
+    // );
+    // let leftMultiplier = getFractionMultiplier(leftFraction);
+    // let rightMultiplier = getFractionMultiplier(rightFraction);
+    // changeFractionLeft *= leftMultiplier;
+    // changeFractionRight *= rightMultiplier;
+    // console.log(
+    //   'lF',
+    //   leftFraction,
+    //   'rF',
+    //   rightFraction,
+    //   'lM',
+    //   leftMultiplier,
+    //   'rM',
+    //   rightMultiplier
+    // );
 
+    // Calculate values to change from fractions.
     const valueBoundarySize =
       this.valueBoundary.max - this.valueBoundary.min + 1;
 
-    let amountLeft = Math.round(fractionLeft * valueBoundarySize);
-    let amountRight = Math.round(fractionRight * valueBoundarySize);
+    let changeValueLeft = Math.round(changeFractionLeft * valueBoundarySize);
+    let changeValueRight = Math.round(changeFractionRight * valueBoundarySize);
 
-    let newMin = this.clampValue(this.selectedValues.min - amountLeft);
-    let newMax = this.clampValue(this.selectedValues.max + amountRight);
+    // Calculate new selected boundaries.
+    let newMin = this.clampValue(this.selectedValues.min - changeValueLeft);
+    let newMax = this.clampValue(this.selectedValues.max + changeValueRight);
 
     // In case they pass each other, set them to the middle.
     if (newMin > newMax) {
