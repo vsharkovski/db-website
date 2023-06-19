@@ -2,35 +2,35 @@
   <div class="selector" #selector>
     <div
       class="tick left-tick"
-      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      [style.left]="getPositionPercentageFromValue(selectedValues.min)"
       (mousedown)="onMouseDown('left')"
     >
-      <span class="label">{{ minValueSelected | dateYear }}</span>
+      <span class="label">{{ selectedValues.min | dateYear }}</span>
     </div>
     <div
       class="tick right-tick"
-      [style.left]="getPositionPercentageFromValue(maxValueSelected)"
+      [style.left]="getPositionPercentageFromValue(selectedValues.max)"
       (mousedown)="onMouseDown('right')"
     >
-      <span class="label" [class.hidden]="minValueSelected == maxValueSelected">{{ maxValueSelected | dateYear }}</span>
+      <span class="label" [class.hidden]="selectedValues.min == selectedValues.max">{{ selectedValues.max | dateYear }}</span>
     </div>
     <div
       #bar
       class="bar"
-      [style.left]="getPositionPercentageFromValue(minValueSelected)"
-      [style.width]="getSizePercentageFromValues(minValueSelected, maxValueSelected)"
+      [style.left]="getPositionPercentageFromValue(selectedValues.min)"
+      [style.width]="getSizePercentageFromValues(selectedValues.min, selectedValues.max)"
       (mousedown)="onMouseDown('bar')"
     ></div>
     <div
       class="arrow left-arrow"
-      [style.left]="getPositionPercentageFromValue(minValueSelected)"
+      [style.left]="getPositionPercentageFromValue(selectedValues.min)"
       (click)="onClick('left')"
     >
       <span><</span>
     </div>
     <div
       class="arrow right-arrow"
-      [style.left]="getPositionPercentageFromValue(maxValueSelected)"
+      [style.left]="getPositionPercentageFromValue(selectedValues.max)"
       (click)="onClick('right')"
     >
       <span>></span>

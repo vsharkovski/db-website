@@ -23,11 +23,8 @@ type ElementName = 'left' | 'right' | 'bar';
   hostDirectives: [MouseTrackerDirective],
 })
 export class RangeSelectorComponent implements OnChanges, OnInit {
-  @Input() minValue!: number;
-  @Input() maxValue!: number;
-
-  @Input() minValueSelected!: number;
-  @Input() maxValueSelected!: number;
+  @Input() valueBoundary!: NumberRange;
+  @Input() selectedValues!: NumberRange;
 
   // Whether to enable zoom when using mouse wheel *on the range selector itself.*
   @Input() enableZoomOnWheel: boolean = false;
@@ -44,11 +41,8 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
   ngOnChanges(): void {
     // If selected values are not provided, set them to the boundaries.
-    if (this.minValueSelected === undefined) {
-      this.minValueSelected = this.minValue;
-    }
-    if (this.maxValueSelected === undefined) {
-      this.maxValueSelected = this.maxValue;
+    if (!this.selectedValues) {
+      this.selectedValues = this.valueBoundary;
     }
   }
 
@@ -72,22 +66,23 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
   onClick(side: 'left' | 'right'): void {
     let didUpdate = false;
+    let newSelectedValues: NumberRange = { ...this.selectedValues };
+
     if (side === 'left') {
-      if (this.minValueSelected - 1 >= this.minValue) {
-        this.minValueSelected -= 1;
+      if (this.selectedValues.min - 1 >= this.valueBoundary.min) {
+        newSelectedValues.min -= 1;
         didUpdate = true;
       }
     } else {
-      if (this.maxValueSelected + 1 <= this.maxValue) {
-        this.maxValueSelected += 1;
+      if (this.selectedValues.max + 1 <= this.valueBoundary.max) {
+        newSelectedValues.max += 1;
         didUpdate = true;
       }
     }
+
     if (didUpdate) {
-      this.selectionChanged.next({
-        min: this.minValueSelected,
-        max: this.maxValueSelected,
-      });
+      this.selectedValues = newSelectedValues;
+      this.selectionChanged.next(this.selectedValues);
     }
   }
 
@@ -106,17 +101,18 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
     let value = this.getValueFromPositionFraction(fraction.x);
     let updatedAnySelected = false;
+    let newSelectedValues: NumberRange = { ...this.selectedValues };
 
     if (this.selectedElement == 'left') {
       // Update min selected value if new.
-      if (this.maxValueSelected < value) value = this.maxValueSelected;
-      updatedAnySelected = value != this.minValueSelected;
-      this.minValueSelected = value;
+      if (this.selectedValues.max < value) value = this.selectedValues.max;
+      updatedAnySelected = value != this.selectedValues.min;
+      newSelectedValues.min = value;
     } else if (this.selectedElement == 'right') {
       // Update max selected value if new.
-      if (value < this.minValueSelected) value = this.minValueSelected;
-      updatedAnySelected = value != this.maxValueSelected;
-      this.maxValueSelected = value;
+      if (value < this.selectedValues.min) value = this.selectedValues.min;
+      updatedAnySelected = value != this.selectedValues.max;
+      newSelectedValues.max = value;
     } else if (prevFraction !== null) {
       // Bar. Move both min and max selected values, if it would not decrease range size.
 
@@ -126,25 +122,22 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
       const valueDifference = prevValue - value;
 
       // Get new min and max values.
-      const newMin = this.clampValue(this.minValueSelected + valueDifference);
-      const newMax = this.clampValue(this.maxValueSelected + valueDifference);
+      const newMin = this.clampValue(this.selectedValues.min + valueDifference);
+      const newMax = this.clampValue(this.selectedValues.max + valueDifference);
 
       // Get range sizes. Only update min and max selected if they are the same.
-      const prevRangeSize = this.maxValueSelected - this.minValueSelected;
+      const prevRangeSize = this.selectedValues.max - this.selectedValues.min;
       const rangeSize = newMax - newMin;
 
       if (rangeSize == prevRangeSize) {
-        this.minValueSelected = newMin;
-        this.maxValueSelected = newMax;
+        newSelectedValues = { min: newMin, max: newMax };
         updatedAnySelected = true;
       }
     }
 
     if (updatedAnySelected) {
-      this.selectionChanged.next({
-        min: this.minValueSelected,
-        max: this.maxValueSelected,
-      });
+      this.selectedValues = newSelectedValues;
+      this.selectionChanged.next(this.selectedValues);
     }
   }
 
@@ -179,26 +172,28 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
     // }
 
     // Move left and right ticks by updating their values.
-    let newMin = this.clampValue(this.minValueSelected - amountLeft);
-    let newMax = this.clampValue(this.maxValueSelected + amountRight);
+    let newMin = this.clampValue(this.selectedValues.min - amountLeft);
+    let newMax = this.clampValue(this.selectedValues.max + amountRight);
 
     // In case they pass each other, set them to the middle.
     if (newMin > newMax) {
       const middle = Math.round(
-        (this.minValueSelected + this.maxValueSelected) / 2
+        (this.selectedValues.min + this.selectedValues.max) / 2
       );
       newMin = middle;
       newMax = middle;
     }
 
     // Update selected values.
-    this.minValueSelected = newMin;
-    this.maxValueSelected = newMax;
-    this.selectionChanged.emit({ min: newMin, max: newMax });
+    this.selectedValues = { min: newMin, max: newMax };
+    this.selectionChanged.emit(this.selectedValues);
   }
 
   clampValue(value: number): number {
-    return Math.max(this.minValue, Math.min(this.maxValue, value));
+    return Math.max(
+      this.valueBoundary.min,
+      Math.min(this.valueBoundary.max, value)
+    );
   }
 
   getPercentageFromFraction(fraction: number): string {
@@ -211,12 +206,15 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
    */
   getValueFromPositionFraction(fraction: number): number {
     return Math.round(
-      this.minValue + fraction * (this.maxValue - this.minValue)
+      this.valueBoundary.min +
+        fraction * (this.valueBoundary.max - this.valueBoundary.min)
     );
   }
 
   getPositionFractionFromValue(value: number): number {
-    return (value - this.minValue) / (this.maxValue - this.minValue);
+    const valueBoundarySize = this.valueBoundary.max - this.valueBoundary.min;
+    if (valueBoundarySize === 0) return 0;
+    return (value - this.valueBoundary.min) / valueBoundarySize;
   }
 
   getPositionPercentageFromValue(value: number): string {

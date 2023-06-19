@@ -21,10 +21,8 @@
         class="mb-3"
       ></dbw-timeline-canvas>
       <dbw-range-selector
-        [minValue]="selectedYearsBoundary.min"
-        [maxValue]="selectedYearsBoundary.max"
-        [minValueSelected]="selectedYears.min"
-        [maxValueSelected]="selectedYears.max"
+        [valueBoundary]="selectedYearsBoundary"
+        [selectedValues]="selectedYears"
         [enableZoomOnWheel]="false"
         (selectionChanged)="onYearSelectionChanged($event)"
       ></dbw-range-selector>
