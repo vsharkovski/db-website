@@ -11,6 +11,8 @@ import { NumberRange } from '../number-range.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
 import { PixelCoordinate } from '../pixel-coordinate.model';
 import { pairwise, startWith } from 'rxjs';
+import { RangeMapService } from '../range-map.service';
+import { RangeMappingType } from '../range-mapping.type';
 
 type ElementName = 'left' | 'right' | 'bar';
 
@@ -27,18 +29,20 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   // Whether to enable zoom when using mouse wheel *on the range selector itself.*
   @Input() enableZoomOnWheel: boolean = false;
 
-  @Input() type: 'linear' | 'log' = 'linear';
+  @Input() type: RangeMappingType = 'linear';
 
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
   readonly defaultZoomFraction = 0.005;
-  readonly logarithmicConstant = 0.001;
 
   selectedElement: ElementName | null = null;
   mousePositionFraction: PixelCoordinate | null = null;
   isMouseInsideX = false;
 
-  constructor(private mouseTracker: MouseTrackerDirective) {}
+  constructor(
+    private mouseTracker: MouseTrackerDirective,
+    private rangeMapService: RangeMapService
+  ) {}
 
   ngOnChanges(): void {
     // If selected values are not provided, set them to the boundaries.
@@ -100,7 +104,11 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   updateSelection(fraction: number, prevFraction: number | null): void {
     if (!this.selectedElement) return;
 
-    let value = this.getValueFromFraction(fraction);
+    let value = this.rangeMapService.mapFractionToValue(
+      this.type,
+      fraction,
+      this.valueBoundary
+    );
     let updatedAnySelected = false;
     let newSelectedValues: NumberRange = { ...this.selectedValues };
 
@@ -119,12 +127,19 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
       // Get value from previous mouse position. Use it to calculate the difference
       // in values that the mouse movement would cause.
-      const prevValue = this.getValueFromFraction(prevFraction);
+      const prevValue = this.rangeMapService.mapFractionToValue(
+        this.type,
+        prevFraction,
+        this.valueBoundary
+      );
       const valueDifference = prevValue - value;
 
       // Get new min and max values.
-      const newMin = this.clampValue(this.selectedValues.min + valueDifference);
-      const newMax = this.clampValue(this.selectedValues.max + valueDifference);
+      const clampValue = (v: number): number =>
+        Math.max(this.valueBoundary.min, Math.min(this.valueBoundary.max, v));
+
+      const newMin = clampValue(this.selectedValues.min + valueDifference);
+      const newMax = clampValue(this.selectedValues.max + valueDifference);
 
       // Get range sizes. Only update min and max selected if they are the same.
       const prevRangeSize = this.selectedValues.max - this.selectedValues.min;
@@ -177,17 +192,37 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
       changeFractionRight = changeFraction - changeFractionLeft;
     }
 
-    const leftFraction = this.getFractionFromValue(this.selectedValues.min);
-    const rightFraction = this.getFractionFromValue(this.selectedValues.max);
+    const leftFraction = this.rangeMapService.mapValueToFraction(
+      this.type,
+      this.selectedValues.min,
+      this.valueBoundary
+    );
+    const rightFraction = this.rangeMapService.mapValueToFraction(
+      this.type,
+      this.selectedValues.max,
+      this.valueBoundary
+    );
 
     // Calculate new selected boundaries.
-    let newMin = this.getValueFromFraction(leftFraction - changeFractionLeft);
-    let newMax = this.getValueFromFraction(rightFraction + changeFractionRight);
+    let newMin = this.rangeMapService.mapFractionToValue(
+      this.type,
+      leftFraction - changeFractionLeft,
+      this.valueBoundary
+    );
+    let newMax = this.rangeMapService.mapFractionToValue(
+      this.type,
+      rightFraction + changeFractionRight,
+      this.valueBoundary
+    );
 
     // In case they pass each other, set them to the middle.
     if (newMin > newMax) {
       const middleFraction = (leftFraction + rightFraction) / 2;
-      const middleValue = this.getValueFromFraction(middleFraction);
+      const middleValue = this.rangeMapService.mapFractionToValue(
+        this.type,
+        middleFraction,
+        this.valueBoundary
+      );
       newMin = middleValue;
       newMax = middleValue;
     }
@@ -202,81 +237,33 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
     }
   }
 
-  clampFraction(fraction: number): number {
-    return Math.max(0, Math.min(1, fraction));
-  }
-
-  clampValue(value: number): number {
-    return Math.max(
-      this.valueBoundary.min,
-      Math.min(this.valueBoundary.max, value)
-    );
-  }
-
   getPercentageFromFraction(fraction: number): string {
     const result = Math.max(0, Math.min(100, 100 * fraction));
     return `${result}%`;
   }
 
-  /**
-   * @param fraction Number in [0, 1).
-   * @returns A number in range [this.valueBoundary.min, this.valueBoundary.max].
-   */
-  getValueFromFraction(fraction: number): number {
-    let v;
-    if (this.type === 'linear') {
-      // Linear mapping.
-      v =
-        this.valueBoundary.min +
-        fraction * (this.valueBoundary.max - this.valueBoundary.min + 1);
-    } else {
-      /*
-      Logarithmic mapping.
-      Formula is v=(1/k)*ln((e^kb-e^ka)f + e^ka), where
-      a=valueBoundary.min, b=valueBoundary.max+1, k is a constant.
-      We can't calculate this using floating-point arithmetic, but
-      because a << -100, we have an approximation f~b+ln(x)/k.
-      */
-      v =
-        this.valueBoundary.max +
-        1 +
-        Math.log(fraction) / this.logarithmicConstant;
-    }
-    return this.clampValue(Math.round(v));
-  }
-
-  /**
-   *
-   * @param value A number in range [this.valueBoundary.min, this.valueBoundary.max].
-   * @returns A fraction in range [0, 1).
-   */
-  getFractionFromValue(value: number): number {
-    let f;
-    if (this.type === 'linear') {
-      // Linear mapping.
-      f =
-        (value - this.valueBoundary.min) /
-        (this.valueBoundary.max - this.valueBoundary.min + 1);
-    } else {
-      /*
-      Logarithmic mapping.
-      Same logic as in getValueFromFraction.
-      */
-      f = Math.exp(
-        this.logarithmicConstant * (value - (this.valueBoundary.max + 1))
-      );
-    }
-    return this.clampFraction(f);
-  }
-
   getPositionPercentageFromValue(value: number): string {
-    return this.getPercentageFromFraction(this.getFractionFromValue(value));
+    return this.getPercentageFromFraction(
+      this.rangeMapService.mapValueToFraction(
+        this.type,
+        value,
+        this.valueBoundary
+      )
+    );
   }
 
   getSizePercentageFromValues(values: NumberRange): string {
     const sizeFraction =
-      this.getFractionFromValue(values.max) -
-      this.getFractionFromValue(values.min);
+      this.rangeMapService.mapValueToFraction(
+        this.type,
+        values.max,
+        this.valueBoundary
+      ) -
+      this.rangeMapService.mapValueToFraction(
+        this.type,
+        values.min,
+        this.valueBoundary
+      );
     return this.getPercentageFromFraction(sizeFraction);
   }
 }
