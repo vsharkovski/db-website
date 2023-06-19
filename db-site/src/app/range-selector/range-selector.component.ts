@@ -204,8 +204,13 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
     }
 
     // Update selected values.
-    this.selectedValues = { min: newMin, max: newMax };
-    this.selectionChanged.emit(this.selectedValues);
+    if (
+      newMin != this.selectedValues.min ||
+      newMax != this.selectedValues.max
+    ) {
+      this.selectedValues = { min: newMin, max: newMax };
+      this.selectionChanged.emit(this.selectedValues);
+    }
   }
 
   clampValue(value: number): number {
