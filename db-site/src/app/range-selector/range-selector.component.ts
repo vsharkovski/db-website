@@ -123,30 +123,20 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
       updatedAnySelected = value != this.selectedValues.max;
       newSelectedValues.max = value;
     } else if (prevFraction !== null) {
-      // Bar. Move both min and max selected values, if it would not decrease range size.
+      // Bar. Move both min and max selected values, if it would not decrease the size of the bar.
+      const shiftedValues =
+        this.rangeMapService.shiftValueRangeByFractionDifference(
+          this.type,
+          this.selectedValues,
+          this.valueBoundary,
+          prevFraction - fraction
+        );
 
-      // Get value from previous mouse position. Use it to calculate the difference
-      // in values that the mouse movement would cause.
-      const prevValue = this.rangeMapService.mapFractionToValue(
-        this.type,
-        prevFraction,
-        this.valueBoundary
-      );
-      const valueDifference = prevValue - value;
-
-      // Get new min and max values.
-      const clampValue = (v: number): number =>
-        Math.max(this.valueBoundary.min, Math.min(this.valueBoundary.max, v));
-
-      const newMin = clampValue(this.selectedValues.min + valueDifference);
-      const newMax = clampValue(this.selectedValues.max + valueDifference);
-
-      // Get range sizes. Only update min and max selected if they are the same.
-      const prevRangeSize = this.selectedValues.max - this.selectedValues.min;
-      const rangeSize = newMax - newMin;
-
-      if (rangeSize == prevRangeSize) {
-        newSelectedValues = { min: newMin, max: newMax };
+      if (
+        shiftedValues.min !== this.selectedValues.min &&
+        shiftedValues.max !== this.selectedValues.max
+      ) {
+        newSelectedValues = shiftedValues;
         updatedAnySelected = true;
       }
     }
