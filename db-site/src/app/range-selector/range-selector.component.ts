@@ -161,15 +161,17 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   }
 
   doZoom(amount: number) {
-    if (!this.selectorElementRef || !this.isMouseInsideX) return;
+    if (!this.selectorElementRef) return;
 
     // Determine how much to move the left and right ticks.
     let amountLeft = Math.round(amount * 0.5);
     let amountRight = amount - amountLeft;
 
-    // Between the left and right endpoints of the selector. Determine amount dynamically.
-    amountLeft = Math.round(amount * this.mousePositionFraction!.x);
-    amountRight = amount - amountLeft;
+    if (this.isMouseInsideX) {
+      // Between the left and right endpoints of the selector. Determine amount dynamically.
+      amountLeft = Math.round(amount * this.mousePositionFraction!.x);
+      amountRight = amount - amountLeft;
+    }
 
     // If zooming out, swap them.
     // if (amount >= 0) {
