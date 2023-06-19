@@ -12,13 +12,15 @@
       [style.left]="getPositionPercentageFromValue(selectedValues.max)"
       (mousedown)="onMouseDown('right')"
     >
-      <span class="label" [class.hidden]="selectedValues.min == selectedValues.max">{{ selectedValues.max | dateYear }}</span>
+      <span class="label" [class.hidden]="selectedValues.min == selectedValues.max">{{
+        selectedValues.max | dateYear
+      }}</span>
     </div>
     <div
       #bar
       class="bar"
       [style.left]="getPositionPercentageFromValue(selectedValues.min)"
-      [style.width]="getSizePercentageFromValues(selectedValues.min, selectedValues.max)"
+      [style.width]="getSizePercentageFromValues(selectedValues)"
       (mousedown)="onMouseDown('bar')"
     ></div>
     <div

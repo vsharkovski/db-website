@@ -23,6 +23,7 @@
       <dbw-range-selector
         [valueBoundary]="selectedYearsBoundary"
         [selectedValues]="selectedYears"
+        type="log"
         [enableZoomOnWheel]="false"
         (selectionChanged)="onYearSelectionChanged($event)"
       ></dbw-range-selector>

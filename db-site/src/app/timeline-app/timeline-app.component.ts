@@ -14,7 +14,7 @@ import { PersonParametersService } from '../person-parameters.service';
 export class TimelineAppComponent implements OnInit {
   hasMousePointer = true;
   selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
-  selectedYears: NumberRange = { min: -600, max: 2000 };
+  selectedYears: NumberRange = { min: -400, max: 2000 };
   timelineData: TimelinePoint[] = [];
   filterOptions: TimelineOptions = {
     citizenshipId: null,
