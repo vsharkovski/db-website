@@ -31,6 +31,8 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
 
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
+  readonly defaultZoomFraction = 0.005;
+
   selectedElement: ElementName | null = null;
   mousePositionFraction: PixelCoordinate | null = null;
   isMouseInsideX = false;
@@ -144,8 +146,7 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   @HostListener('wheel', ['$event'])
   onWheel(event: WheelEvent): void {
     if (this.enableZoomOnWheel) {
-      const amount = 0.5 * (event.deltaX + event.deltaY + event.deltaZ);
-      this.doZoom(amount);
+      this.doZoomDefault(Math.sign(event.deltaX + event.deltaY + event.deltaZ));
 
       // Prevent default scrolling behavior to keep the screen in place.
       event.preventDefault();
@@ -153,25 +154,43 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
     }
   }
 
-  doZoom(amount: number) {
+  /**
+   * Zoom in/out the selected range.
+   * @param direction The direction (< 0 means expand, > 0 means shrink,
+   * 0 means no change).
+   */
+  doZoomDefault(direction: number): void {
+    this.doZoom(this.defaultZoomFraction * Math.sign(direction));
+  }
+
+  /**
+   * Zoom in/out the selected range.
+   * @param fraction Number in [0, 1], the fraction of the total value range
+   * to change the selected value range by.
+   */
+  private doZoom(fraction: number) {
     if (!this.selectorElementRef) return;
 
     // Determine how much to move the left and right ticks.
-    let amountLeft = Math.round(amount * 0.5);
-    let amountRight = amount - amountLeft;
+    let fractionLeft = fraction * 0.5;
+    let fractionRight = fraction - fractionLeft;
 
     if (this.isMouseInsideX) {
       // Between the left and right endpoints of the selector. Determine amount dynamically.
-      amountLeft = Math.round(amount * this.mousePositionFraction!.x);
-      amountRight = amount - amountLeft;
+      fractionLeft = fraction * this.mousePositionFraction!.x;
+      fractionRight = fraction - fractionLeft;
     }
 
-    // If zooming out, swap them.
-    // if (amount >= 0) {
-    //   [amountLeft, amountRight] = [amountRight, amountLeft];
-    // }
-
     // Move left and right ticks by updating their values.
+    const func = (x: number): number =>
+      100 * Math.exp((-x - this.valueBoundary.min) / 2000);
+
+    const valueBoundarySize =
+      this.valueBoundary.max - this.valueBoundary.min + 1;
+
+    let amountLeft = Math.round(fractionLeft * valueBoundarySize);
+    let amountRight = Math.round(fractionRight * valueBoundarySize);
+
     let newMin = this.clampValue(this.selectedValues.min - amountLeft);
     let newMax = this.clampValue(this.selectedValues.max + amountRight);
 
@@ -207,14 +226,15 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   getValueFromPositionFraction(fraction: number): number {
     return Math.round(
       this.valueBoundary.min +
-        fraction * (this.valueBoundary.max - this.valueBoundary.min)
+        fraction * (this.valueBoundary.max - this.valueBoundary.min + 1)
     );
   }
 
   getPositionFractionFromValue(value: number): number {
-    const valueBoundarySize = this.valueBoundary.max - this.valueBoundary.min;
-    if (valueBoundarySize === 0) return 0;
-    return (value - this.valueBoundary.min) / valueBoundarySize;
+    return (
+      (value - this.valueBoundary.min) /
+      (this.valueBoundary.max - this.valueBoundary.min + 1)
+    );
   }
 
   getPositionPercentageFromValue(value: number): string {
