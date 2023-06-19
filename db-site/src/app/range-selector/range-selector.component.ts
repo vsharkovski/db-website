@@ -5,10 +5,14 @@ import {
   HostListener,
   Input,
   OnChanges,
+  OnInit,
   Output,
   ViewChild,
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
+import { MouseTrackerDirective } from '../mouse-tracker.directive';
+import { PixelCoordinate } from '../pixel-coordinate.model';
+import { pairwise, startWith } from 'rxjs';
 
 type ElementName = 'left' | 'right' | 'bar';
 
@@ -16,8 +20,9 @@ type ElementName = 'left' | 'right' | 'bar';
   selector: 'dbw-range-selector',
   templateUrl: './range-selector.component.html',
   styleUrls: ['./range-selector.component.css'],
+  hostDirectives: [MouseTrackerDirective],
 })
-export class RangeSelectorComponent implements OnChanges {
+export class RangeSelectorComponent implements OnChanges, OnInit {
   @Input() minValue!: number;
   @Input() maxValue!: number;
 
@@ -27,17 +32,15 @@ export class RangeSelectorComponent implements OnChanges {
   // Whether to enable zoom when using mouse wheel *on the range selector itself.*
   @Input() enableZoomOnWheel: boolean = false;
 
-  @Input() requestedZoomAmount?: number;
-  @Output() requestedZoomAmountChange = new EventEmitter<undefined>();
-
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
   selectedElement: ElementName | null = null;
-
-  lastMousePagePosition: { x: number; y: number } = { x: 0, y: 0 };
+  mousePositionFraction: PixelCoordinate | null = null;
+  isMouseInsideX = false;
 
   @ViewChild('selector') selectorElementRef?: ElementRef;
-  @ViewChild('bar') barElementRef?: ElementRef;
+
+  constructor(private mouseTracker: MouseTrackerDirective) {}
 
   ngOnChanges(): void {
     // If selected values are not provided, set them to the boundaries.
@@ -47,6 +50,20 @@ export class RangeSelectorComponent implements OnChanges {
     if (this.maxValueSelected === undefined) {
       this.maxValueSelected = this.maxValue;
     }
+  }
+
+  ngOnInit(): void {
+    this.mouseTracker.currentFraction$
+      .pipe(startWith(null), pairwise())
+      .subscribe(([fraction, prevFraction]) => {
+        this.mousePositionFraction = fraction;
+        if (fraction !== null && fraction.x >= 0 && fraction.x < 1) {
+          this.isMouseInsideX = true;
+          this.updateSelection(fraction, prevFraction);
+        } else {
+          this.isMouseInsideX = false;
+        }
+      });
   }
 
   onMouseDown(element: ElementName): void {
@@ -81,36 +98,13 @@ export class RangeSelectorComponent implements OnChanges {
     }
   }
 
-  @HostListener('window:mousemove', ['$event'])
-  onWindowMouseMove(event: MouseEvent): void {
-    // Update last mouse position.
-    this.lastMousePagePosition = {
-      x: event.pageX,
-      y: event.pageY,
-    };
+  updateSelection(
+    fraction: PixelCoordinate,
+    prevFraction: PixelCoordinate | null
+  ): void {
+    if (!this.selectedElement) return;
 
-    // If something is selected, update values.
-    if (!this.selectedElement || !this.selectorElementRef) return;
-
-    const selectorBoundingBox =
-      this.selectorElementRef.nativeElement.getBoundingClientRect();
-
-    // X position of selector on the page. Takes scrolling into account.
-    const selectorPositionX = selectorBoundingBox.x + window.scrollX;
-
-    const getValueFromPageX = (pageX: number): number => {
-      // Get difference between the X and selector X position (both page coordinates),
-      // as a fraction of the size of the selector.
-      let fraction = (pageX - selectorPositionX) / selectorBoundingBox.width;
-
-      // Get value using the fraction.
-      // Round, clamp, and return it.
-      let value = this.minValue + fraction * (this.maxValue - this.minValue);
-      return this.clampValue(Math.round(value));
-    };
-
-    // Get new value.
-    let value = getValueFromPageX(event.pageX);
+    let value = this.getValueFromPositionFraction(fraction.x);
     let updatedAnySelected = false;
 
     if (this.selectedElement == 'left') {
@@ -123,12 +117,12 @@ export class RangeSelectorComponent implements OnChanges {
       if (value < this.minValueSelected) value = this.minValueSelected;
       updatedAnySelected = value != this.maxValueSelected;
       this.maxValueSelected = value;
-    } else {
+    } else if (prevFraction !== null) {
       // Bar. Move both min and max selected values, if it would not decrease range size.
 
       // Get value from previous mouse position. Use it to calculate the difference
       // in values that the mouse movement would cause.
-      const prevValue = getValueFromPageX(event.pageX + event.movementX);
+      const prevValue = this.getValueFromPositionFraction(prevFraction.x);
       const valueDifference = prevValue - value;
 
       // Get new min and max values.
@@ -167,31 +161,20 @@ export class RangeSelectorComponent implements OnChanges {
   }
 
   doZoom(amount: number) {
-    // Determine how much to move the left and right ticks.
-    if (!this.selectorElementRef) return;
-    const selectorBoundingBox =
-      this.selectorElementRef.nativeElement.getBoundingClientRect();
-    const selectorPositionX = selectorBoundingBox.x + window.scrollX;
+    if (!this.selectorElementRef || !this.isMouseInsideX) return;
 
+    // Determine how much to move the left and right ticks.
     let amountLeft = Math.round(amount * 0.5);
     let amountRight = amount - amountLeft;
 
-    const mouseDistanceFromStart =
-      this.lastMousePagePosition.x - selectorPositionX;
-    if (
-      mouseDistanceFromStart >= 0 &&
-      mouseDistanceFromStart < selectorBoundingBox.width
-    ) {
-      // Between the left and right endpoints of the selector. Determine amount dynamically.
-      const fraction = mouseDistanceFromStart / selectorBoundingBox.width;
-      amountLeft = Math.round(amount * fraction);
-      amountRight = amount - amountLeft;
+    // Between the left and right endpoints of the selector. Determine amount dynamically.
+    amountLeft = Math.round(amount * this.mousePositionFraction!.x);
+    amountRight = amount - amountLeft;
 
-      // If zooming out, swap them.
-      // if (amount >= 0) {
-      //   [amountLeft, amountRight] = [amountRight, amountLeft];
-      // }
-    }
+    // If zooming out, swap them.
+    // if (amount >= 0) {
+    //   [amountLeft, amountRight] = [amountRight, amountLeft];
+    // }
 
     // Move left and right ticks by updating their values.
     let newMin = this.clampValue(this.minValueSelected - amountLeft);
@@ -212,9 +195,22 @@ export class RangeSelectorComponent implements OnChanges {
     this.selectionChanged.emit({ min: newMin, max: newMax });
   }
 
+  clampValue(value: number): number {
+    return Math.max(this.minValue, Math.min(this.maxValue, value));
+  }
+
   getPercentageFromFraction(fraction: number): string {
     const result = Math.max(0, Math.min(100, 100 * fraction));
     return `${result}%`;
+  }
+
+  /**
+   * @param fraction Number in [0, 1).
+   */
+  getValueFromPositionFraction(fraction: number): number {
+    return Math.round(
+      this.minValue + fraction * (this.maxValue - this.minValue)
+    );
   }
 
   getPositionFractionFromValue(value: number): number {
@@ -232,9 +228,5 @@ export class RangeSelectorComponent implements OnChanges {
       this.getPositionFractionFromValue(max) -
       this.getPositionFractionFromValue(min);
     return this.getPercentageFromFraction(sizeFraction);
-  }
-
-  clampValue(value: number): number {
-    return Math.max(this.minValue, Math.min(this.maxValue, value));
   }
 }

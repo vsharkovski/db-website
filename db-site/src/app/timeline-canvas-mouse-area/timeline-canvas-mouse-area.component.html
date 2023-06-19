@@ -1,12 +1,12 @@
 <div
-  *ngIf="lastValidMousePosition"
+  *ngIf="lastInsideMousePosition"
   class="pointer border-primary"
   [class.hidden]="!hovered.point || hovered.person"
   [class.clickable]="hovered.point && hovered.person"
   [class.loading]="!hovered.point || !hovered.person"
   style.width="{{ hoverRadiusPixels * 2 }}px"
-  style.left="{{ lastValidMousePosition.x }}px"
-  style.top="{{ lastValidMousePosition.y }}px"
+  style.left="{{ lastInsideMousePosition.x }}px"
+  style.top="{{ lastInsideMousePosition.y }}px"
 ></div>
 <div
   *ngIf="hoveredCardPosition"

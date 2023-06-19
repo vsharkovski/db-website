@@ -12,16 +12,16 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
   @Input() selectedYears!: NumberRange;
   @Input() numBuckets!: number;
   @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastValidMousePosition!: PixelCoordinate | null;
+  @Input() lastInsideMousePosition!: PixelCoordinate | null;
 
   mouseYears: NumberRange | null = null;
 
   constructor(private painterService: TimelineCanvasPainterService) {}
 
   ngOnChanges(): void {
-    if (this.lastValidMousePosition) {
+    if (this.lastInsideMousePosition) {
       const newMouseYears = this.getTimeRangeFromPixel(
-        this.lastValidMousePosition.x
+        this.lastInsideMousePosition.x
       );
       if (newMouseYears) this.mouseYears = newMouseYears;
     }

@@ -51,7 +51,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
   @Input() buckets!: TimelinePoint[][];
   @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastValidMousePosition!: PixelCoordinate | null;
+  @Input() lastInsideMousePosition!: PixelCoordinate | null;
 
   hovered: PointData = {
     point: null,
@@ -189,7 +189,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
     this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
       if (
-        !this.lastValidMousePosition ||
+        !this.lastInsideMousePosition ||
         !this.painterService.canvasBoundingBox
       ) {
         this.hoveredCardPosition = null;
@@ -197,7 +197,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       }
 
       this.hoveredCardPosition = this.fitRectWithinBounds(
-        this.lastValidMousePosition,
+        this.lastInsideMousePosition,
         this.hoveredCardDimensions,
         {
           x: this.painterService.canvasBoundingBox.width,
