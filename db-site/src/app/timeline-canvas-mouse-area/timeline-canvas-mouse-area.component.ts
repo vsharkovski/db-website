@@ -51,7 +51,9 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
   @Input() buckets!: TimelinePoint[][];
   @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastValidMousePosition!: PixelCoordinate | null;
+  @Input() lastInsideMousePosition!: PixelCoordinate | null;
+
+  isMouseInside = false;
 
   hovered: PointData = {
     point: null,
@@ -78,9 +80,12 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.mousePosition) {
-      // For all changes, we should update hover data.
-      this.updateHoverData(this.mousePosition);
+    if (
+      this.mousePosition &&
+      this.mousePosition === this.lastInsideMousePosition
+    ) {
+      // Since mouse is inside, for any change, we should update hover data.
+      this.updateHoverData(this.lastInsideMousePosition);
       this.updateHoveredCardPosition$.next();
     }
 
@@ -189,7 +194,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
 
     this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
       if (
-        !this.lastValidMousePosition ||
+        !this.lastInsideMousePosition ||
         !this.painterService.canvasBoundingBox
       ) {
         this.hoveredCardPosition = null;
@@ -197,7 +202,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       }
 
       this.hoveredCardPosition = this.fitRectWithinBounds(
-        this.lastValidMousePosition,
+        this.lastInsideMousePosition,
         this.hoveredCardDimensions,
         {
           x: this.painterService.canvasBoundingBox.width,
@@ -207,10 +212,26 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     });
   }
 
+  @HostListener('mouseenter')
+  onMouseEnter(): void {
+    this.isMouseInside = true;
+  }
+
+  @HostListener('mouseleave')
+  onMouseLeave(): void {
+    this.isMouseInside = false;
+  }
+
   @HostListener('window:click')
   onPointerClick(): void {
-    // If a person is hovered and mouse is inside the canvas, open a modal.
-    if (this.hovered.person && this.mousePosition) {
+    // If modal is not opened, and a person is hovered,
+    // and mouse is inside the canvas, then open a modal.
+    if (
+      this.isMouseInside &&
+      this.hovered.person &&
+      this.mousePosition &&
+      this.mousePosition === this.lastInsideMousePosition
+    ) {
       this.modalService.openPersonDetailModal(this.hovered.person);
       this.hovered = {
         point: null,

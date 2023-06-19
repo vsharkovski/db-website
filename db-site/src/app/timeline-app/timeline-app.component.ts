@@ -14,7 +14,7 @@ import { PersonParametersService } from '../person-parameters.service';
 export class TimelineAppComponent implements OnInit {
   hasMousePointer = true;
   selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
-  selectedYears: NumberRange = { min: -600, max: 2000 };
+  selectedYears: NumberRange = { min: -400, max: 2000 };
   timelineData: TimelinePoint[] = [];
   filterOptions: TimelineOptions = {
     citizenshipId: null,
@@ -51,10 +51,9 @@ export class TimelineAppComponent implements OnInit {
 
   onWheel(event: WheelEvent): void {
     if (this.rangeSelector) {
-      const amount = Math.round(
-        0.5 * (event.deltaX + event.deltaY + event.deltaZ)
+      this.rangeSelector.doZoomDefault(
+        Math.sign(event.deltaX + event.deltaY + event.deltaZ)
       );
-      this.rangeSelector.doZoom(amount);
 
       // Prevent default scrolling behavior to keep the screen in place.
       event.preventDefault();

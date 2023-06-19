@@ -31,7 +31,7 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
 
   // Mouse position is tracked for the mouse area and year line area components.
   mousePosition!: PixelCoordinate | null;
-  lastValidMousePosition!: PixelCoordinate | null;
+  lastInsideMousePosition!: PixelCoordinate | null;
 
   dataUpdated$ = new ReplaySubject<void>();
 
@@ -90,10 +90,10 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     combineLatest([
       this.mouseTracker.current$,
-      this.mouseTracker.lastValid$,
-    ]).subscribe(([currentPosition, lastValidPosition]) => {
+      this.mouseTracker.lastInside$,
+    ]).subscribe(([currentPosition, lastInsidePosition]) => {
       this.mousePosition = currentPosition;
-      this.lastValidMousePosition = lastValidPosition;
+      this.lastInsideMousePosition = lastInsidePosition;
     });
 
     this.dataUpdated$.subscribe(() => {
