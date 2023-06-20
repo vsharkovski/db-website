@@ -17,7 +17,6 @@ import { RangeMappingType } from '../range-mapping.type';
 export class TimelineAppComponent implements OnInit {
   readonly partialDataResultLimit = 5000;
   readonly partialDataYearsBoundary: NumberRange = { min: 1800, max: 1900 };
-  readonly fullDataInitialSelectedYears: NumberRange = { min: -400, max: 2020 };
   readonly fullDataYearsBoundary: NumberRange = { min: -3500, max: 2020 };
 
   hasMousePointer = true;
@@ -67,11 +66,8 @@ export class TimelineAppComponent implements OnInit {
     };
 
     // Request for both full and partial data immediately.
-    console.log('Delaying full data artificially!!!');
     merge(
-      this.timelineService
-        .getFullTimelineData()
-        .pipe(delay(50000), map(mapToType('full'))),
+      this.timelineService.getFullTimelineData().pipe(map(mapToType('full'))),
       this.timelineService
         .getPartialTimelineData(
           this.partialDataResultLimit,
@@ -80,27 +76,30 @@ export class TimelineAppComponent implements OnInit {
         .pipe(map(mapToType('partial')))
     ).subscribe(([data, type]) => {
       if (
-        type == 'full' ||
-        (type == 'partial' && this.loadedDataType == 'none')
+        data.length > 0 &&
+        (type == 'full' || (type == 'partial' && this.loadedDataType == 'none'))
       ) {
         // Got better data.
         this.timelineData = data;
         this.loadedDataType = type;
-      }
-      // Update loading message.
-      if (type == 'partial') {
-        this.loadingMessage$.next(
-          'Loaded 19th century. Loading full timeline...'
-        );
-      }
-      if (type == 'full') {
-        this.selectedYearsBoundary = this.fullDataYearsBoundary;
-        this.selectedYears = this.fullDataInitialSelectedYears;
-        this.rangeMappingType = 'linear';
-        this.loadingMessage$.next('Loaded.');
-        of(null)
-          .pipe(delay(4000))
-          .subscribe(() => this.loadingMessage$.next(''));
+
+        if (type == 'partial') {
+          // Update loading message.
+          this.loadingMessage$.next(
+            'Loaded 19th century. Loading full timeline...'
+          );
+        }
+        if (type == 'full') {
+          // Update boundary and mapping type.
+          this.selectedYearsBoundary = this.fullDataYearsBoundary;
+          this.rangeMappingType = 'log';
+
+          // Update loading message.
+          this.loadingMessage$.next('Loaded.');
+          of(null)
+            .pipe(delay(4000))
+            .subscribe(() => this.loadingMessage$.next(''));
+        }
       }
     });
   }

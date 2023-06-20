@@ -43,11 +43,13 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
 
     const leftValue = this.rangeMapService.mapFractionToValueLinear(
       leftFraction,
-      this.selectedYears
+      this.selectedYears,
+      -1
     );
     const rightValue = this.rangeMapService.mapFractionToValueLinear(
       rightFraction,
-      this.selectedYears
+      this.selectedYears,
+      -1
     );
 
     return { min: leftValue, max: rightValue };
