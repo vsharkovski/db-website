@@ -190,15 +190,6 @@ export class TimelineCanvasPainterComponent
 
     const ctx = this.canvasRef.nativeElement.getContext('2d');
 
-    // Draw white background.
-    // ctx.fillStyle = 'white';
-    // ctx.fillRect(
-    //   0,
-    //   0,
-    //   this.canvasBoundingBox.width,
-    //   this.canvasBoundingBox.height
-    // );
-
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
     const pointSize = this.pointSizePixels;
