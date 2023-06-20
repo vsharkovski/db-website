@@ -41,21 +41,21 @@ export class VariablesService {
     return this.variables$.pipe(map((variables) => variables.citizenships));
   }
 
-  getGenderMap(): Observable<[number: string]> {
+  getGenderIdToNameMap(): Observable<{ [key: number]: string }> {
     return this.variables$.pipe(
-      map((variables) => this.createVariableMap(variables.genders))
+      map((variables) => this.createVariableIdToNameMap(variables.genders))
     );
   }
 
-  getOccupationMap(): Observable<[number: string]> {
+  getOccupationIdToNameMap(): Observable<{ [key: number]: string }> {
     return this.variables$.pipe(
-      map((variables) => this.createVariableMap(variables.occupations))
+      map((variables) => this.createVariableIdToNameMap(variables.occupations))
     );
   }
 
-  getCitizenshipMap(): Observable<[number: string]> {
+  getCitizenshipIdToNameMap(): Observable<{ [key: number]: string }> {
     return this.variables$.pipe(
-      map((variables) => this.createVariableMap(variables.citizenships))
+      map((variables) => this.createVariableIdToNameMap(variables.citizenships))
     );
   }
 
@@ -75,7 +75,7 @@ export class VariablesService {
     );
   }
 
-  private createVariableMap(variables: Variable[]): [number: string] {
+  private createVariableIdToNameMap(variables: Variable[]): { [key: number]: string } {
     const mp = variables.reduce((mp, it) => {
       mp[it.id] = it.name;
       return mp;

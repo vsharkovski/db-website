@@ -23,9 +23,9 @@ export class PersonDetailModalComponent implements OnInit {
 
   wikidataUrl!: string;
 
-  genders = {} as [number: string];
-  occupations = {} as [number: string];
-  citizenships = {} as [number: string];
+  genders: { [key: number]: string } = {};
+  occupations: { [key: number]: string } = {};
+  citizenships: { [key: number]: string } = {};
 
   waitingForResponse: boolean = false;
 
@@ -37,15 +37,15 @@ export class PersonDetailModalComponent implements OnInit {
 
   ngOnInit(): void {
     // Get variables data.
-    this.variablesService.getGenderMap().subscribe((genders) => {
+    this.variablesService.getGenderIdToNameMap().subscribe((genders) => {
       this.genders = genders;
       this.variablesLoaded.next();
     });
-    this.variablesService.getOccupationMap().subscribe((occupations) => {
+    this.variablesService.getOccupationIdToNameMap().subscribe((occupations) => {
       this.occupations = occupations;
       this.variablesLoaded.next();
     });
-    this.variablesService.getCitizenshipMap().subscribe((citizenships) => {
+    this.variablesService.getCitizenshipIdToNameMap().subscribe((citizenships) => {
       this.citizenships = citizenships;
       this.variablesLoaded.next();
     });

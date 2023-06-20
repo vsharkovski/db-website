@@ -12,9 +12,9 @@ import { WikiApiPage } from '../wiki-api-page.model';
   styleUrls: ['./search-results.component.css'],
 })
 export class SearchResultsComponent implements OnInit {
-  genders = {} as [number: string];
-  occupations = {} as [number: string];
-  citizenships = {} as [number: string];
+  genders: { [key: number]: string } = {};
+  occupations: { [key: number]: string } = {};
+  citizenships: { [key: number]: string } = {};
 
   @Input() results?: SearchResponse;
   @Input() waitingForResponse: boolean = false;
@@ -28,13 +28,13 @@ export class SearchResultsComponent implements OnInit {
   ngOnInit(): void {
     // Get the variable maps of form "id to name" from the API.
     this.variablesService
-      .getGenderMap()
+      .getGenderIdToNameMap()
       .subscribe((genders) => (this.genders = genders));
     this.variablesService
-      .getOccupationMap()
+      .getOccupationIdToNameMap()
       .subscribe((occupations) => (this.occupations = occupations));
     this.variablesService
-      .getCitizenshipMap()
+      .getCitizenshipIdToNameMap()
       .subscribe((citizenships) => (this.citizenships = citizenships));
   }
 
