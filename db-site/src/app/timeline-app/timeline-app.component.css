@@ -11,3 +11,8 @@
 .options {
   min-width: 14rem;
 }
+
+.loading-label {
+  position: absolute;
+  margin: 1rem;
+}
