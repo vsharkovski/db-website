@@ -12,7 +12,18 @@ import {
   ViewChild,
 } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
-import { ReplaySubject, debounceTime } from 'rxjs';
+import {
+  ReplaySubject,
+  debounceTime,
+  delay,
+  map,
+  repeat,
+  scan,
+  switchMap,
+  take,
+  tap,
+  timer,
+} from 'rxjs';
 import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
 import { VariablesService } from '../variables.service';
 
@@ -32,8 +43,6 @@ export class TimelineCanvasPainterComponent
 
   @ViewChild('canvas') canvasRef?: ElementRef;
 
-  initialize$ = new ReplaySubject<void>();
-
   // Drawing parameters.
   readonly minPointSizePixels = 5;
   readonly maxPointSizePixels = 44;
@@ -43,6 +52,8 @@ export class TimelineCanvasPainterComponent
     'rgb(120, 120, 120)',
     'rgb(80, 80, 80)',
   ];
+  readonly numDrawingFrames = 20;
+  readonly drawingDelay = 20;
 
   canvasBoundingBox?: DOMRect;
   canvasMiddleYPixels = 0;
@@ -51,6 +62,11 @@ export class TimelineCanvasPainterComponent
   pointMarginSizeCombined = 6;
 
   occupationIdToColor: string[] | null = null;
+
+  initialize$ = new ReplaySubject<void>();
+
+  timesDrawn = 0;
+  startDrawing$ = new ReplaySubject<number>();
 
   constructor(
     private service: TimelineCanvasPainterService,
@@ -64,7 +80,7 @@ export class TimelineCanvasPainterComponent
       // Re-draw canvas immediately with colors.
       this.updateCanvasSize();
       this.updateDrawData();
-      this.drawCanvas();
+      this.startDrawing();
     });
 
     this.initialize$.pipe(debounceTime(100)).subscribe(() => {
@@ -74,7 +90,14 @@ export class TimelineCanvasPainterComponent
       // Draw the canvas even though the buckets are outdated and will
       // soon be updated to new ones.
       // This prevents a blank screen.
-      this.drawCanvas();
+      this.startDrawing();
+    });
+
+    const draw = timer(0, this.drawingDelay).pipe(
+      take(this.numDrawingFrames + 1)
+    );
+    this.startDrawing$.pipe(switchMap((id) => draw)).subscribe((t) => {
+      this.drawCanvas(t / this.numDrawingFrames);
     });
   }
 
@@ -89,7 +112,7 @@ export class TimelineCanvasPainterComponent
       this.service.numBuckets = this.buckets.length;
       this.updateCanvasSize();
       this.updateDrawData();
-      this.drawCanvas();
+      this.startDrawing();
     }
   }
 
@@ -185,15 +208,27 @@ export class TimelineCanvasPainterComponent
   /**
    * Draw the points in the buckets onto the canvas.
    */
-  drawCanvas(): void {
+  drawCanvas(multiplier: number): void {
     if (!this.canvasRef || !this.canvasBoundingBox) return;
 
     const ctx = this.canvasRef.nativeElement.getContext('2d');
 
+    // White background.
+    ctx.fillStyle = 'white';
+    ctx.fillRect(
+      0,
+      0,
+      this.canvasBoundingBox.width,
+      this.canvasBoundingBox.height
+    );
+
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
     const pointSize = this.pointSizePixels;
+    const pointSizeMultiplied = pointSize * multiplier;
     const pointMarginSizeCombined = this.pointMarginSizeCombined;
+    const pointMarginSizeCombinedMultiplied =
+      pointMarginSizeCombined * multiplier;
     const yMiddle = this.canvasMiddleYPixels;
     const occupationIdToColor = this.occupationIdToColor;
     const backupPointColors = this.backupPointColors;
@@ -203,7 +238,7 @@ export class TimelineCanvasPainterComponent
     for (const bucket of this.buckets) {
       // Y coordinate of top point will be a point and margin size away
       // from the middle line.
-      let yTop = yMiddle - pointMarginSizeCombined;
+      let yTop = yMiddle - pointMarginSizeCombinedMultiplied;
       // Y coordinate of bottom point will be directly at the bottom line.
       let yBottom = yMiddle;
 
@@ -222,15 +257,20 @@ export class TimelineCanvasPainterComponent
         }
 
         if (pointIndex % 2 == 0) {
-          ctx.fillRect(x, yBottom, pointSize, pointSize);
-          yBottom += pointMarginSizeCombined;
+          ctx.fillRect(x, yBottom, pointSize, pointSizeMultiplied);
+          yBottom += pointMarginSizeCombinedMultiplied;
         } else {
-          ctx.fillRect(x, yTop, pointSize, pointSize);
-          yTop -= pointMarginSizeCombined;
+          ctx.fillRect(x, yTop, pointSize, pointSizeMultiplied);
+          yTop -= pointMarginSizeCombinedMultiplied;
         }
       }
 
       x += pointMarginSizeCombined;
     }
+  }
+
+  startDrawing(): void {
+    this.timesDrawn++;
+    this.startDrawing$.next(this.timesDrawn);
   }
 }
