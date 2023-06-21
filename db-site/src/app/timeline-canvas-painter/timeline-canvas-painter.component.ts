@@ -129,7 +129,7 @@ export class TimelineCanvasPainterComponent
       .pipe(switchMap(() => concat(undraw, draw)))
       .subscribe((data) => {
         const [frame, buckets] = data as [number, TimelinePoint[][]];
-        this.drawCanvas(buckets, frame / this.numDrawingFrames);
+        this.drawCanvas3(buckets, frame / this.numDrawingFrames);
       });
   }
 
@@ -225,7 +225,7 @@ export class TimelineCanvasPainterComponent
   /**
    * Draw the points in the buckets onto the canvas.
    */
-  drawCanvas(buckets: TimelinePoint[][], multiplier: number): void {
+  drawCanvas1(buckets: TimelinePoint[][], multiplier: number): void {
     if (!this.canvasRef || !this.canvasBoundingBox) return;
 
     const ctx = this.canvasRef.nativeElement.getContext('2d');
@@ -279,6 +279,130 @@ export class TimelineCanvasPainterComponent
           yBottom += pointMarginSizeCombined;
         } else {
           ctx.fillRect(x, yTop, pointSize, pointSize);
+          yTop -= pointMarginSizeCombined;
+        }
+      }
+
+      x += pointMarginSizeCombined;
+    }
+  }
+
+  drawCanvas2(buckets: TimelinePoint[][], multiplier: number): void {
+    if (!this.canvasRef || !this.canvasBoundingBox) return;
+
+    const ctx = this.canvasRef.nativeElement.getContext('2d');
+
+    // White background.
+    ctx.fillStyle = 'white';
+    ctx.fillRect(
+      0,
+      0,
+      this.canvasBoundingBox.width,
+      this.canvasBoundingBox.height
+    );
+
+    // Draw all buckets.
+    // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
+    const pointSize = this.pointSizePixels;
+    const pointMarginSizeCombined = this.pointMarginSizeCombined;
+    const yMiddle = this.canvasMiddleYPixels;
+    const occupationIdToColor = this.occupationIdToColor;
+    const backupPointColors = this.backupPointColors;
+
+    const yOffset = (1 - multiplier) * this.canvasBoundingBox.height;
+    let x = this.marginSizePixels;
+    let goDown = true;
+
+    for (const bucket of buckets) {
+      const yOffsetHere = goDown ? yOffset : -yOffset;
+      // Y coordinate of top point will be a point and margin size away
+      // from the middle line.
+      let yTop = yMiddle - pointMarginSizeCombined + yOffsetHere;
+      // Y coordinate of bottom point will be directly at the bottom line.
+      let yBottom = yMiddle + yOffsetHere;
+
+      // Alternately place points at bottom/top positions and move
+      // down/up, starting with the bottom position.
+      for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
+        // Pick random color for this point.
+        if (occupationIdToColor) {
+          ctx.fillStyle =
+            occupationIdToColor[bucket[pointIndex].level1MainOccId ?? 0];
+        } else {
+          ctx.fillStyle =
+            backupPointColors[
+              Math.floor(Math.random() * backupPointColors.length)
+            ];
+        }
+
+        if (pointIndex % 2 == 0) {
+          ctx.fillRect(x, yBottom, pointSize, pointSize);
+          yBottom += pointMarginSizeCombined;
+        } else {
+          ctx.fillRect(x, yTop, pointSize, pointSize);
+          yTop -= pointMarginSizeCombined;
+        }
+      }
+
+      x += pointMarginSizeCombined;
+      goDown = !goDown;
+    }
+  }
+
+  drawCanvas3(buckets: TimelinePoint[][], multiplier: number): void {
+    if (!this.canvasRef || !this.canvasBoundingBox) return;
+
+    const ctx = this.canvasRef.nativeElement.getContext('2d');
+
+    // White background.
+    ctx.fillStyle = 'white';
+    ctx.fillRect(
+      0,
+      0,
+      this.canvasBoundingBox.width,
+      this.canvasBoundingBox.height
+    );
+
+    // Draw all buckets.
+    // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
+    const pointSize = this.pointSizePixels;
+    const pointMarginSizeCombined = this.pointMarginSizeCombined;
+    const yMiddle = this.canvasMiddleYPixels;
+    const occupationIdToColor = this.occupationIdToColor;
+    const backupPointColors = this.backupPointColors;
+
+    const xOffset = (1 - multiplier) * this.canvasBoundingBox.width;
+    let x = this.marginSizePixels;
+
+    for (const bucket of buckets) {
+      // Y coordinate of top point will be a point and margin size away
+      // from the middle line.
+      let yTop = yMiddle - pointMarginSizeCombined;
+      // Y coordinate of bottom point will be directly at the bottom line.
+      let yBottom = yMiddle;
+
+      // Alternately place points at bottom/top positions and move
+      // down/up, starting with the bottom position.
+      let goRight = true;
+      for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
+        // Pick random color for this point.
+        if (occupationIdToColor) {
+          ctx.fillStyle =
+            occupationIdToColor[bucket[pointIndex].level1MainOccId ?? 0];
+        } else {
+          ctx.fillStyle =
+            backupPointColors[
+              Math.floor(Math.random() * backupPointColors.length)
+            ];
+        }
+
+        const xOffsetHere = goRight ? xOffset : -xOffset;
+        if (pointIndex % 2 == 0) {
+          ctx.fillRect(x + xOffsetHere, yBottom, pointSize, pointSize);
+          yBottom += pointMarginSizeCombined;
+          goRight = !goRight;
+        } else {
+          ctx.fillRect(x + xOffsetHere, yTop, pointSize, pointSize);
           yTop -= pointMarginSizeCombined;
         }
       }
