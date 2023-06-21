@@ -14,15 +14,15 @@ import {
 import { TimelinePoint } from '../timeline-point.model';
 import {
   ReplaySubject,
+  concat,
   debounceTime,
-  delay,
   map,
-  repeat,
-  scan,
+  pairwise,
+  startWith,
   switchMap,
   take,
-  tap,
   timer,
+  withLatestFrom,
 } from 'rxjs';
 import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
 import { VariablesService } from '../variables.service';
@@ -52,8 +52,8 @@ export class TimelineCanvasPainterComponent
     'rgb(120, 120, 120)',
     'rgb(80, 80, 80)',
   ];
-  readonly numDrawingFrames = 20;
-  readonly drawingDelay = 20;
+  readonly numDrawingFrames = 30;
+  readonly drawingDelay = (1 / 60) * 1000;
 
   canvasBoundingBox?: DOMRect;
   canvasMiddleYPixels = 0;
@@ -65,41 +65,13 @@ export class TimelineCanvasPainterComponent
 
   initialize$ = new ReplaySubject<void>();
 
-  timesDrawn = 0;
-  startDrawing$ = new ReplaySubject<number>();
+  redrawCanvas$ = new ReplaySubject<void>();
+  buckets$ = new ReplaySubject<TimelinePoint[][]>();
 
   constructor(
     private service: TimelineCanvasPainterService,
     private variablesService: VariablesService
   ) {}
-
-  ngOnInit(): void {
-    this.variablesService.getOccupationIdToColorMap().subscribe((map) => {
-      this.occupationIdToColor = map;
-
-      // Re-draw canvas immediately with colors.
-      this.updateCanvasSize();
-      this.updateDrawData();
-      this.startDrawing();
-    });
-
-    this.initialize$.pipe(debounceTime(100)).subscribe(() => {
-      this.updateCanvasSize();
-      this.updateDrawData();
-      this.updateNumBuckets();
-      // Draw the canvas even though the buckets are outdated and will
-      // soon be updated to new ones.
-      // This prevents a blank screen.
-      this.startDrawing();
-    });
-
-    const draw = timer(0, this.drawingDelay).pipe(
-      take(this.numDrawingFrames + 1)
-    );
-    this.startDrawing$.pipe(switchMap((id) => draw)).subscribe((t) => {
-      this.drawCanvas(t / this.numDrawingFrames);
-    });
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -109,11 +81,56 @@ export class TimelineCanvasPainterComponent
       this.initialize$.next();
     }
     if (changes['buckets']) {
+      this.buckets$.next(this.buckets);
       this.service.numBuckets = this.buckets.length;
       this.updateCanvasSize();
       this.updateDrawData();
-      this.startDrawing();
+      this.redrawCanvas$.next();
     }
+  }
+
+  ngOnInit(): void {
+    this.variablesService.getOccupationIdToColorMap().subscribe((map) => {
+      this.occupationIdToColor = map;
+
+      // Re-draw canvas immediately with colors.
+      this.updateCanvasSize();
+      this.updateDrawData();
+      this.redrawCanvas$.next();
+    });
+
+    this.initialize$.pipe(debounceTime(100)).subscribe(() => {
+      this.updateCanvasSize();
+      this.updateDrawData();
+      this.updateNumBuckets();
+      // Draw the canvas even though the buckets are outdated and will
+      // soon be updated to new ones.
+      // This prevents a blank screen.
+      this.redrawCanvas$.next();
+    });
+
+    // Canvas drawing.
+    const drawFramesAndBucketsPairwise = timer(0, this.drawingDelay).pipe(
+      take(this.numDrawingFrames + 1),
+      withLatestFrom(this.buckets$.pipe(startWith([]), pairwise()))
+    );
+    const undraw = drawFramesAndBucketsPairwise.pipe(
+      // Reverse order.
+      map(([frame, [prevBuckets, _]]) => [
+        this.numDrawingFrames - frame,
+        prevBuckets,
+      ])
+    );
+    const draw = drawFramesAndBucketsPairwise.pipe(
+      map(([frame, [_, buckets]]) => [frame, buckets])
+    );
+
+    this.redrawCanvas$
+      .pipe(switchMap(() => concat(undraw, draw)))
+      .subscribe((data) => {
+        const [frame, buckets] = data as [number, TimelinePoint[][]];
+        this.drawCanvas(buckets, frame / this.numDrawingFrames);
+      });
   }
 
   ngAfterViewInit(): void {
@@ -208,7 +225,7 @@ export class TimelineCanvasPainterComponent
   /**
    * Draw the points in the buckets onto the canvas.
    */
-  drawCanvas(multiplier: number): void {
+  drawCanvas(buckets: TimelinePoint[][], multiplier: number): void {
     if (!this.canvasRef || !this.canvasBoundingBox) return;
 
     const ctx = this.canvasRef.nativeElement.getContext('2d');
@@ -232,7 +249,7 @@ export class TimelineCanvasPainterComponent
 
     let x = this.marginSizePixels;
 
-    for (const bucket of this.buckets) {
+    for (const bucket of buckets) {
       // Y coordinate of top point will be a point and margin size away
       // from the middle line.
       let yTop = yMiddle - pointMarginSizeCombined;
@@ -268,10 +285,5 @@ export class TimelineCanvasPainterComponent
 
       x += pointMarginSizeCombined;
     }
-  }
-
-  startDrawing(): void {
-    this.timesDrawn++;
-    this.startDrawing$.next(this.timesDrawn);
   }
 }
