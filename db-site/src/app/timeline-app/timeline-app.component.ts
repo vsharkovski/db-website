@@ -5,6 +5,9 @@ import { TimelineService } from '../timeline.service';
 import { TimelinePoint } from '../timeline-point.model';
 import { TimelineOptions } from '../timeline-options.model';
 import { PersonParametersService } from '../person-parameters.service';
+import { TimelineLoadedDataType } from '../timeline-loaded-data.type';
+import { ReplaySubject, delay, map, merge, of } from 'rxjs';
+import { RangeMappingType } from '../range-mapping.type';
 
 @Component({
   selector: 'dbw-timeline-app',
@@ -12,16 +15,26 @@ import { PersonParametersService } from '../person-parameters.service';
   styleUrls: ['./timeline-app.component.css'],
 })
 export class TimelineAppComponent implements OnInit {
+  readonly partialDataResultLimit = 5000;
+  readonly partialDataYearsBoundary: NumberRange = { min: 1800, max: 1900 };
+  readonly fullDataYearsBoundary: NumberRange = { min: -3500, max: 2020 };
+
   hasMousePointer = true;
-  selectedYearsBoundary: NumberRange = { min: -3500, max: 2020 };
-  selectedYears: NumberRange = { min: -400, max: 2000 };
+
+  selectedYearsBoundary = { ...this.partialDataYearsBoundary };
+  selectedYears: NumberRange = { ...this.partialDataYearsBoundary };
+  rangeMappingType: RangeMappingType = 'linear';
+
   timelineData: TimelinePoint[] = [];
+
   filterOptions: TimelineOptions = {
     citizenshipId: null,
     occupationLevel1Id: null,
     genderId: null,
   };
-  loadedData = false;
+
+  loadedDataType: TimelineLoadedDataType = 'none';
+  loadingMessage$ = new ReplaySubject<string>();
 
   @ViewChild(RangeSelectorComponent) rangeSelector?: RangeSelectorComponent;
 
@@ -34,7 +47,7 @@ export class TimelineAppComponent implements OnInit {
       this.hasMousePointer = false;
     }
 
-    this.selectedYearsBoundary = {
+    this.fullDataYearsBoundary = {
       min: personParametersService.LIFE_YEAR_MIN,
       max: personParametersService.LIFE_YEAR_MAX,
     };
@@ -43,9 +56,51 @@ export class TimelineAppComponent implements OnInit {
   ngOnInit(): void {
     if (!this.hasMousePointer) return;
 
-    this.timelineService.getTimelineData().subscribe((data) => {
-      this.timelineData = data;
-      this.loadedData = true;
+    // Load data.
+    this.loadingMessage$.next('Loading...');
+
+    const mapToType = (type: TimelineLoadedDataType) => {
+      return (
+        data: TimelinePoint[]
+      ): [TimelinePoint[], TimelineLoadedDataType] => [data, type];
+    };
+
+    // Request for both full and partial data immediately.
+    merge(
+      this.timelineService.getFullTimelineData().pipe(map(mapToType('full'))),
+      this.timelineService
+        .getPartialTimelineData(
+          this.partialDataResultLimit,
+          this.partialDataYearsBoundary
+        )
+        .pipe(map(mapToType('partial')))
+    ).subscribe(([data, type]) => {
+      if (
+        data.length > 0 &&
+        (type == 'full' || (type == 'partial' && this.loadedDataType == 'none'))
+      ) {
+        // Got better data.
+        this.timelineData = data;
+        this.loadedDataType = type;
+
+        if (type == 'partial') {
+          // Update loading message.
+          this.loadingMessage$.next(
+            'Loaded 19th century. Loading full timeline...'
+          );
+        }
+        if (type == 'full') {
+          // Update boundary and mapping type.
+          this.selectedYearsBoundary = this.fullDataYearsBoundary;
+          this.rangeMappingType = 'log';
+
+          // Update loading message.
+          this.loadingMessage$.next('Loaded.');
+          of(null)
+            .pipe(delay(4000))
+            .subscribe(() => this.loadingMessage$.next(''));
+        }
+      }
     });
   }
 

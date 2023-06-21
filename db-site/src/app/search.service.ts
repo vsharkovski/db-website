@@ -40,14 +40,11 @@ export class SearchService {
   ): Observable<SearchResponse> {
     return this.http
       .get<SearchResponse>('api/search', {
-        params: new HttpParams({
-          fromObject: {
-            page: page,
-            term: term,
-            sortVariable: sortVariable,
-            sortDirection: sortDirection,
-          },
-        }),
+        params: new HttpParams()
+          .append('page', page)
+          .append('term', term)
+          .append('sortVariable', sortVariable)
+          .append('sortDirection', sortDirection),
       })
       .pipe(
         catchError(

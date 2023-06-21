@@ -6,13 +6,14 @@ import {
   OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
 import { PixelCoordinate } from '../pixel-coordinate.model';
-import { pairwise, startWith } from 'rxjs';
 import { RangeMapService } from '../range-map.service';
 import { RangeMappingType } from '../range-mapping.type';
+import { ReplaySubject, distinctUntilChanged, filter, map } from 'rxjs';
 
 type ElementName = 'left' | 'right' | 'bar';
 
@@ -23,128 +24,176 @@ type ElementName = 'left' | 'right' | 'bar';
   hostDirectives: [MouseTrackerDirective],
 })
 export class RangeSelectorComponent implements OnChanges, OnInit {
+  readonly defaultZoomFraction = 0.005;
+
   @Input() valueBoundary!: NumberRange;
-  @Input() selectedValues!: NumberRange;
+  @Input('selectedValues') selectedValuesInjected!: NumberRange;
+  @Input() type: RangeMappingType = 'linear';
 
   // Whether to enable zoom when using mouse wheel *on the range selector itself.*
   @Input() enableZoomOnWheel: boolean = false;
 
-  @Input() type: RangeMappingType = 'linear';
-
   @Output() selectionChanged = new EventEmitter<NumberRange>();
 
-  readonly defaultZoomFraction = 0.005;
+  selectedFractions$ = new ReplaySubject<NumberRange>();
+  selectedFractions!: NumberRange;
 
-  selectedElement: ElementName | null = null;
+  // Always calculated from selectedFractions.
+  selectedValues!: NumberRange;
+
+  clickedElement: ElementName | null = null;
   mousePositionFraction: PixelCoordinate | null = null;
   isMouseInsideX = false;
+
+  barMoveStartFraction: number | null = null;
+  barMoveStartSelectedFractions: NumberRange | null = null;
 
   constructor(
     private mouseTracker: MouseTrackerDirective,
     private rangeMapService: RangeMapService
   ) {}
 
-  ngOnChanges(): void {
-    // If selected values are not provided, set them to the boundaries.
-    if (!this.selectedValues) {
-      this.selectedValues = this.valueBoundary;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes['valueBoundary'] ||
+      (changes['selectedValuesInjected'] &&
+        (this.selectedValuesInjected.min !== this.selectedValues.min ||
+          this.selectedValuesInjected.max !== this.selectedValues.max))
+    ) {
+      // Either boundaries changed, or selectedValues actually changed.
+      this.selectedFractions =
+        this.rangeMapService.mapValueRangeToFractionRange(
+          this.type,
+          this.selectedValuesInjected,
+          this.valueBoundary
+        );
+      this.selectedValues = { ...this.selectedValuesInjected };
+      this.clickedElement = null;
+      this.barMoveStartFraction = null;
+      this.barMoveStartSelectedFractions = null;
     }
   }
 
   ngOnInit(): void {
-    this.mouseTracker.currentFraction$
-      .pipe(startWith(null), pairwise())
-      .subscribe(([fraction, prevFraction]) => {
-        this.mousePositionFraction = fraction;
-        if (fraction !== null && fraction.x >= 0 && fraction.x < 1) {
-          this.updateSelection(
-            fraction.x,
-            prevFraction !== null ? prevFraction.x : null
-          );
-        }
-      });
+    // Update selection from mouse movement.
+    this.mouseTracker.currentFraction$.subscribe((fraction) => {
+      this.mousePositionFraction = fraction;
+      if (fraction !== null && fraction.x >= 0 && fraction.x < 1) {
+        this.updateSelection(fraction.x);
+      }
+    });
+
+    // Track whether inside the component.
     this.mouseTracker.isInside$.subscribe(
       (isInside) => (this.isMouseInsideX = isInside.x)
     );
+
+    // Update selectedFractions and selectedValues.
+    const jsonCompare = (a: any, b: any): boolean =>
+      JSON.stringify(a) === JSON.stringify(b);
+
+    this.selectedFractions$.subscribe(
+      (fractions) => (this.selectedFractions = fractions)
+    );
+    this.selectedFractions$
+      .pipe(
+        map((fractions) =>
+          this.rangeMapService.mapFractionRangeToValueRange(
+            this.type,
+            fractions,
+            this.valueBoundary,
+            0,
+            0
+          )
+        ),
+        distinctUntilChanged(jsonCompare),
+        filter((values) => values != this.selectedValues)
+      )
+      .subscribe((selectedValues) => {
+        this.selectedValues = selectedValues;
+        this.selectionChanged.next(selectedValues);
+      });
   }
 
   onMouseDown(element: ElementName): void {
-    this.selectedElement = element;
-  }
-
-  onClick(side: 'left' | 'right'): void {
-    let didUpdate = false;
-    let newSelectedValues: NumberRange = { ...this.selectedValues };
-
-    if (side === 'left') {
-      if (this.selectedValues.min - 1 >= this.valueBoundary.min) {
-        newSelectedValues.min -= 1;
-        didUpdate = true;
-      }
-    } else {
-      if (this.selectedValues.max + 1 <= this.valueBoundary.max) {
-        newSelectedValues.max += 1;
-        didUpdate = true;
-      }
-    }
-
-    if (didUpdate) {
-      this.selectedValues = newSelectedValues;
-      this.selectionChanged.next(this.selectedValues);
-    }
+    this.clickedElement = element;
   }
 
   @HostListener('window:mouseup')
   onWindowMouseUp(): void {
-    if (this.selectedElement) {
-      this.selectedElement = null;
+    if (this.clickedElement) {
+      this.clickedElement = null;
+      this.barMoveStartFraction = null;
+      this.barMoveStartSelectedFractions = null;
+
+      // Round selectedFractions to match selectedValues.
+      this.selectedFractions = this.rangeMapService.roundFractionRange(
+        this.type,
+        this.selectedFractions,
+        this.valueBoundary,
+        0,
+        0
+      );
     }
   }
 
-  updateSelection(fraction: number, prevFraction: number | null): void {
-    if (!this.selectedElement) return;
-
-    let value = this.rangeMapService.mapFractionToValue(
+  onClick(side: 'left' | 'right'): void {
+    let newValues: NumberRange = { ...this.selectedValues };
+    if (side === 'left') {
+      newValues.min -= 1;
+    } else {
+      newValues.max += 1;
+    }
+    const newFractions = this.rangeMapService.mapValueRangeToFractionRange(
       this.type,
-      fraction,
+      newValues,
       this.valueBoundary
     );
-    let updatedAnySelected = false;
-    let newSelectedValues: NumberRange = { ...this.selectedValues };
+    this.selectedFractions$.next(newFractions);
+  }
 
-    if (this.selectedElement == 'left') {
-      // Update min selected value if new.
-      if (this.selectedValues.max < value) value = this.selectedValues.max;
-      updatedAnySelected = value != this.selectedValues.min;
-      newSelectedValues.min = value;
-    } else if (this.selectedElement == 'right') {
-      // Update max selected value if new.
-      if (value < this.selectedValues.min) value = this.selectedValues.min;
-      updatedAnySelected = value != this.selectedValues.max;
-      newSelectedValues.max = value;
-    } else if (prevFraction !== null) {
-      // Bar. Move both min and max selected values, if it would not decrease the size of the bar.
-      const shiftedValues =
-        this.rangeMapService.shiftValueRangeByFractionDifference(
-          this.type,
-          this.selectedValues,
-          this.valueBoundary,
-          prevFraction - fraction
-        );
+  updateSelection(fraction: number): void {
+    if (!this.clickedElement) return;
+    let newSelectedFractions: NumberRange = { ...this.selectedFractions };
 
-      if (
-        shiftedValues.min !== this.selectedValues.min &&
-        shiftedValues.max !== this.selectedValues.max
-      ) {
-        newSelectedValues = shiftedValues;
-        updatedAnySelected = true;
+    if (this.clickedElement === 'left' || this.clickedElement === 'right') {
+      this.barMoveStartFraction = null;
+      this.barMoveStartSelectedFractions = null;
+
+      // Move the selected endpoint by setting its value to the fraction's value.
+      if (this.clickedElement == 'left') {
+        if (this.selectedFractions.max < fraction)
+          fraction = this.selectedFractions.max;
+        newSelectedFractions.min = fraction;
+      } else if (this.clickedElement == 'right') {
+        if (fraction < this.selectedFractions.min)
+          fraction = this.selectedFractions.min;
+        newSelectedFractions.max = fraction;
+      }
+    } else {
+      // Bar. Move both endpoints of selected range.
+      if (this.barMoveStartFraction === null) {
+        this.barMoveStartFraction = fraction;
+        this.barMoveStartSelectedFractions = this.selectedFractions;
+      } else {
+        const shiftedFractions =
+          this.rangeMapService.shiftFractionRangeByFractionDifference(
+            this.barMoveStartSelectedFractions!,
+            fraction - this.barMoveStartFraction
+          );
+
+        // Update selectedFractions if range size is the same.
+        const shiftedSize = shiftedFractions.max - shiftedFractions.min;
+        const selectedSize =
+          this.selectedFractions.max - this.selectedFractions.min;
+
+        if (Math.abs(shiftedSize - selectedSize) < Number.EPSILON) {
+          newSelectedFractions = shiftedFractions;
+        }
       }
     }
 
-    if (updatedAnySelected) {
-      this.selectedValues = newSelectedValues;
-      this.selectionChanged.next(this.selectedValues);
-    }
+    this.selectedFractions$.next(newSelectedFractions);
   }
 
   @HostListener('wheel', ['$event'])
@@ -159,7 +208,7 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   }
 
   /**
-   * Zoom in/out the selected range.
+   * Zoom in/out the selected range by a default amount.
    * @param direction The direction (< 0 means expand, > 0 means shrink,
    * 0 means no change).
    */
@@ -182,49 +231,60 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
       changeFractionRight = changeFraction - changeFractionLeft;
     }
 
-    const leftFraction = this.rangeMapService.mapValueToFraction(
+    const fractionsRounded = this.rangeMapService.mapValueRangeToFractionRange(
       this.type,
-      this.selectedValues.min,
-      this.valueBoundary
-    );
-    const rightFraction = this.rangeMapService.mapValueToFraction(
-      this.type,
-      this.selectedValues.max,
+      this.selectedValues,
       this.valueBoundary
     );
 
-    // Calculate new selected boundaries.
-    let newMin = this.rangeMapService.mapFractionToValue(
-      this.type,
-      leftFraction - changeFractionLeft,
-      this.valueBoundary
-    );
-    let newMax = this.rangeMapService.mapFractionToValue(
-      this.type,
-      rightFraction + changeFractionRight,
-      this.valueBoundary
-    );
+    const changedFractions: NumberRange = {
+      min: fractionsRounded.min - changeFractionLeft,
+      max: fractionsRounded.max + changeFractionRight,
+    };
 
     // In case they pass each other, set them to the middle.
-    if (newMin > newMax) {
-      const middleFraction = (leftFraction + rightFraction) / 2;
-      const middleValue = this.rangeMapService.mapFractionToValue(
-        this.type,
-        middleFraction,
-        this.valueBoundary
-      );
-      newMin = middleValue;
-      newMax = middleValue;
+    let setToMiddle = false;
+    if (changedFractions.min > changedFractions.max) {
+      setToMiddle = true;
+      const middle = (fractionsRounded.min + fractionsRounded.max) / 2;
+      changedFractions.min = middle;
+      changedFractions.max = middle;
     }
 
-    // Update selected values.
+    let newValues = this.rangeMapService.mapFractionRangeToValueRange(
+      this.type,
+      changedFractions,
+      this.valueBoundary,
+      0,
+      0
+    );
+
     if (
-      newMin != this.selectedValues.min ||
-      newMax != this.selectedValues.max
+      !setToMiddle &&
+      newValues.min === this.selectedValues.min &&
+      newValues.max === this.selectedValues.max
     ) {
-      this.selectedValues = { min: newMin, max: newMax };
-      this.selectionChanged.emit(this.selectedValues);
+      // Fraction ranges were too close to change the values.
+      // Force a minimal change (at most 1 from each side).
+      const clamp = (x: number) =>
+        this.rangeMapService.clamp(x, this.valueBoundary);
+      const candidate: NumberRange = {
+        min: clamp(newValues.min - Math.sign(changeFractionLeft)),
+        max: clamp(newValues.max + Math.sign(changeFractionRight)),
+      };
+      if (candidate.min > candidate.max) {
+        // Zoomed inward and went from [i, i+1] to [i+1, i].
+        candidate.max = candidate.min;
+      }
+      newValues = candidate;
     }
+
+    const newFractions = this.rangeMapService.mapValueRangeToFractionRange(
+      this.type,
+      newValues,
+      this.valueBoundary
+    );
+    this.selectedFractions$.next(newFractions);
   }
 
   getPercentageFromFraction(fraction: number): string {

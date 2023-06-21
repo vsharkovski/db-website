@@ -30,6 +30,19 @@ interface PersonRepository : JpaRepository<Person, Long>, PagingAndSortingReposi
     """)
     fun findTimelineData(page: Pageable): Slice<PersonTimelineData>
 
+    @Query("""
+        select new com.vsharkovski.dbpaperapi.model.PersonTimelineData(
+            p.wikidataCode, p.birth, p.notabilityIndex,
+            p.genderId, p.level1MainOccId, p.citizenship1BId)
+        from Person p
+        where
+            p.birth is not null and
+            p.birth >= :minBirthYear and
+            p.birth <= :maxBirthYear
+        order by p.notabilityIndex desc
+    """)
+    fun findTimelineDataByBirthYearRange(page: Pageable, minBirthYear: Short, maxBirthYear: Short): Slice<PersonTimelineData>
+
     fun findByWikidataCode(wikidataCode: Int): PersonNoRawData?
 
     @Transactional

@@ -17,18 +17,33 @@ export class RangeMapService {
   }
 
   /**
+   * @param rounding -1 (floor), 0 (round), or 1 (ceil)
+   * @returns Math.floor, Math.round, or Math.ceil.
+   * If rounding is not -1, 0, or 1, returns Math.ceil.
+   */
+  getRoundingFn(rounding: number): (x: number) => number {
+    return rounding === 0
+      ? Math.round
+      : rounding === -1
+      ? Math.floor
+      : Math.ceil;
+  }
+
+  /**
    * Linearly map a fraction to a range of discrete values.
    * @param fraction A number in range [0, 1).
    * @param valueBoundary Discrete value range [min, max].
+   * @param rounding -1 (floor), 0 (round), or 1 (ceil).
    */
   mapFractionToValueLinear(
     fraction: number,
-    valueBoundary: NumberRange
+    valueBoundary: NumberRange,
+    rounding: number
   ): number {
     const v =
       valueBoundary.min +
       fraction * (valueBoundary.max - valueBoundary.min + 1);
-    return this.clamp(Math.round(v), valueBoundary);
+    return this.clamp(this.getRoundingFn(rounding)(v), valueBoundary);
   }
 
   /**
@@ -45,8 +60,13 @@ export class RangeMapService {
    * Logarithmically map a fraction to a range of discrete values.
    * @param fraction A number in range [0, 1).
    * @param valueBoundary Discrete value range [min, max].
+   * @param rounding -1 (floor), 0 (round), or 1 (ceil).
    */
-  mapFractionToValueLog(fraction: number, valueBoundary: NumberRange): number {
+  mapFractionToValueLog(
+    fraction: number,
+    valueBoundary: NumberRange,
+    rounding: number
+  ): number {
     /*
     Formula is v=(1/k)*ln((e^kb-e^ka)f + e^ka), where
     a=valueBoundary.min, b=valueBoundary.max+1, k is a constant.
@@ -56,7 +76,7 @@ export class RangeMapService {
     */
     const v =
       valueBoundary.max + 1 + Math.log(fraction) / this.logarithmicConstant;
-    return this.clamp(Math.round(v), valueBoundary);
+    return this.clamp(this.getRoundingFn(rounding)(v), valueBoundary);
   }
 
   /**
@@ -96,55 +116,150 @@ export class RangeMapService {
    * @param type Linear or logarithmic.
    * @param fraction A number in range [0, 1).
    * @param valueBoundary Discrete value range [min, max].
+   * @param rounding -1 (floor), 0 (round), or 1 (ceil).
    */
   mapFractionToValue(
     mappingType: RangeMappingType,
     fraction: number,
-    valueBoundary: NumberRange
+    valueBoundary: NumberRange,
+    rounding: number
   ): number {
     if (mappingType === 'linear') {
-      return this.mapFractionToValueLinear(fraction, valueBoundary);
+      return this.mapFractionToValueLinear(fraction, valueBoundary, rounding);
     } else {
       // Log.
-      return this.mapFractionToValueLog(fraction, valueBoundary);
+      return this.mapFractionToValueLog(fraction, valueBoundary, rounding);
     }
   }
 
+  /**
+   * See mapValueToFraction.
+   */
+  mapValueRangeToFractionRange(
+    mappingType: RangeMappingType,
+    valueRange: NumberRange,
+    valueBoundary: NumberRange
+  ): NumberRange {
+    return {
+      min: this.mapValueToFraction(mappingType, valueRange.min, valueBoundary),
+      max: this.mapValueToFraction(mappingType, valueRange.max, valueBoundary),
+    };
+  }
+
+  /**
+   * See mapFractionToValue.
+   * @param roundingMin Rounding for range minimum.
+   * @param roundingMax Rounding for range maximum.
+   */
+  mapFractionRangeToValueRange(
+    mappingType: RangeMappingType,
+    fractionRange: NumberRange,
+    valueBoundary: NumberRange,
+    roundingMin: number,
+    roundingMax: number
+  ): NumberRange {
+    return {
+      min: this.mapFractionToValue(
+        mappingType,
+        fractionRange.min,
+        valueBoundary,
+        roundingMin
+      ),
+      max: this.mapFractionToValue(
+        mappingType,
+        fractionRange.max,
+        valueBoundary,
+        roundingMax
+      ),
+    };
+  }
+
+  /**
+   * Shift a value range by a fractional difference.
+   * @param mappingType Linear or log.
+   * @param valueRange The range to shift.
+   * @param valueBoundary The boundary of the range.
+   * @param fractionDifference The fraction of the boundary to shift by.
+   * @param forceChange Whether to force a change of at least 1, even if
+   * fractionDifference is too small to map a value difference of 1.
+   * @returns The resulting value range.
+   */
   shiftValueRangeByFractionDifference(
     mappingType: RangeMappingType,
     valueRange: NumberRange,
     valueBoundary: NumberRange,
+    fractionDifference: number,
+    forceChange: boolean
+  ): NumberRange {
+    const fractionRange = this.mapValueRangeToFractionRange(
+      mappingType,
+      valueRange,
+      valueBoundary
+    );
+    const newFractionRange: NumberRange = {
+      min: this.clampFraction(fractionRange.min + fractionDifference),
+      max: this.clampFraction(fractionRange.max + fractionDifference),
+    };
+    const newValueRange = this.mapFractionRangeToValueRange(
+      mappingType,
+      newFractionRange,
+      valueBoundary,
+      0,
+      0
+    );
+
+    if (
+      forceChange &&
+      newValueRange.min === valueRange.min &&
+      newValueRange.max === valueRange.max
+    ) {
+      const sign = Math.sign(fractionDifference);
+      newValueRange.min = this.clamp(newValueRange.min + sign, valueBoundary);
+      newValueRange.max = this.clamp(newValueRange.max + sign, valueBoundary);
+    }
+
+    return newValueRange;
+  }
+
+  shiftFractionRangeByFractionDifference(
+    fractionRange: NumberRange,
     fractionDifference: number
   ): NumberRange {
-    const leftFraction = this.mapValueToFraction(
-      mappingType,
-      valueRange.min,
-      valueBoundary
-    );
-    const rightFraction = this.mapValueToFraction(
-      mappingType,
-      valueRange.max,
-      valueBoundary
-    );
+    return {
+      min: this.clampFraction(fractionRange.min + fractionDifference),
+      max: this.clampFraction(fractionRange.max + fractionDifference),
+    };
+  }
 
-    const newLeftFraction = this.clampFraction(
-      leftFraction + fractionDifference
+  roundFraction(
+    type: RangeMappingType,
+    fraction: number,
+    valueBoundary: NumberRange,
+    rounding: number
+  ): number {
+    const value = this.mapFractionToValue(
+      type,
+      fraction,
+      valueBoundary,
+      rounding
     );
-    const newRightFraction = this.clampFraction(
-      rightFraction + fractionDifference
-    );
+    return this.mapValueToFraction(type, value, valueBoundary);
+  }
 
-    const newMinValue = this.mapFractionToValue(
-      mappingType,
-      newLeftFraction,
-      valueBoundary
+  roundFractionRange(
+    type: RangeMappingType,
+    fractionRange: NumberRange,
+    valueBoundary: NumberRange,
+    roundingMin: number,
+    roundingMax: number
+  ) {
+    const valueRange = this.mapFractionRangeToValueRange(
+      type,
+      fractionRange,
+      valueBoundary,
+      roundingMin,
+      roundingMax
     );
-    const newMaxValue = this.mapFractionToValue(
-      mappingType,
-      newRightFraction,
-      valueBoundary
-    );
-
-    return { min: newMinValue, max: newMaxValue };
+    return this.mapValueRangeToFractionRange(type, valueRange, valueBoundary);
   }
 }

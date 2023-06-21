@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ErrorService } from './error.service';
-import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, catchError, of } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, Subject, catchError, map, of } from 'rxjs';
 import { TimelinePoint } from './timeline-point.model';
 import { TimelineResponse } from './timeline-response.model';
 import { TimelineOptions } from './timeline-options.model';
 import { TimelineTimeStatistics } from './timeline-statistics.model';
 import { StorageItem } from './storage-item.model';
+import { NumberRange } from './number-range.model';
 
 const TIMELINE_RESPONSE_KEY = 'timeline-data';
 const STORAGE_LIFETIME_MS = 1000 * 60 * 60 * 24; // One day.
@@ -43,7 +44,7 @@ export class TimelineService {
     // }
   }
 
-  getTimelineData(): Observable<TimelinePoint[]> {
+  getFullTimelineData(): Observable<TimelinePoint[]> {
     if (this.timelineData.length > 0) {
       return of(this.timelineData);
     }
@@ -57,7 +58,9 @@ export class TimelineService {
         .get<TimelineResponse>('api/timeline')
         .pipe(
           catchError(
-            this.errorService.handleError('getTimelineData', { results: [] })
+            this.errorService.handleError('getFullTimelineData', {
+              results: [],
+            } as TimelineResponse)
           )
         )
         .subscribe((response) => {
@@ -77,6 +80,27 @@ export class TimelineService {
     }
 
     return this.timelineDataFromApi$.asObservable();
+  }
+
+  getPartialTimelineData(
+    resultLimit: number,
+    timeLimit: NumberRange
+  ): Observable<TimelinePoint[]> {
+    return this.http
+      .get<TimelineResponse>('api/timeline', {
+        params: new HttpParams()
+          .append('limit', resultLimit)
+          .append('minTime', timeLimit.min)
+          .append('maxTime', timeLimit.max),
+      })
+      .pipe(
+        catchError(
+          this.errorService.handleError('getPartialTimelineData', {
+            results: [],
+          } as TimelineResponse)
+        ),
+        map((response) => this.processResponse(response))
+      );
   }
 
   private processResponse(data: TimelineResponse): TimelinePoint[] {
