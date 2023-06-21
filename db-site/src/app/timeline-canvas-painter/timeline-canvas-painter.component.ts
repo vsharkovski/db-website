@@ -225,10 +225,7 @@ export class TimelineCanvasPainterComponent
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
     const pointSize = this.pointSizePixels;
-    const pointSizeMultiplied = pointSize * multiplier;
     const pointMarginSizeCombined = this.pointMarginSizeCombined;
-    const pointMarginSizeCombinedMultiplied =
-      pointMarginSizeCombined * multiplier;
     const yMiddle = this.canvasMiddleYPixels;
     const occupationIdToColor = this.occupationIdToColor;
     const backupPointColors = this.backupPointColors;
@@ -238,13 +235,17 @@ export class TimelineCanvasPainterComponent
     for (const bucket of this.buckets) {
       // Y coordinate of top point will be a point and margin size away
       // from the middle line.
-      let yTop = yMiddle - pointMarginSizeCombinedMultiplied;
+      let yTop = yMiddle - pointMarginSizeCombined;
       // Y coordinate of bottom point will be directly at the bottom line.
       let yBottom = yMiddle;
 
       // Alternately place points at bottom/top positions and move
       // down/up, starting with the bottom position.
-      for (let pointIndex = 0; pointIndex < bucket.length; pointIndex++) {
+      for (
+        let pointIndex = 0;
+        pointIndex < Math.ceil(bucket.length * multiplier);
+        pointIndex++
+      ) {
         // Pick random color for this point.
         if (occupationIdToColor) {
           ctx.fillStyle =
@@ -257,11 +258,11 @@ export class TimelineCanvasPainterComponent
         }
 
         if (pointIndex % 2 == 0) {
-          ctx.fillRect(x, yBottom, pointSize, pointSizeMultiplied);
-          yBottom += pointMarginSizeCombinedMultiplied;
+          ctx.fillRect(x, yBottom, pointSize, pointSize);
+          yBottom += pointMarginSizeCombined;
         } else {
-          ctx.fillRect(x, yTop, pointSize, pointSizeMultiplied);
-          yTop -= pointMarginSizeCombinedMultiplied;
+          ctx.fillRect(x, yTop, pointSize, pointSize);
+          yTop -= pointMarginSizeCombined;
         }
       }
 
