@@ -33,9 +33,7 @@ export class PersonService {
       );
   }
 
-  getPeopleByWikidataCodes(
-    wikidataCodes: number[]
-  ): Observable<Person[] | null> {
+  getPeopleByWikidataCodes(wikidataCodes: number[]): Observable<Person[]> {
     return this.http
       .get<Person[]>('/api/person/wikidata_codes', {
         params: new HttpParams().append(

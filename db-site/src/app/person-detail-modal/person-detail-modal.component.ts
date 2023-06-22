@@ -41,14 +41,18 @@ export class PersonDetailModalComponent implements OnInit {
       this.genders = genders;
       this.variablesLoaded.next();
     });
-    this.variablesService.getOccupationIdToNameMap().subscribe((occupations) => {
-      this.occupations = occupations;
-      this.variablesLoaded.next();
-    });
-    this.variablesService.getCitizenshipIdToNameMap().subscribe((citizenships) => {
-      this.citizenships = citizenships;
-      this.variablesLoaded.next();
-    });
+    this.variablesService
+      .getOccupationIdToNameMap()
+      .subscribe((occupations) => {
+        this.occupations = occupations;
+        this.variablesLoaded.next();
+      });
+    this.variablesService
+      .getCitizenshipIdToNameMap()
+      .subscribe((citizenships) => {
+        this.citizenships = citizenships;
+        this.variablesLoaded.next();
+      });
 
     // When all 3 variable groups have been loaded, update strings.
     this.variablesLoaded.pipe(skip(2)).subscribe(() => {
@@ -79,10 +83,14 @@ export class PersonDetailModalComponent implements OnInit {
     if (this.data === null) {
       this.waitingForResponse = true;
       this.wikidataUrl = `https://www.wikidata.org/wiki/Q${this.person.wikidataCode}`;
-      this.wikiService.getDataFromEnglishWiki(this.person).subscribe((data) => {
-        this.waitingForResponse = false;
-        this.data = data;
-      });
+      this.wikiService
+        .getDataFromEnglishWiki([this.person], true, true, 600, 4)
+        .subscribe((data) => {
+          this.waitingForResponse = false;
+          if (data.length > 0) {
+            this.data = data[0];
+          }
+        });
     }
   }
 }

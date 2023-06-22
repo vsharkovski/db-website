@@ -7,6 +7,9 @@ export interface WikiApiPage {
   thumbnail?: {
     source?: string;
   };
+  terms?: {
+    description?: string;
+  };
   extract?: string;
   fullurl?: string;
   wikidataCode?: number;

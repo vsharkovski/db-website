@@ -8,12 +8,14 @@ import {
 } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
 import {
+  Observable,
   Subject,
   debounceTime,
   delay,
   distinctUntilChanged,
   filter,
   forkJoin,
+  map,
   of,
   switchMap,
 } from 'rxjs';
@@ -63,14 +65,15 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   };
   hoveredPointLastTimeNotNullMs: number = 0;
   removeHoveredPoint$ = new Subject<number>();
-  updateHoverApiData$ = new Subject<TimelinePoint>();
 
   hoveredCardDimensions: PixelPair = { x: 0, y: 0 };
   hoveredCardPosition: PixelPair | null = null;
   updateHoveredCardPosition$ = new Subject<void>();
 
   highlighted: PointData[] = [];
-  highlightedPoints$ = new Subject<TimelinePoint[]>();
+
+  getHoveredApiData$ = new Subject<PointData>();
+  getHighlightedApiData$ = new Subject<PointData[]>();
 
   constructor(
     private personService: PersonService,
@@ -112,9 +115,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
             )
           : null,
       }));
-      this.highlightedPoints$.next(
-        highlightedPointsAndIndices.map((it) => it.point)
-      );
+      this.getHighlightedApiData$.next(this.highlighted);
     }
   }
 
@@ -140,62 +141,64 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         };
       });
 
-    this.updateHoverApiData$
-      .pipe(
+    // Get API data for points.
+    const getApiDataAndSubscribe = (data$: Observable<PointData[]>) => {
+      data$
+        .pipe(
+          // Get persons.
+          switchMap((data) =>
+            forkJoin([
+              of(data),
+              this.personService.getPeopleByWikidataCodes(
+                data.map((it) => it.point!.wikidataCode)
+              ),
+            ])
+          ),
+          // Get thumbnails.
+          switchMap(([data, persons]) =>
+            forkJoin([
+              of(data),
+              of(persons),
+              this.wikiService.getDataFromEnglishWiki(
+                persons,
+                true,
+                true,
+                300,
+                undefined
+              ),
+            ])
+          )
+        )
+        .subscribe(([data, persons, wikiPages]) => {
+          const wikidataCodeToDatum = new Map<number, PointData>();
+          for (const datum of data)
+            wikidataCodeToDatum.set(datum.point!.wikidataCode, datum);
+          for (const person of persons) {
+            const datum = wikidataCodeToDatum.get(person.wikidataCode);
+            if (datum) datum.person = person;
+          }
+          for (const page of wikiPages) {
+            const datum = wikidataCodeToDatum.get(page.wikidataCode!);
+            if (datum) datum.wikiPage = page;
+          }
+        });
+    };
+
+    getApiDataAndSubscribe(
+      this.getHoveredApiData$.pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        filter(
-          (point) => point.wikidataCode == this.hovered.point?.wikidataCode
-        ),
-        switchMap((point) =>
-          this.personService.getPersonByWikidataCode(point.wikidataCode)
-        ),
-        filter(
-          (person) =>
-            person !== null &&
-            person.wikidataCode === this.hovered.point?.wikidataCode
-        ),
-        switchMap((person) =>
-          forkJoin([
-            of(person),
-            this.wikiService.getDataFromEnglishWiki(person!, 300),
-          ])
-        )
+        map((datum) => [datum])
       )
-      .subscribe(([person, wikiPage]) => {
-        if (!this.hovered.point) return;
-        const code = this.hovered.point.wikidataCode;
-        if (code === person!.wikidataCode) {
-          this.hovered.person = person;
-        }
-        if (code === wikiPage?.wikidataCode) {
-          this.hovered.wikiPage = wikiPage;
-        }
-      });
-
-    // When highlighted points are changed, get their People from
-    // the API. We use switchMap to cancel any ongoing request,
-    // as its value will be useless.
-    this.highlightedPoints$
-      .pipe(
+    );
+    getApiDataAndSubscribe(
+      this.getHighlightedApiData$.pipe(
         debounceTime(100),
-        switchMap((points) =>
-          this.personService.getPeopleByWikidataCodes(
-            points.map((point) => point.wikidataCode)
-          )
-        ),
-        filter((persons) => persons !== null)
+        distinctUntilChanged()
       )
-      .subscribe((persons) => {
-        // Add each person to their highlight.
-        for (const highlight of this.highlighted) {
-          const person = persons!.find(
-            (it) => it.wikidataCode == highlight.point!.wikidataCode
-          );
-          if (person) highlight.person = person;
-        }
-      });
+    );
 
+    // Update hovered card position.
     this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
       if (!this.lastInsideMousePosition || !this.drawParams) {
         this.hoveredCardPosition = null;
@@ -252,7 +255,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
           wikiPage: null,
           position: null,
         };
-        this.updateHoverApiData$.next(hovered);
+        this.getHoveredApiData$.next(this.hovered);
       }
       this.hoveredPointLastTimeNotNullMs = time;
     }

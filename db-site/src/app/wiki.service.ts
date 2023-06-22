@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of } from 'rxjs';
 import { ErrorService } from './error.service';
 import { Person } from './person.model';
 import { WikiApiPage } from './wiki-api-page.model';
@@ -31,15 +31,18 @@ export class WikiService {
   constructor(private http: HttpClient, private errorService: ErrorService) {}
 
   getDataFromEnglishWiki(
-    person: Person,
-    thumbnailSize?: number
-  ): Observable<WikiApiPage | null> {
-    if (!person.name) {
-      return of(null);
-    }
-    if (thumbnailSize === undefined) {
-      thumbnailSize = 600;
-    }
+    persons: Person[],
+    getPageProperties: boolean,
+    getPageTerms: boolean,
+    thumbnailSize?: number,
+    numExtractSentences?: number
+  ): Observable<WikiApiPage[]> {
+    const properties = [];
+    if (getPageProperties) properties.push('pageprops');
+    if (getPageTerms) properties.push('pageterms');
+    if (thumbnailSize) properties.push('pageimages');
+    if (numExtractSentences) properties.push('extracts');
+
     return this.http
       .get<WikiApiResponse>(wikipediaUrl, {
         params: new HttpParams({
@@ -48,40 +51,34 @@ export class WikiService {
             format: 'json',
             formatversion: 2,
             action: 'query',
-            prop: 'pageprops|pageimages|pageterms|extracts|info',
+            prop: properties.join('|'),
             piprop: 'thumbnail',
             inprop: 'url',
-            pithumbsize: thumbnailSize,
+            pithumbsize: thumbnailSize ?? 600,
             explaintext: 1,
             exsectionformat: 'plain',
-            exsentences: 4,
-            titles: person.name,
+            exsentences: numExtractSentences ?? 4,
+            titles: persons.map((it) => it.name).join('|'),
           },
         }),
       })
       .pipe(
         catchError(
-          this.errorService.handleError('getDataFromEnglishWiki', null)
+          this.errorService.handleError('getDataFromEnglishWiki', {
+            query: { pages: [] },
+          } as WikiApiResponse)
         ),
-        map((response) => {
-          if (!response || !this.doesPageExistInResponse(response)) {
-            return null;
-          }
-          const page = response!.query!.pages![0];
-          page.wikidataCode = Number(
-            page.pageprops?.wikibase_item?.substring(1)
-          );
-          if (isNaN(page.wikidataCode)) page.wikidataCode = undefined;
-          return page;
-        })
+        map((response) =>
+          response.query.pages
+            .filter((page) => !page.missing)
+            .map((page) => {
+              page.wikidataCode = Number(
+                page.pageprops?.wikibase_item?.substring(1)
+              );
+              if (isNaN(page.wikidataCode)) page.wikidataCode = undefined;
+              return page;
+            })
+        )
       );
-  }
-
-  private doesPageExistInResponse(response: WikiApiResponse): boolean {
-    const pages = response?.query?.pages;
-    if (!pages || pages.length == 0 || pages[0].missing) {
-      return false;
-    }
-    return true;
   }
 }
