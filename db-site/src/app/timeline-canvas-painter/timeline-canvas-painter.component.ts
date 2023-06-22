@@ -1,7 +1,6 @@
 import {
   Component,
   ElementRef,
-  HostListener,
   Input,
   OnChanges,
   OnInit,

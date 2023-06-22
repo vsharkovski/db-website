@@ -3,7 +3,7 @@ import { NumberRange } from '../number-range.model';
 import { PixelPair } from '../pixel-pair.model';
 import { RangeMapService } from '../range-map.service';
 import { TimelineDrawParams } from '../timeline-draw-params.model';
-import { TimelineService } from '../timeline.service';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 @Component({
   selector: 'dbw-timeline-canvas-year-line-area',
@@ -20,7 +20,7 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
 
   constructor(
     private rangeMapService: RangeMapService,
-    private timelineService: TimelineService
+    private timelineDrawService: TimelineDrawService
   ) {}
 
   ngOnChanges(): void {
@@ -63,7 +63,7 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
   getTimeRangeFromPosition(position: PixelPair): NumberRange | null {
     if (!this.drawParams) return null;
 
-    const bucketIndex = this.timelineService.getBucketIndexFromPosition(
+    const bucketIndex = this.timelineDrawService.getBucketIndexFromPosition(
       position,
       this.drawParams
     );

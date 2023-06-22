@@ -24,7 +24,7 @@ import { WikiApiPage } from '../wiki-api-page.model';
 import { Person } from '../person.model';
 import { PixelPair } from '../pixel-pair.model';
 import { TimelineDrawParams } from '../timeline-draw-params.model';
-import { TimelineService } from '../timeline.service';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 interface PointData {
   point: TimelinePoint | null;
@@ -78,7 +78,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     private personService: PersonService,
     private wikiService: WikiService,
     private modalService: ModalService,
-    private timelineService: TimelineService
+    private timelineDrawService: TimelineDrawService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -103,7 +103,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         person: null,
         wikiPage: null,
         position: this.drawParams
-          ? this.timelineService.getPixelPositionFromGridPosition(
+          ? this.timelineDrawService.getPixelPositionFromGridPosition(
               {
                 // We're assuming the points with highest notability will be at
                 // row 0 (the vertical middle).
@@ -276,10 +276,11 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   ): TimelinePoint | null {
     if (!this.drawParams) return null;
 
-    const center = this.timelineService.getApproxGridPositionFromPixelPosition(
-      position,
-      this.drawParams
-    );
+    const center =
+      this.timelineDrawService.getApproxGridPositionFromPixelPosition(
+        position,
+        this.drawParams
+      );
     if (center === null) return null;
 
     const maxApproxGridDistance = Math.ceil(

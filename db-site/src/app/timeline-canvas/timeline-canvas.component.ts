@@ -20,9 +20,10 @@ import { TimelinePoint } from '../timeline-point.model';
 import { TimelineOptions } from '../timeline-options.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
 import { PixelPair } from '../pixel-pair.model';
-import { TimelineService } from '../timeline.service';
+import { TimelineDataService } from '../timeline-data.service';
 import { TimelineDrawParams } from '../timeline-draw-params.model';
 import { TimelineTimeStatistics } from '../timeline-statistics.model';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -61,7 +62,8 @@ export class TimelineCanvasComponent
   buckets: TimelinePoint[][] = [];
 
   constructor(
-    private timelineService: TimelineService,
+    private timelineDataService: TimelineDataService,
+    private timelineDrawService: TimelineDrawService,
     private mouseTracker: MouseTrackerDirective,
     private elementRef: ElementRef
   ) {}
@@ -71,12 +73,12 @@ export class TimelineCanvasComponent
       this.selectedYears$.next(this.selectedYears);
     }
     if (changes['data'] || changes['filterOptions']) {
-      const dataProcessed = this.timelineService.processData(
+      const dataProcessed = this.timelineDataService.processData(
         this.data,
         this.filterOptions
       );
       const timeStatistics =
-        this.timelineService.getTimeStatistics(dataProcessed);
+        this.timelineDataService.getTimeStatistics(dataProcessed);
       this.dataProcessed$.next({ dataProcessed, timeStatistics });
     }
   }
@@ -106,7 +108,7 @@ export class TimelineCanvasComponent
           this.maxSelectable
         );
         const maxSelectedDataPointsAtAnyMoment =
-          this.timelineService.getMaxDataPointsAtAnyMoment(
+          this.timelineDataService.getMaxDataPointsAtAnyMoment(
             dataSelected,
             timeStatistics
           );
@@ -123,7 +125,7 @@ export class TimelineCanvasComponent
           x: elementDOMRect.width,
           y: elementDOMRect.height,
         };
-        this.drawParams = this.timelineService.getDrawParams(
+        this.drawParams = this.timelineDrawService.getDrawParams(
           drawAreaSize,
           dataSelected.dataSelected.length,
           dataSelected.maxSelectedDataPointsAtAnyMoment
@@ -181,7 +183,7 @@ export class TimelineCanvasComponent
     const mappingFn = (point: TimelinePoint): number =>
       (point.time - this.selectedYears.min) / selectedYearsRangeSize;
 
-    return this.timelineService.splitDataIntoBuckets(
+    return this.timelineDataService.splitDataIntoBuckets(
       data,
       numBuckets,
       mappingFn,
