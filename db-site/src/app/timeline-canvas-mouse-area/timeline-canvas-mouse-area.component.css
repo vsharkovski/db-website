@@ -73,7 +73,7 @@ Its parent should be positioned, for example 'position: relative'
 }
 
 .highlight {
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .highlight:hover {
