@@ -38,11 +38,7 @@ export class TimelineCanvasComponent
 
   @Input() selectedYears!: NumberRange;
   @Input() data!: TimelinePoint[];
-  @Input() filterOptions: TimelineOptions = {
-    citizenshipId: null,
-    occupationLevel1Id: null,
-    genderId: null,
-  };
+  @Input() filterOptions!: TimelineOptions;
 
   selectedYears$ = new ReplaySubject<NumberRange>();
   dataProcessed$ = new ReplaySubject<{
