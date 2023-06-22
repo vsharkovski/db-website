@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { RangeSelectorComponent } from '../range-selector/range-selector.component';
 import { NumberRange } from '../number-range.model';
-import { TimelineService } from '../timeline.service';
+import { TimelineApiService } from '../timeline-api.service';
 import { TimelinePoint } from '../timeline-point.model';
 import { TimelineOptions } from '../timeline-options.model';
 import { PersonParametersService } from '../person-parameters.service';
@@ -39,7 +39,7 @@ export class TimelineAppComponent implements OnInit {
   @ViewChild(RangeSelectorComponent) rangeSelector?: RangeSelectorComponent;
 
   constructor(
-    private timelineService: TimelineService,
+    private timelineApiService: TimelineApiService,
     personParametersService: PersonParametersService
   ) {
     // Check if there is a mouse pointer. One is needed for the app to work.
@@ -67,8 +67,8 @@ export class TimelineAppComponent implements OnInit {
 
     // Request for both full and partial data immediately.
     merge(
-      this.timelineService.getFullTimelineData().pipe(map(mapToType('full'))),
-      this.timelineService
+      this.timelineApiService.getFullTimelineData().pipe(map(mapToType('full'))),
+      this.timelineApiService
         .getPartialTimelineData(
           this.partialDataResultLimit,
           this.partialDataYearsBoundary

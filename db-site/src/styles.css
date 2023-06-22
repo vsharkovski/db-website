@@ -4,6 +4,10 @@ app-root {
   height: 100%;
 }
 
+body {
+  --person-small-card-max-width: 8rem;
+}
+
 a {
   text-decoration: none;
 }

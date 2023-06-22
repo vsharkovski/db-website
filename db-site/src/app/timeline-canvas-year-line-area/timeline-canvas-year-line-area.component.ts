@@ -1,8 +1,9 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { NumberRange } from '../number-range.model';
-import { PixelCoordinate } from '../pixel-coordinate.model';
-import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
+import { PixelPair } from '../pixel-pair.model';
 import { RangeMapService } from '../range-map.service';
+import { TimelineDrawParams } from '../timeline-draw-params.model';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 @Component({
   selector: 'dbw-timeline-canvas-year-line-area',
@@ -11,21 +12,21 @@ import { RangeMapService } from '../range-map.service';
 })
 export class TimelineCanvasYearLineAreaComponent implements OnChanges {
   @Input() selectedYears!: NumberRange;
-  @Input() numBuckets!: number;
-  @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastInsideMousePosition!: PixelCoordinate | null;
+  @Input() drawParams!: TimelineDrawParams | null;
+  @Input() mousePosition!: PixelPair | null;
+  @Input() lastInsideMousePosition!: PixelPair | null;
 
   mouseYears: NumberRange | null = null;
 
   constructor(
-    private painterService: TimelineCanvasPainterService,
-    private rangeMapService: RangeMapService
+    private rangeMapService: RangeMapService,
+    private timelineDrawService: TimelineDrawService
   ) {}
 
   ngOnChanges(): void {
     if (this.lastInsideMousePosition) {
-      const newMouseYears = this.getTimeRangeFromPixel(
-        this.lastInsideMousePosition.x
+      const newMouseYears = this.getTimeRangeFromPosition(
+        this.lastInsideMousePosition
       );
       if (newMouseYears) this.mouseYears = newMouseYears;
     }
@@ -35,11 +36,10 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
    * Returns the time range which the bucket index corresponds to.
    */
   getTimeRangeFromBucketIndex(index: number): NumberRange | null {
-    // If buckets have not been filled.
-    if (this.numBuckets === 0) return null;
+    if (!this.drawParams) return null;
 
-    const leftFraction = index / this.numBuckets;
-    const rightFraction = (index + 1) / this.numBuckets;
+    const leftFraction = index / this.drawParams.numBuckets;
+    const rightFraction = (index + 1) / this.drawParams.numBuckets;
 
     const leftValue = this.rangeMapService.mapFractionToValueLinear(
       leftFraction,
@@ -60,8 +60,13 @@ export class TimelineCanvasYearLineAreaComponent implements OnChanges {
    * which, when drawn on the canvas, contains the given
    * X pixel coordinate.
    */
-  getTimeRangeFromPixel(pixelX: number): NumberRange | null {
-    const bucketIndex = this.painterService.getBucketIndexFromPixel(pixelX);
+  getTimeRangeFromPosition(position: PixelPair): NumberRange | null {
+    if (!this.drawParams) return null;
+
+    const bucketIndex = this.timelineDrawService.getBucketIndexFromPosition(
+      position,
+      this.drawParams
+    );
     if (bucketIndex === null) return null;
 
     return this.getTimeRangeFromBucketIndex(bucketIndex);

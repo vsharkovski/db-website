@@ -1,18 +1,29 @@
 import {
+  AfterViewInit,
   Component,
+  ElementRef,
+  HostListener,
   Input,
   OnChanges,
   OnInit,
   SimpleChanges,
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
-import { ReplaySubject, combineLatest, debounceTime } from 'rxjs';
+import {
+  ReplaySubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+} from 'rxjs';
 import { TimelinePoint } from '../timeline-point.model';
 import { TimelineOptions } from '../timeline-options.model';
-import { TimelineService } from '../timeline.service';
-import { TimelineTimeStatistics } from '../timeline-statistics.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
-import { PixelCoordinate } from '../pixel-coordinate.model';
+import { PixelPair } from '../pixel-pair.model';
+import { TimelineDataService } from '../timeline-data.service';
+import { TimelineDrawParams } from '../timeline-draw-params.model';
+import { TimelineTimeStatistics } from '../timeline-statistics.model';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 @Component({
   selector: 'dbw-timeline-canvas',
@@ -20,74 +31,56 @@ import { PixelCoordinate } from '../pixel-coordinate.model';
   styleUrls: ['./timeline-canvas.component.css'],
   hostDirectives: [MouseTrackerDirective],
 })
-export class TimelineCanvasComponent implements OnInit, OnChanges {
+export class TimelineCanvasComponent
+  implements OnChanges, OnInit, AfterViewInit
+{
+  readonly maxSelectable = 10000;
+
   @Input() selectedYears!: NumberRange;
-  @Input() data: TimelinePoint[] = [];
-  @Input() filterOptions: TimelineOptions = {
-    citizenshipId: null,
-    occupationLevel1Id: null,
-    genderId: null,
-  };
+  @Input() data!: TimelinePoint[];
+  @Input() filterOptions!: TimelineOptions;
+
+  selectedYears$ = new ReplaySubject<NumberRange>();
+  dataProcessed$ = new ReplaySubject<{
+    dataProcessed: TimelinePoint[];
+    timeStatistics: TimelineTimeStatistics;
+  }>();
+  domAreaUpdated$ = new ReplaySubject<void>();
 
   // Mouse position is tracked for the mouse area and year line area components.
-  mousePosition!: PixelCoordinate | null;
-  lastInsideMousePosition!: PixelCoordinate | null;
+  mousePosition!: PixelPair | null;
+  lastInsideMousePosition!: PixelPair | null;
 
-  dataUpdated$ = new ReplaySubject<void>();
-
-  selectionChanged$ = new ReplaySubject<void>();
-  selectionChangedToBeProcessed = false;
-
-  // Data is re-processed when a new filter is applied (not years).
-  dataProcessed: TimelinePoint[] = [];
-  // Data selected to be split into buckets and later drawn.
-  // Data is re-selected when selectedYears changes.
-  readonly maxSelectable = 10000;
-  dataSelected: TimelinePoint[] = [];
-  maxSelectedDataPointsAtAnyMoment: number | null = null;
-
-  // Time statistics.
-  timeStatistics: TimelineTimeStatistics = {
-    numPointsAtMoment: [],
-    timeBoundaries: {
-      min: Number.MAX_SAFE_INTEGER,
-      max: Number.MIN_SAFE_INTEGER,
-    },
-  };
-
-  // The number of buckets is received from a child component and
-  // then used to split the selected data.
-  numBuckets: number | null = null;
+  // Data used for drawing the timeline.
+  drawParams: TimelineDrawParams | null = null;
 
   // The buckets into which the selected data is split.
   buckets: TimelinePoint[][] = [];
 
   constructor(
-    private timelineService: TimelineService,
-    private mouseTracker: MouseTrackerDirective
+    private timelineDataService: TimelineDataService,
+    private timelineDrawService: TimelineDrawService,
+    private mouseTracker: MouseTrackerDirective,
+    private elementRef: ElementRef
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYears']) {
-      const change = changes['selectedYears'];
-      const range = change.currentValue;
-      const prevRange = change.previousValue;
-      if (
-        change.isFirstChange() ||
-        range.min != prevRange.min ||
-        range.max != prevRange.max
-      ) {
-        this.selectionChanged$.next();
-        this.selectionChangedToBeProcessed = true;
-      }
+      this.selectedYears$.next(this.selectedYears);
     }
-
     if (changes['data'] || changes['filterOptions']) {
-      this.dataUpdated$.next();
+      const dataProcessed = this.timelineDataService.processData(
+        this.data,
+        this.filterOptions
+      );
+      const timeStatistics =
+        this.timelineDataService.getTimeStatistics(dataProcessed);
+      this.dataProcessed$.next({ dataProcessed, timeStatistics });
     }
   }
 
   ngOnInit(): void {
+    // Track mouse position for child components.
     combineLatest([
       this.mouseTracker.current$,
       this.mouseTracker.lastInside$,
@@ -96,31 +89,57 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
       this.lastInsideMousePosition = lastInsidePosition;
     });
 
-    this.dataUpdated$.subscribe(() => {
-      this.dataProcessed = this.timelineService.processData(
-        this.data,
-        this.filterOptions
-      );
-      this.timeStatistics = this.timelineService.calculateTimeStatistics(
-        this.dataProcessed
-      );
-      this.selectionChanged$.next();
-      this.selectionChangedToBeProcessed = true;
-    });
+    const jsonCompare = (a: any, b: any): boolean =>
+      JSON.stringify(a) === JSON.stringify(b);
 
-    this.selectionChanged$.pipe(debounceTime(100)).subscribe(() => {
-      this.dataSelected = this.selectDataForDrawing(
-        this.dataProcessed,
-        this.selectedYears,
-        this.maxSelectable
-      );
-      this.maxSelectedDataPointsAtAnyMoment =
-        this.timelineService.getMaxDataPointsAtAnyMoment(
-          this.dataSelected,
-          this.timeStatistics
+    const dataSelected$ = combineLatest([
+      this.dataProcessed$,
+      this.selectedYears$.pipe(distinctUntilChanged(jsonCompare)),
+    ]).pipe(
+      debounceTime(100),
+      map(([{ dataProcessed, timeStatistics }, selectedYears]) => {
+        const dataSelected = this.selectDataForDrawing(
+          dataProcessed,
+          selectedYears,
+          this.maxSelectable
         );
-      this.selectionChangedToBeProcessed = false;
-    });
+        const maxSelectedDataPointsAtAnyMoment =
+          this.timelineDataService.getMaxDataPointsAtAnyMoment(
+            dataSelected,
+            timeStatistics
+          );
+        return { dataSelected, maxSelectedDataPointsAtAnyMoment };
+      })
+    );
+
+    combineLatest([dataSelected$, this.domAreaUpdated$.pipe(debounceTime(200))])
+      .pipe()
+      .subscribe(([dataSelected, _]) => {
+        const elementDOMRect =
+          this.elementRef.nativeElement.getBoundingClientRect();
+        const drawAreaSize: PixelPair = {
+          x: elementDOMRect.width,
+          y: elementDOMRect.height,
+        };
+        this.drawParams = this.timelineDrawService.getDrawParams(
+          drawAreaSize,
+          dataSelected.dataSelected.length,
+          dataSelected.maxSelectedDataPointsAtAnyMoment
+        );
+        this.buckets = this.splitDataIntoBuckets(
+          dataSelected.dataSelected,
+          this.drawParams.numBuckets
+        );
+      });
+  }
+
+  ngAfterViewInit(): void {
+    this.domAreaUpdated$.next();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.domAreaUpdated$.next();
   }
 
   /**
@@ -146,26 +165,23 @@ export class TimelineCanvasComponent implements OnInit, OnChanges {
     return result;
   }
 
-  onNumBucketsReceived(numBuckets: number): void {
-    if (!this.selectionChangedToBeProcessed) {
-      // We didn't select different data in the time it took for us to
-      // get the number of buckets. Therefore, we can split the data.
-      this.numBuckets = numBuckets;
-      this.splitDataIntoBuckets();
-    }
-  }
-
-  splitDataIntoBuckets(): void {
-    if (!this.numBuckets) return;
-
+  /**
+   * Split data into buckets.
+   * @param data The data to split.
+   * @param numBuckets The number of buckets to split into.
+   */
+  splitDataIntoBuckets(
+    data: TimelinePoint[],
+    numBuckets: number
+  ): TimelinePoint[][] {
     const selectedYearsRangeSize =
       this.selectedYears.max + 1 - this.selectedYears.min;
     const mappingFn = (point: TimelinePoint): number =>
       (point.time - this.selectedYears.min) / selectedYearsRangeSize;
 
-    this.buckets = this.timelineService.splitDataIntoBuckets(
-      this.dataSelected,
-      this.numBuckets,
+    return this.timelineDataService.splitDataIntoBuckets(
+      data,
+      numBuckets,
       mappingFn,
       true
     );

@@ -8,12 +8,14 @@ import {
 } from '@angular/core';
 import { TimelinePoint } from '../timeline-point.model';
 import {
+  Observable,
   Subject,
   debounceTime,
   delay,
   distinctUntilChanged,
   filter,
   forkJoin,
+  map,
   of,
   switchMap,
 } from 'rxjs';
@@ -22,14 +24,15 @@ import { WikiService } from '../wiki.service';
 import { ModalService } from '../modal.service';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { Person } from '../person.model';
-import { PixelCoordinate } from '../pixel-coordinate.model';
-import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
+import { PixelPair } from '../pixel-pair.model';
+import { TimelineDrawParams } from '../timeline-draw-params.model';
+import { TimelineDrawService } from '../timeline-draw.service';
 
 interface PointData {
   point: TimelinePoint | null;
   person: Person | null;
   wikiPage: WikiApiPage | null;
-  position: PixelCoordinate | null;
+  position: PixelPair | null;
 }
 
 interface PointAndIndex {
@@ -50,10 +53,9 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   readonly maxCardSizeFraction = 1 / (this.maxNumHighlightedPoints + 1);
 
   @Input() buckets!: TimelinePoint[][];
-  @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastInsideMousePosition!: PixelCoordinate | null;
-
-  isMouseInside = false;
+  @Input() drawParams!: TimelineDrawParams | null;
+  @Input() mousePosition!: PixelPair | null;
+  @Input() lastInsideMousePosition!: PixelPair | null;
 
   hovered: PointData = {
     point: null,
@@ -63,20 +65,21 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   };
   hoveredPointLastTimeNotNullMs: number = 0;
   removeHoveredPoint$ = new Subject<number>();
-  updateHoverApiData$ = new Subject<TimelinePoint>();
 
-  hoveredCardDimensions: PixelCoordinate = { x: 0, y: 0 };
-  hoveredCardPosition: PixelCoordinate | null = null;
+  hoveredCardDimensions: PixelPair = { x: 0, y: 0 };
+  hoveredCardPosition: PixelPair | null = null;
   updateHoveredCardPosition$ = new Subject<void>();
 
   highlighted: PointData[] = [];
-  highlightedPoints$ = new Subject<TimelinePoint[]>();
+
+  getHoveredApiData$ = new Subject<PointData>();
+  getHighlightedApiData$ = new Subject<PointData[]>();
 
   constructor(
-    private painterService: TimelineCanvasPainterService,
     private personService: PersonService,
     private wikiService: WikiService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private timelineDrawService: TimelineDrawService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,17 +103,19 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         point: it.point,
         person: null,
         wikiPage: null,
-        position: this.painterService.getPixelFromGridPosition({
-          // We're assuming the points with highest notability will be at
-          // row 0 (the vertical middle).
-          row: 0,
-          col: it.index,
-        }),
+        position: this.drawParams
+          ? this.timelineDrawService.getPixelPositionFromGridPosition(
+              {
+                // We're assuming the points with highest notability will be at
+                // row 0 (the vertical middle).
+                row: 0,
+                col: it.index,
+              },
+              this.drawParams
+            )
+          : null,
       }));
-      // Send signal that highlighted points were changed.
-      this.highlightedPoints$.next(
-        highlightedPointsAndIndices.map((it) => it.point)
-      );
+      this.getHighlightedApiData$.next(this.highlighted);
     }
   }
 
@@ -136,67 +141,66 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         };
       });
 
-    this.updateHoverApiData$
-      .pipe(
+    // Get API data for points.
+    const getApiDataAndSubscribe = (data$: Observable<PointData[]>) => {
+      data$
+        .pipe(
+          // Get persons.
+          switchMap((data) =>
+            forkJoin([
+              of(data),
+              this.personService.getPeopleByWikidataCodes(
+                data.map((it) => it.point!.wikidataCode)
+              ),
+            ])
+          ),
+          // Get thumbnails.
+          switchMap(([data, persons]) =>
+            forkJoin([
+              of(data),
+              of(persons),
+              this.wikiService.getDataFromEnglishWiki(
+                persons,
+                true,
+                true,
+                300,
+                undefined
+              ),
+            ])
+          )
+        )
+        .subscribe(([data, persons, wikiPages]) => {
+          const wikidataCodeToDatum = new Map<number, PointData>();
+          for (const datum of data)
+            wikidataCodeToDatum.set(datum.point!.wikidataCode, datum);
+          for (const person of persons) {
+            const datum = wikidataCodeToDatum.get(person.wikidataCode);
+            if (datum) datum.person = person;
+          }
+          for (const page of wikiPages) {
+            const datum = wikidataCodeToDatum.get(page.wikidataCode!);
+            if (datum) datum.wikiPage = page;
+          }
+        });
+    };
+
+    getApiDataAndSubscribe(
+      this.getHoveredApiData$.pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        filter(
-          (point) => point.wikidataCode == this.hovered.point?.wikidataCode
-        ),
-        switchMap((point) =>
-          this.personService.getPersonByWikidataCode(point.wikidataCode)
-        ),
-        filter(
-          (person) =>
-            person !== null &&
-            person.wikidataCode === this.hovered.point?.wikidataCode
-        ),
-        switchMap((person) =>
-          forkJoin([
-            of(person),
-            this.wikiService.getDataFromEnglishWiki(person!, 300),
-          ])
-        )
+        map((datum) => [datum])
       )
-      .subscribe(([person, wikiPage]) => {
-        if (!this.hovered.point) return;
-        const code = this.hovered.point.wikidataCode;
-        if (code === person!.wikidataCode) {
-          this.hovered.person = person;
-        }
-        if (code === wikiPage?.wikidataCode) {
-          this.hovered.wikiPage = wikiPage;
-        }
-      });
-
-    // When highlighted points are changed, get their People from
-    // the API. We use switchMap to cancel any ongoing request,
-    // as its value will be useless.
-    this.highlightedPoints$
-      .pipe(
+    );
+    getApiDataAndSubscribe(
+      this.getHighlightedApiData$.pipe(
         debounceTime(100),
-        switchMap((points) =>
-          this.personService.getPeopleByWikidataCodes(
-            points.map((point) => point.wikidataCode)
-          )
-        ),
-        filter((persons) => persons !== null)
+        distinctUntilChanged()
       )
-      .subscribe((persons) => {
-        // Add each person to their highlight.
-        for (const highlight of this.highlighted) {
-          const person = persons!.find(
-            (it) => it.wikidataCode == highlight.point!.wikidataCode
-          );
-          if (person) highlight.person = person;
-        }
-      });
+    );
 
+    // Update hovered card position.
     this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
-      if (
-        !this.lastInsideMousePosition ||
-        !this.painterService.canvasBoundingBox
-      ) {
+      if (!this.lastInsideMousePosition || !this.drawParams) {
         this.hoveredCardPosition = null;
         return;
       }
@@ -204,22 +208,9 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       this.hoveredCardPosition = this.fitRectWithinBounds(
         this.lastInsideMousePosition,
         this.hoveredCardDimensions,
-        {
-          x: this.painterService.canvasBoundingBox.width,
-          y: this.painterService.canvasBoundingBox.height,
-        }
+        this.drawParams.drawAreaSize
       );
     });
-  }
-
-  @HostListener('mouseenter')
-  onMouseEnter(): void {
-    this.isMouseInside = true;
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
-    this.isMouseInside = false;
   }
 
   @HostListener('window:click')
@@ -227,7 +218,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     // If modal is not opened, and a person is hovered,
     // and mouse is inside the canvas, then open a modal.
     if (
-      this.isMouseInside &&
+      !this.modalService.isPersonDetailModalOpen &&
       this.hovered.person &&
       this.mousePosition &&
       this.mousePosition === this.lastInsideMousePosition
@@ -245,9 +236,12 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   /**
    * Update hover data from a given position.
    */
-  updateHoverData(pixel: PixelCoordinate): void {
+  updateHoverData(pixel: PixelPair): void {
     // Update hovered point and related properties.
-    const hovered = this.getBestPointAroundPixel(pixel, this.hoverRadiusPixels);
+    const hovered = this.getBestPointAroundPosition(
+      pixel,
+      this.hoverRadiusPixels
+    );
     const time = new Date().getTime();
 
     if (hovered == null) {
@@ -261,25 +255,29 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
           wikiPage: null,
           position: null,
         };
-        this.updateHoverApiData$.next(hovered);
+        this.getHoveredApiData$.next(this.hovered);
       }
       this.hoveredPointLastTimeNotNullMs = time;
     }
   }
 
-  getBestPointAroundPixel(
-    pixel: PixelCoordinate,
+  getBestPointAroundPosition(
+    position: PixelPair,
     distancePixels: number
   ): TimelinePoint | null {
-    const center = this.painterService.getApproxGridPositionFromPixel(pixel);
+    if (!this.drawParams) return null;
+
+    const center =
+      this.timelineDrawService.getApproxGridPositionFromPixelPosition(
+        position,
+        this.drawParams
+      );
     if (center === null) return null;
 
-    const maxDist = Math.max(
-      0,
-      this.painterService.getApproxGridDistanceFromPixelDistance(
-        distancePixels
-      ) - 1
+    const maxApproxGridDistance = Math.ceil(
+      distancePixels / (this.drawParams.pointSize + this.drawParams.marginSize)
     );
+    const maxDist = Math.max(0, maxApproxGridDistance - 1);
 
     // Look at cells in diamond shape around center (square rotated 45 degrees).
     let bestPoint: TimelinePoint | null = null;
@@ -355,16 +353,16 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     return result;
   }
 
-  onHoveredCardDimensionsChanged(dimensions: PixelCoordinate): void {
+  onHoveredCardDimensionsChanged(dimensions: PixelPair): void {
     this.hoveredCardDimensions = dimensions;
     this.updateHoveredCardPosition$.next();
   }
 
   private fitRectWithinBounds(
-    center: PixelCoordinate,
-    sizeRect: PixelCoordinate,
-    boundsRect: PixelCoordinate
-  ): PixelCoordinate {
+    center: PixelPair,
+    sizeRect: PixelPair,
+    boundsRect: PixelPair
+  ): PixelPair {
     const fitCoordWithinBounds = (
       coord: number,
       size: number,

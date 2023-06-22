@@ -11,7 +11,7 @@ import {
 import { Person } from '../person.model';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { ReplaySubject, Subject, combineLatest, debounceTime } from 'rxjs';
-import { PixelCoordinate } from '../pixel-coordinate.model';
+import { PixelPair } from '../pixel-pair.model';
 import { VariablesService } from '../variables.service';
 
 @Component({
@@ -24,7 +24,7 @@ export class PersonSmallCardComponent implements OnChanges, OnInit {
   @Input('wikiPage') wikiPageInjected: WikiApiPage | null = null;
   @Input() showPicture: boolean = false;
 
-  @Output() dimensionsChanged = new EventEmitter<PixelCoordinate>();
+  @Output() dimensionsChanged = new EventEmitter<PixelPair>();
 
   person$ = new ReplaySubject<Person | null>();
   person: Person | null = null;
@@ -32,7 +32,7 @@ export class PersonSmallCardComponent implements OnChanges, OnInit {
   isDisappearing = false;
   isImageLoaded = false;
 
-  dimensions: PixelCoordinate = { x: 0, y: 0 };
+  dimensions: PixelPair = { x: 0, y: 0 };
   checkDimensions$ = new Subject<void>();
 
   borderColor: string = 'var(--bs-primary)';
