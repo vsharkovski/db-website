@@ -9,10 +9,10 @@ import { NumberRange } from '../number-range.model';
 import { ReplaySubject, combineLatest, debounceTime } from 'rxjs';
 import { TimelinePoint } from '../timeline-point.model';
 import { TimelineOptions } from '../timeline-options.model';
-import { TimelineService } from '../timeline.service';
 import { TimelineTimeStatistics } from '../timeline-statistics.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
 import { PixelCoordinate } from '../pixel-coordinate.model';
+import { TimelineService } from '../timeline.service';
 
 @Component({
   selector: 'dbw-timeline-canvas',
