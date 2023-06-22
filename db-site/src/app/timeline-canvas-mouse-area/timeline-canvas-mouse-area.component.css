@@ -61,7 +61,7 @@ Its parent should be positioned, for example 'position: relative'
   transform: translate(-50%, -50%) scale(100%, 100%);
   transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
   opacity: 1;
-  width: min(10rem, var(--size-percentage));
+  width: min(var(--person-small-card-max-width), var(--size-percentage));
 }
 
 .card-wrapper.hidden {
