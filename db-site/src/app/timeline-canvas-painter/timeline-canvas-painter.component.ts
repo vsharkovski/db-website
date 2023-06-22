@@ -11,6 +11,7 @@ import { TimelinePoint } from '../timeline-point.model';
 import {
   ReplaySubject,
   concat,
+  filter,
   map,
   pairwise,
   startWith,
@@ -29,7 +30,7 @@ import { TimelineDrawParams } from '../timeline-draw-params.model';
 })
 export class TimelineCanvasPainterComponent implements OnInit, OnChanges {
   @Input() drawParams!: TimelineDrawParams | null;
-  @Input() buckets: TimelinePoint[][] = [];
+  @Input() buckets!: TimelinePoint[][];
 
   @ViewChild('canvas') canvasRef!: ElementRef;
 
@@ -45,6 +46,7 @@ export class TimelineCanvasPainterComponent implements OnInit, OnChanges {
   occupationIdToColor: string[] | null = null;
 
   redrawCanvas$ = new ReplaySubject<void>();
+  drawParams$ = new ReplaySubject<TimelineDrawParams | null>();
   buckets$ = new ReplaySubject<TimelinePoint[][]>();
   lastDrawFrame: number = 0;
 
@@ -57,43 +59,65 @@ export class TimelineCanvasPainterComponent implements OnInit, OnChanges {
     }
 
     if (changes['drawParams']) {
-      this.updateCanvasSize();
+      this.drawParams$.next(this.drawParams);
       this.redrawCanvas$.next();
+      this.updateCanvasSize();
     }
   }
 
   ngOnInit(): void {
+    // Colors.
     this.variablesService.getOccupationIdToColorMap().subscribe((map) => {
       this.occupationIdToColor = map;
+      // Redraw canvas with colors.
       this.redrawCanvas$.next();
     });
 
     // Canvas drawing.
-    const drawFramesAndBucketsPairwise = timer(0, this.drawingDelay).pipe(
-      withLatestFrom(this.buckets$.pipe(startWith([]), pairwise()))
+    const drawFrameData$ = timer(0, this.drawingDelay).pipe(
+      withLatestFrom(this.drawParams$.pipe(startWith(null), pairwise())),
+      withLatestFrom(this.buckets$.pipe(startWith([]), pairwise())),
+      map(
+        ([[frame, [prevParams, currParams]], [prevBuckets, currBuckets]]) => ({
+          frame,
+          prevParams,
+          currParams,
+          prevBuckets,
+          currBuckets,
+        })
+      )
     );
     // Get observable that undraws the current canvas, even if it's being drawn.
     const getUndrawObservable = (lastDrawFrame: number) =>
-      drawFramesAndBucketsPairwise.pipe(
+      drawFrameData$.pipe(
         take(lastDrawFrame),
         // Reverse order.
-        map(([frame, [prevBuckets, _]]) => [lastDrawFrame - frame, prevBuckets])
+        map((data) => ({
+          frame: lastDrawFrame - data.frame,
+          buckets: data.prevBuckets,
+          params: data.prevParams,
+        }))
       );
     // Observable that draws the canvas from nothing.
-    const draw = drawFramesAndBucketsPairwise.pipe(
+    const draw = drawFrameData$.pipe(
       take(this.numDrawingFrames + 1),
-      map(([frame, [_, buckets]]) => [frame, buckets])
+      map((data) => ({
+        frame: data.frame,
+        buckets: data.currBuckets,
+        params: data.currParams,
+      }))
     );
 
     this.redrawCanvas$
       .pipe(
         // First undraw, then draw.
-        switchMap(() => concat(getUndrawObservable(this.lastDrawFrame), draw))
+        switchMap(() => concat(getUndrawObservable(this.lastDrawFrame), draw)),
+        // Need drawParams to draw.
+        filter((data) => data.params !== null)
       )
-      .subscribe((data) => {
-        const [frame, buckets] = data as [number, TimelinePoint[][]];
+      .subscribe(({ frame, buckets, params }) => {
         this.lastDrawFrame = frame;
-        this.drawCanvas(buckets, frame / this.numDrawingFrames);
+        this.drawCanvas(params!, buckets, frame / this.numDrawingFrames);
       });
   }
 
@@ -115,36 +139,32 @@ export class TimelineCanvasPainterComponent implements OnInit, OnChanges {
    * @param progress A number between 0 and 1.
    * What point of the drawing animation to draw. 0 is beginning, 1 is end.
    */
-  drawCanvas(buckets: TimelinePoint[][], progress: number): void {
-    if (!this.drawParams) return;
-
+  drawCanvas(
+    drawParams: TimelineDrawParams,
+    buckets: TimelinePoint[][],
+    progress: number
+  ): void {
     const ctx = this.canvasRef.nativeElement.getContext('2d');
 
     // White background.
     ctx.fillStyle = 'white';
-    ctx.fillRect(
-      0,
-      0,
-      this.drawParams.drawAreaSize.x,
-      this.drawParams.drawAreaSize.y
-    );
+    ctx.fillRect(0, 0, drawParams.drawAreaSize.x, drawParams.drawAreaSize.y);
 
     // Draw all buckets.
     // Index 0 will be in the middle, 1 above 0, 2 below 0, 3 below 1, etc.
     const occupationIdToColor = this.occupationIdToColor;
     const backupPointColors = this.backupPointColors;
 
-    const pointSize = this.drawParams.pointSize;
-    const pointMarginSizeCombined = pointSize + this.drawParams.marginSize;
-    let x = this.drawParams.marginSize;
+    const pointSize = drawParams.pointSize;
+    const pointMarginSizeCombined = pointSize + drawParams.marginSize;
+    let x = drawParams.marginSize;
 
     for (const bucket of buckets) {
       // Y coordinate of top point will be a point and margin size away
       // from the middle line.
-      let yTop =
-        this.drawParams.drawAreaMiddlePosition.y - pointMarginSizeCombined;
+      let yTop = drawParams.drawAreaMiddlePosition.y - pointMarginSizeCombined;
       // Y coordinate of bottom point will be directly at the bottom line.
-      let yBottom = this.drawParams.drawAreaMiddlePosition.y;
+      let yBottom = drawParams.drawAreaMiddlePosition.y;
 
       // Alternately place points at bottom/top positions and move
       // down/up, starting with the bottom position.
