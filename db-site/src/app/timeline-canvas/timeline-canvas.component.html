@@ -1,18 +1,14 @@
 <div class="canvas-wrapper">
-  <dbw-timeline-canvas-painter
-    [dataSelected]="dataSelected"
-    [maxSelectedDataPointsAtAnyMoment]="maxSelectedDataPointsAtAnyMoment"
-    [buckets]="buckets"
-    (numBucketsUpdated)="onNumBucketsReceived($event)"
-  ></dbw-timeline-canvas-painter>
+  <dbw-timeline-canvas-painter [buckets]="buckets" [drawParams]="drawParams"></dbw-timeline-canvas-painter>
   <dbw-timeline-canvas-mouse-area
     [buckets]="buckets"
+    [drawParams]="drawParams"
     [mousePosition]="mousePosition"
     [lastInsideMousePosition]="lastInsideMousePosition"
   ></dbw-timeline-canvas-mouse-area>
   <dbw-timeline-canvas-year-line-area
     [selectedYears]="selectedYears"
-    [numBuckets]="buckets.length"
+    [drawParams]="drawParams"
     [mousePosition]="mousePosition"
     [lastInsideMousePosition]="lastInsideMousePosition"
   ></dbw-timeline-canvas-year-line-area>

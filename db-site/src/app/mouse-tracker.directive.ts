@@ -4,7 +4,7 @@ import {
   ElementRef,
   HostListener,
 } from '@angular/core';
-import { PixelCoordinate } from './pixel-coordinate.model';
+import { PixelPair } from './pixel-pair.model';
 import { Observable, ReplaySubject, map } from 'rxjs';
 
 @Directive({
@@ -12,10 +12,10 @@ import { Observable, ReplaySubject, map } from 'rxjs';
   selector: '[dbwMouseTracker]',
 })
 export class MouseTrackerDirective implements AfterViewInit {
-  current$ = new ReplaySubject<PixelCoordinate | null>();
-  currentFraction$ = new ReplaySubject<PixelCoordinate | null>();
-  lastInside$ = new ReplaySubject<PixelCoordinate | null>();
-  lastInsideFraction$ = new ReplaySubject<PixelCoordinate | null>();
+  current$ = new ReplaySubject<PixelPair | null>();
+  currentFraction$ = new ReplaySubject<PixelPair | null>();
+  lastInside$ = new ReplaySubject<PixelPair | null>();
+  lastInsideFraction$ = new ReplaySubject<PixelPair | null>();
   isInside$!: Observable<{ x: boolean; y: boolean }>;
 
   constructor(private elementRef: ElementRef) {
@@ -51,7 +51,7 @@ export class MouseTrackerDirective implements AfterViewInit {
       y: Math.round(event.pageY - (boundingBox.y + window.scrollY)),
     };
 
-    const fraction: PixelCoordinate = {
+    const fraction: PixelPair = {
       x: current.x / boundingBox.width,
       y: current.y / boundingBox.height,
     };

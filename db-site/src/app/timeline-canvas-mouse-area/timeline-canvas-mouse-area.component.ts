@@ -22,14 +22,15 @@ import { WikiService } from '../wiki.service';
 import { ModalService } from '../modal.service';
 import { WikiApiPage } from '../wiki-api-page.model';
 import { Person } from '../person.model';
-import { PixelCoordinate } from '../pixel-coordinate.model';
-import { TimelineCanvasPainterService } from '../timeline-canvas-painter.service';
+import { PixelPair } from '../pixel-pair.model';
+import { TimelineDrawParams } from '../timeline-draw-params.model';
+import { TimelineService } from '../timeline.service';
 
 interface PointData {
   point: TimelinePoint | null;
   person: Person | null;
   wikiPage: WikiApiPage | null;
-  position: PixelCoordinate | null;
+  position: PixelPair | null;
 }
 
 interface PointAndIndex {
@@ -50,8 +51,9 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   readonly maxCardSizeFraction = 1 / (this.maxNumHighlightedPoints + 1);
 
   @Input() buckets!: TimelinePoint[][];
-  @Input() mousePosition!: PixelCoordinate | null;
-  @Input() lastInsideMousePosition!: PixelCoordinate | null;
+  @Input() drawParams!: TimelineDrawParams | null;
+  @Input() mousePosition!: PixelPair | null;
+  @Input() lastInsideMousePosition!: PixelPair | null;
 
   isMouseInside = false;
 
@@ -65,18 +67,18 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   removeHoveredPoint$ = new Subject<number>();
   updateHoverApiData$ = new Subject<TimelinePoint>();
 
-  hoveredCardDimensions: PixelCoordinate = { x: 0, y: 0 };
-  hoveredCardPosition: PixelCoordinate | null = null;
+  hoveredCardDimensions: PixelPair = { x: 0, y: 0 };
+  hoveredCardPosition: PixelPair | null = null;
   updateHoveredCardPosition$ = new Subject<void>();
 
   highlighted: PointData[] = [];
   highlightedPoints$ = new Subject<TimelinePoint[]>();
 
   constructor(
-    private painterService: TimelineCanvasPainterService,
     private personService: PersonService,
     private wikiService: WikiService,
-    private modalService: ModalService
+    private modalService: ModalService,
+    private timelineService: TimelineService
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,14 +102,18 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
         point: it.point,
         person: null,
         wikiPage: null,
-        position: this.painterService.getPixelFromGridPosition({
-          // We're assuming the points with highest notability will be at
-          // row 0 (the vertical middle).
-          row: 0,
-          col: it.index,
-        }),
+        position: this.drawParams
+          ? this.timelineService.getPixelPositionFromGridPosition(
+              {
+                // We're assuming the points with highest notability will be at
+                // row 0 (the vertical middle).
+                row: 0,
+                col: it.index,
+              },
+              this.drawParams
+            )
+          : null,
       }));
-      // Send signal that highlighted points were changed.
       this.highlightedPoints$.next(
         highlightedPointsAndIndices.map((it) => it.point)
       );
@@ -193,10 +199,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       });
 
     this.updateHoveredCardPosition$.pipe(debounceTime(10)).subscribe(() => {
-      if (
-        !this.lastInsideMousePosition ||
-        !this.painterService.canvasBoundingBox
-      ) {
+      if (!this.lastInsideMousePosition || !this.drawParams) {
         this.hoveredCardPosition = null;
         return;
       }
@@ -204,10 +207,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
       this.hoveredCardPosition = this.fitRectWithinBounds(
         this.lastInsideMousePosition,
         this.hoveredCardDimensions,
-        {
-          x: this.painterService.canvasBoundingBox.width,
-          y: this.painterService.canvasBoundingBox.height,
-        }
+        this.drawParams.drawAreaSize
       );
     });
   }
@@ -245,9 +245,12 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   /**
    * Update hover data from a given position.
    */
-  updateHoverData(pixel: PixelCoordinate): void {
+  updateHoverData(pixel: PixelPair): void {
     // Update hovered point and related properties.
-    const hovered = this.getBestPointAroundPixel(pixel, this.hoverRadiusPixels);
+    const hovered = this.getBestPointAroundPosition(
+      pixel,
+      this.hoverRadiusPixels
+    );
     const time = new Date().getTime();
 
     if (hovered == null) {
@@ -267,19 +270,22 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     }
   }
 
-  getBestPointAroundPixel(
-    pixel: PixelCoordinate,
+  getBestPointAroundPosition(
+    position: PixelPair,
     distancePixels: number
   ): TimelinePoint | null {
-    const center = this.painterService.getApproxGridPositionFromPixel(pixel);
+    if (!this.drawParams) return null;
+
+    const center = this.timelineService.getApproxGridPositionFromPixelPosition(
+      position,
+      this.drawParams
+    );
     if (center === null) return null;
 
-    const maxDist = Math.max(
-      0,
-      this.painterService.getApproxGridDistanceFromPixelDistance(
-        distancePixels
-      ) - 1
+    const maxApproxGridDistance = Math.ceil(
+      distancePixels / (this.drawParams.pointSize + this.drawParams.marginSize)
     );
+    const maxDist = Math.max(0, maxApproxGridDistance - 1);
 
     // Look at cells in diamond shape around center (square rotated 45 degrees).
     let bestPoint: TimelinePoint | null = null;
@@ -355,16 +361,16 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     return result;
   }
 
-  onHoveredCardDimensionsChanged(dimensions: PixelCoordinate): void {
+  onHoveredCardDimensionsChanged(dimensions: PixelPair): void {
     this.hoveredCardDimensions = dimensions;
     this.updateHoveredCardPosition$.next();
   }
 
   private fitRectWithinBounds(
-    center: PixelCoordinate,
-    sizeRect: PixelCoordinate,
-    boundsRect: PixelCoordinate
-  ): PixelCoordinate {
+    center: PixelPair,
+    sizeRect: PixelPair,
+    boundsRect: PixelPair
+  ): PixelPair {
     const fitCoordWithinBounds = (
       coord: number,
       size: number,

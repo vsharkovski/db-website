@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { NumberRange } from '../number-range.model';
 import { MouseTrackerDirective } from '../mouse-tracker.directive';
-import { PixelCoordinate } from '../pixel-coordinate.model';
+import { PixelPair } from '../pixel-pair.model';
 import { RangeMapService } from '../range-map.service';
 import { RangeMappingType } from '../range-mapping.type';
 import { ReplaySubject, distinctUntilChanged, filter, map } from 'rxjs';
@@ -42,7 +42,7 @@ export class RangeSelectorComponent implements OnChanges, OnInit {
   selectedValues!: NumberRange;
 
   clickedElement: ElementName | null = null;
-  mousePositionFraction: PixelCoordinate | null = null;
+  mousePositionFraction: PixelPair | null = null;
   isMouseInsideX = false;
 
   barMoveStartFraction: number | null = null;
