@@ -55,8 +55,6 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
   @Input() mousePosition!: PixelPair | null;
   @Input() lastInsideMousePosition!: PixelPair | null;
 
-  isMouseInside = false;
-
   hovered: PointData = {
     point: null,
     person: null,
@@ -212,22 +210,11 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     });
   }
 
-  @HostListener('mouseenter')
-  onMouseEnter(): void {
-    this.isMouseInside = true;
-  }
-
-  @HostListener('mouseleave')
-  onMouseLeave(): void {
-    this.isMouseInside = false;
-  }
-
   @HostListener('window:click')
   onPointerClick(): void {
     // If modal is not opened, and a person is hovered,
     // and mouse is inside the canvas, then open a modal.
     if (
-      this.isMouseInside &&
       this.hovered.person &&
       this.mousePosition &&
       this.mousePosition === this.lastInsideMousePosition
