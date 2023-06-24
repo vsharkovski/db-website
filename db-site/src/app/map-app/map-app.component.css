@@ -1,4 +1,25 @@
-.leaflet-map {
-  height: 700px;
+.wrapper {
+  position: relative;
   width: 100%;
+  height: calc(100vh - 7rem);
+}
+
+.leaflet-map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.options {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: white;
+  padding: 1rem;
+  width: 30%;
+  z-index: 2;
 }

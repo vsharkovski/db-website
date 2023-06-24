@@ -1,1 +1,21 @@
-<div class="leaflet-map" leaflet [leafletOptions]="options" [leafletLayersControl]="layersControl"></div>
+<div class="wrapper">
+  <div
+    class="leaflet-map"
+    leaflet
+    [leafletOptions]="options"
+    [leafletLayersControl]="layersControl"
+    (leafletMapReady)="onMapReady($event)"
+  >
+    <div *ngFor="let layer of layers" [leafletLayer]="layer"></div>
+  </div>
+  <div class="options" *ngIf="selectedLocationIndex !== null">
+    <div class="d-flex flex-row">
+      <span>index: {{ selectedLocationIndex }}</span>
+      <div class="btn-group ms-3">
+        <button type="button" class="btn btn-sm btn-secondary" (click)="onClick(-1)"><</button>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="onClick(1)">></button>
+      </div>
+    </div>
+    <pre>{{ locations[selectedLocationIndex] | json }}</pre>
+  </div>
+</div>
