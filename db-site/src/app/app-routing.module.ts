@@ -7,6 +7,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { SearchAppComponent } from './search-app/search-app.component';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { TimelineAppComponent } from './timeline-app/timeline-app.component';
+import { MapAppComponent } from './map-app/map-app.component';
 
 const routes: Routes = [
   {
@@ -18,27 +19,32 @@ const routes: Routes = [
   {
     path: 'search',
     component: SearchAppComponent,
-    title: 'Search - Notable people database',
+    title: 'Search - Notable people',
   },
   {
     path: 'timeline',
     component: TimelineAppComponent,
-    title: 'Timeline - Notable people database',
+    title: 'Timeline - Notable people',
+  },
+  {
+    path: 'map',
+    component: MapAppComponent,
+    title: 'Map - Notable people',
   },
   {
     path: 'highlights',
     component: HighlightsPageComponent,
-    title: 'Highlights - Notable people database',
+    title: 'Highlights - Notable people',
   },
   {
     path: 'figures',
     component: FiguresPageComponent,
-    title: 'Figures - Notable people database',
+    title: 'Figures - Notable people',
   },
   {
     path: 'about',
     component: AboutPageComponent,
-    title: 'About - Notable people database',
+    title: 'About - Notable people',
   },
   {
     path: 'not-found',

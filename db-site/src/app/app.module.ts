@@ -43,6 +43,8 @@ import { PersonSmallCardComponent } from './person-small-card/person-small-card.
 import { TimelineCanvasMouseAreaComponent } from './timeline-canvas-mouse-area/timeline-canvas-mouse-area.component';
 import { TimelineCanvasYearLineAreaComponent } from './timeline-canvas-year-line-area/timeline-canvas-year-line-area.component';
 import { TimelineCanvasPainterComponent } from './timeline-canvas-painter/timeline-canvas-painter.component';
+import { MapAppComponent } from './map-app/map-app.component';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 @NgModule({
   declarations: [
@@ -82,6 +84,7 @@ import { TimelineCanvasPainterComponent } from './timeline-canvas-painter/timeli
     TimelineCanvasMouseAreaComponent,
     TimelineCanvasYearLineAreaComponent,
     TimelineCanvasPainterComponent,
+    MapAppComponent,
   ],
   imports: [
     BrowserModule,
@@ -89,6 +92,7 @@ import { TimelineCanvasPainterComponent } from './timeline-canvas-painter/timeli
     NgbModule,
     HttpClientModule,
     ReactiveFormsModule,
+    LeafletModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
