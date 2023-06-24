@@ -193,7 +193,7 @@ export class TimelineCanvasMouseAreaComponent implements OnInit, OnChanges {
     );
     getApiDataAndSubscribe(
       this.getHighlightedApiData$.pipe(
-        debounceTime(100),
+        debounceTime(300),
         distinctUntilChanged()
       )
     );
